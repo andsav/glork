@@ -1,18 +1,30 @@
 body {
-    padding-top: 10vh;
+    padding-top: 30px;
     text-align: center;
 }
 
-#toolbar {
-    margin-top: 10px;
+#bottom_toolbar {
+    margin-top: 15px;
     width: 100%;
     text-align:center;
 }
 
-#toolbar > div {
+#bottom_toolbar > div {
     width: 480px;
     margin: 0 auto;
     text-align: right;
+}
+
+#top_toolbar {
+    margin-bottom: 15px;
+    width: 100%;
+    text-align:center;
+}
+
+#top_toolbar > div {
+    width: 480px;
+    margin: 0 auto;
+    text-align: left;
 }
 
 button {
@@ -28,6 +40,7 @@ button {
     -moz-border-radius: 4px;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 button:hover, button:focus {
@@ -38,8 +51,7 @@ button:hover, button:focus {
     outline: none;
 }
 
-
-#c {
+canvas {
     background-color: rgba(32, 69, 124, 0.4);
     -webkit-filter: none !important;
     filter: none !important;
@@ -51,6 +63,14 @@ button:hover, button:focus {
     -webkit-border-radius: 12px;
     -moz-border-radius: 12px;
     border-radius: 12px;
+}
 
+#c {
     cursor: crosshair;
 }
+
+#result {
+    margin-top: 20px;
+    display: none;
+}
+

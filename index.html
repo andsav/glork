@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="viewport" content="width=600,maximum-scale=0.8, initial-scale=0.8">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Andrei Savin">
 
@@ -15,16 +15,19 @@
 </head>
 <body>
 
+    <div id="top_toolbar">
+        <div><button id="reset">Reset</button></div>
+    </div>
+
     <canvas id="c" width="500" height="500"></canvas>
 
-    <div id="toolbar">
+    <div id="bottom_toolbar">
         <div>
-            <span style="float:left">
-                <button id="reset">Reset</button>
-            </span>
-            <button id="SA">Solve (SA)</button> &nbsp; <button id="GA">Solve (GA)</button>
+            <button id="SA">Simulated Annealing</button> &nbsp; <button id="LBS">Local Beam Search</button>
         </div>
     </div>
+
+    <canvas id="result" height="100" width="500"></canvas>
 
 
     <script type="text/javascript" src="app.min.js"></script>

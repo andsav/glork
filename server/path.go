@@ -29,6 +29,14 @@ func (p Path) length() float64 {
 	return total
 }
 
+// Shuffles a path in place
+func (p Path) shuffle() {
+	for i := range p {
+		j := rand.Intn(i + 1)
+		p[i], p[j] = p[j], p[i]
+	}
+}
+
 // Return a neighbour of the path
 func (p Path) neighbour() Path {
 	a, b := rand.Int() % len(p), rand.Int() % len(p)
@@ -46,6 +54,7 @@ func (p Path) SA() Solution {
 	rand.Seed(time.Now().Unix())
 
 	var solution Solution
+	p.shuffle()
 
 	//log.Printf("%s", p)
 

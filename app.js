@@ -11,11 +11,17 @@
 
     let rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    let $post = (url, data, fn) => {
+    let $post = (url, data, success, error) => {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xhr.onload = function() { fn(JSON.parse(this.responseText)); };
+        xhr.onload = function() {
+            if(this.status === 200) {
+                success(JSON.parse(this.responseText));
+            } else {
+                error(this.response);
+            }
+        };
         xhr.send(JSON.stringify(data));
     };
 
@@ -63,6 +69,12 @@
         reset() {
             this.clear();
             this.path.clear();
+        }
+
+        loading() {
+            this.trace(this.coord.sort(() => { return 0.5 - Math.random(); }));
+            let _this = this;
+            setTimeout(() => { _this.loading(); }, 200);
         }
 
         trace(path) {
@@ -138,19 +150,32 @@
         }
     }
 
+    class Result {
+        constructor(id) {
+            this.ctx = $(id)
+        }
+    }
+
+    let clear_timeout = () => {
+
+        let highestTimeoutId = setTimeout(";");
+        for (let i = 0 ; i < highestTimeoutId ; i++) {
+            clearTimeout(i);
+        }
+
+    };
+
 
     let output_solution = (canvas, solution, i) => {
-
         if(i >= solution.length) {
             return 0;
         } else {
             let p = Path.fromObject(solution[i]);
             p.trace(canvas);
-            console.log(p.length);
 
             setTimeout(function() {
                 output_solution(canvas, solution, i+1)
-            }, 333);
+            }, 200);
             return 0;
         }
     };
@@ -158,14 +183,33 @@
     document.addEventListener("DOMContentLoaded", () => {
         const canvas = new Canvas("c");
 
-        $("reset").onclick = () => { canvas.reset() };
+        $("reset").onclick = () => {
+            clear_timeout();
+            canvas.reset();
+        };
 
         $("SA").onclick = () => {
-            console.log(canvas.path);
-
-            $post('https://go.glork.net/tsp/sa', canvas.path.object, (data) => {
-                output_solution(canvas, data, 1);
-            });
+            if(canvas.coord.length > 2) {
+                clear_timeout();
+                canvas.loading();
+                
+                $("result").style.display = "initial";
+                $post('https://go.glork.net/tsp/sa', canvas.path.object, (data) => {
+                    clear_timeout();
+                    output_solution(canvas, data, 1);
+                }, (response) => {
+                    clear_timeout();
+                    canvas.redraw();
+                    alert("Error: " + response);
+                });
+            }
+            else {
+                window.alert("Please define at least 3 coordinates");
+            }
         };
+
+        $("LBS").onclick = () => {
+            clear_timeout();
+        }
     });
 })();
