@@ -25,6 +25,27 @@
         xhr.send(JSON.stringify(data));
     };
 
+    let error = (elem, err) => {
+        let err_msg = $("error_msg");
+
+        elem.classList.add('shake', 'shake-constant');
+        err_msg.innerHTML = err;
+        err_msg.style.opacity = 1;
+
+        setTimeout(function() {
+            elem.classList.remove('shake', 'shake-constant');
+        }, 300);
+
+        setTimeout(function() {
+            err_msg.style.opacity = 0;
+        }, 2000);
+    };
+
+    const ENDPOINTS = {
+        TSP_SA: 'https://go.glork.net/tsp/sa',
+        TSP_LSB: 'https://go.glork.net/tsp/lsb'
+    };
+
     class Canvas {
         constructor(id) {
             this.c = $(id);
@@ -163,6 +184,8 @@
             clearTimeout(i);
         }
 
+        $("error_msg").style.opacity = 0;
+
     };
 
 
@@ -189,22 +212,22 @@
         };
 
         $("SA").onclick = () => {
-            if(canvas.coord.length > 2) {
+            if(canvas.coord.length > 3) {
                 clear_timeout();
                 canvas.loading();
-                
+
                 $("result").style.display = "initial";
-                $post('https://go.glork.net/tsp/sa', canvas.path.object, (data) => {
+                $post(ENDPOINTS.TSP_SA, canvas.path.object, (data) => {
                     clear_timeout();
                     output_solution(canvas, data, 1);
                 }, (response) => {
                     clear_timeout();
                     canvas.redraw();
-                    alert("Error: " + response);
+                    error(canvas.c, response);
                 });
             }
             else {
-                window.alert("Please define at least 3 coordinates");
+                error(canvas.c, "Please define at least 4 coordinates");
             }
         };
 
