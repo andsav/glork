@@ -46,14 +46,40 @@
         TSP_LSB: 'https://go.glork.net/tsp/lsb'
     };
 
-    class Canvas {
+    class CanvasBase {
         constructor(id) {
             this.c = $(id);
             this.ctx = this.c.getContext('2d');
             this.ctx.fillStyle = this.ctx.strokeStyle = "#E6AA68";
             this.ctx.lineWidth = 2;
-            this.path = new Path([]);
+        }
 
+        hide() {
+            this.c.style.display = "none";
+        }
+
+        show() {
+            this.c.style.display = "initial";
+        }
+
+        clear() {
+            this.ctx.clearRect(0, 0, this.c.width, this.c.height);
+        };
+
+        get halfWidth() {
+            return this.c.width/2;
+        }
+
+        get halfHeight() {
+            return this.c.height/2;
+        }
+    }
+
+    class Canvas extends CanvasBase {
+        constructor(id) {
+            super(id);
+
+            this.path = new Path([]);
             let _this = this;
 
             this.c.onclick = function(e) {
@@ -72,10 +98,6 @@
             };
         }
 
-        clear() {
-            this.ctx.clearRect(0, 0, this.c.width, this.c.height);
-        };
-
         drawNode(x, y) {
             this.ctx.fillRect(x-5, y-5, 10, 10);
         };
@@ -92,8 +114,12 @@
             this.path.clear();
         }
 
-        loading() {
-            this.trace(this.coord.sort(() => { return 0.5 - Math.random(); }));
+        loading(result) {
+            let path = this.coord.sort(() => { return 0.5 - Math.random(); });
+
+            this.trace(path);
+            result.sa(new Path(path), 0);
+
             let _this = this;
             setTimeout(() => { _this.loading(); }, 200);
         }
@@ -113,6 +139,43 @@
             return this.path.p;
         }
 
+    }
+
+    class Result extends CanvasBase {
+        constructor(id) {
+            super(id);
+            this.ctx.font = "14pt Verdana"
+        }
+
+        clear_half() {
+            this.ctx.clearRect(0, 0, this.halfWidth, this.c.height);
+        }
+
+        sa(path, i) {
+            if(i == 0) {
+                this.clear();
+            } else {
+                this.clear_half();
+            }
+
+            let t = Math.round(Math.pow(0.98, i) * 100000) / 100000,
+                length = path.length;
+
+            if(i == 1) {
+                this.initial = length;
+            }
+
+            if(i != 0) {
+                let x = this.halfWidth + 5 + this.halfWidth/700*i,
+                    y = (this.initial/length) * this.halfHeight * 0.5,
+                    h = this.c.height - y;
+
+                this.ctx.fillRect(x, y, 1, h);
+            }
+
+            this.ctx.fillText("T° " + String(t), 20, this.halfHeight - 7);
+            this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 18);
+        }
     }
 
     class Path {
@@ -171,12 +234,6 @@
         }
     }
 
-    class Result {
-        constructor(id) {
-            this.ctx = $(id)
-        }
-    }
-
     let clear_timeout = () => {
 
         let highestTimeoutId = setTimeout(";");
@@ -185,41 +242,42 @@
         }
 
         $("error_msg").style.opacity = 0;
-
     };
 
-
-    let output_solution = (canvas, solution, i) => {
+    let output_solution = (canvas, result, solution, i) => {
         if(i >= solution.length) {
             return 0;
         } else {
             let p = Path.fromObject(solution[i]);
             p.trace(canvas);
+            result.sa(p, i);
 
             setTimeout(function() {
-                output_solution(canvas, solution, i+1)
+                output_solution(canvas, result, solution, i+1)
             }, 200);
             return 0;
         }
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-        const canvas = new Canvas("c");
+        const canvas = new Canvas("c"),
+              result = new Result("result");
 
         $("reset").onclick = () => {
             clear_timeout();
             canvas.reset();
+            result.hide();
         };
 
         $("SA").onclick = () => {
             if(canvas.coord.length > 3) {
                 clear_timeout();
-                canvas.loading();
+                canvas.loading(result);
+                result.show();
 
-                $("result").style.display = "initial";
                 $post(ENDPOINTS.TSP_SA, canvas.path.object, (data) => {
                     clear_timeout();
-                    output_solution(canvas, data, 1);
+                    output_solution(canvas, result, data, 1);
                 }, (response) => {
                     clear_timeout();
                     canvas.redraw();
