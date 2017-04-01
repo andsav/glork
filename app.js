@@ -86,21 +86,32 @@
                 let x = e.pageX - _this.c.offsetLeft,
                     y = e.pageY - _this.c.offsetTop;
 
-                if(x > 12
-                    && x < 500 - 12
-                    && y > 12
-                    && y < 500 - 12
-                    && !_this.path.map((co) => dist(co, [x, y]) > 12).includes(false)) {
-
-                    _this.path.push([x, y]);
-                    _this.drawNode(x, y);
-                }
+                _this.placePoint(x, y);
             };
+        }
+
+        placePoint(x, y) {
+            if(x > 12
+                && x < this.c.width - 12
+                && y > 12
+                && y < this.c.height - 12
+                && !this.path.map((co) => dist(co, [x, y]) > 12).includes(false)) {
+
+                this.path.push([x, y]);
+                this.drawNode(x, y);
+            }
         }
 
         drawNode(x, y) {
             this.ctx.fillRect(x-5, y-5, 10, 10);
-        };
+        }
+        
+        random(points) {
+            this.reset();
+            while(this.coord.length < points) {
+                this.placePoint(rand(15, this.c.width-15), rand(15, this.c.height-15))
+            }
+        }
 
         redraw() {
             this.clear();
@@ -110,6 +121,7 @@
         }
 
         reset() {
+            clear_timeout();
             this.clear();
             this.path.clear();
         }
@@ -264,8 +276,12 @@
               result = new Result("result");
 
         $("reset").onclick = () => {
-            clear_timeout();
             canvas.reset();
+            result.hide();
+        };
+
+        $("random").onclick = () => {
+            canvas.random(50);
             result.hide();
         };
 
