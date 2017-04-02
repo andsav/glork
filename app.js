@@ -180,7 +180,7 @@
                 this.ctx.stroke();
             }
 
-            let t = Math.round(Math.pow(0.97, i) * 10000000) / 10000000,
+            let t = Math.round(Math.pow(0.98, i) * 10000000) / 10000000,
                 length = path.length;
 
             if(i == 1) {
@@ -188,14 +188,14 @@
             }
 
             if(i != 0) {
-                let x = this.halfWidth + this.halfWidth/max*i,
+                let x = this.halfWidth + this.halfWidth/max * i,
                     y = this.c.height - (length/this.initial) * this.halfHeight*.67,
                     h = this.c.height - y,
                     y2 = this.halfHeight - t * this.halfHeight,
                     h2 = this.halfHeight - y2;
 
-                this.ctx.fillRect(x, y, 2, h);
-                this.ctx.fillRect(x, y2, 2, h2);
+                this.ctx.fillRect(x, y, 1, h);
+                this.ctx.fillRect(x, y2, 1, h2);
             }
 
             this.ctx.fillText("    T°: " + (t == 1 ? "1.0000000" : String(t)), 20, 26);
