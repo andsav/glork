@@ -56,18 +56,17 @@ func (p Path) SA() Solution {
 	var solution Solution
 	p.shuffle()
 
-	//log.Printf("%s", p)
-
 	ap := func(last float64, current float64, t float64) float64 {
-		return math.Exp((last-current)/t)
+		//log.Printf("%s", last-current)
+		return math.Exp(((last-current)/9000)/t)
 	}
 
-	for t := 1.0; t > 0.000001; t *= 0.98 {
+	for t := 1.0; t > 0.00001; t *= 0.97 {
 		keep := make(Path, len(p))
 		copy(keep, p)
 		solution = append(solution, keep)
 
-		for i := 0; i < 100; i += 1 {
+		for i := 0; i < 200; i += 1 {
 			p2 := p.neighbour();
 			if(ap(p.length(), p2.length(), t) > rand.Float64()) {
 				copy(p, p2);

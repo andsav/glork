@@ -3,7 +3,8 @@
 
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
-    let $ = (id) => document.getElementById(id);
+    let $ = (id) => document.getElementById(id),
+        $$ = (cls) => Array.from(document.getElementsByClassName(cls));
 
     Array.prototype.random = function () {
         return this[Math.floor((Math.random() * this.length))];
@@ -46,6 +47,8 @@
         TSP_LSB: 'https://go.glork.net/tsp/lsb'
     };
 
+    const DELAY = 24; // milliseconds between frames
+
     class CanvasBase {
         constructor(id) {
             this.c = $(id);
@@ -60,6 +63,7 @@
 
         show() {
             this.c.style.display = "initial";
+            this.c.scrollIntoView();
         }
 
         clear() {
@@ -126,14 +130,12 @@
             this.path.clear();
         }
 
-        loading(result) {
-            let path = this.coord.sort(() => { return 0.5 - Math.random(); });
-
-            this.trace(path);
-            result.sa(new Path(path), 0);
+        loading(result, path = Path.random( this.coord )) {
+            path.trace(this);
+            result.sa(path);
 
             let _this = this;
-            setTimeout(() => { _this.loading(); }, 200);
+            setTimeout(() => { _this.loading(result /*, path.neighbour*/ ); }, DELAY);
         }
 
         trace(path) {
@@ -156,21 +158,29 @@
     class Result extends CanvasBase {
         constructor(id) {
             super(id);
-            this.ctx.font = "14pt Verdana"
+            this.ctx.font = "14pt Courier New"
         }
 
         clear_half() {
             this.ctx.clearRect(0, 0, this.halfWidth, this.c.height);
         }
 
-        sa(path, i) {
+        sa(path, i = 0, max = 0) {
             if(i == 0) {
                 this.clear();
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.halfHeight);
+                this.ctx.lineTo(this.c.width, this.halfHeight);
+                this.ctx.stroke();
             } else {
                 this.clear_half();
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.halfHeight);
+                this.ctx.lineTo(this.halfWidth, this.halfHeight);
+                this.ctx.stroke();
             }
 
-            let t = Math.round(Math.pow(0.98, i) * 100000) / 100000,
+            let t = Math.round(Math.pow(0.97, i) * 10000000) / 10000000,
                 length = path.length;
 
             if(i == 1) {
@@ -178,29 +188,24 @@
             }
 
             if(i != 0) {
-                let x = this.halfWidth + 5 + this.halfWidth/700*i,
-                    y = (this.initial/length) * this.halfHeight * 0.5,
-                    h = this.c.height - y;
+                let x = this.halfWidth + this.halfWidth/max*i,
+                    y = this.c.height - (length/this.initial) * this.halfHeight*.67,
+                    h = this.c.height - y,
+                    y2 = this.halfHeight - t * this.halfHeight,
+                    h2 = this.halfHeight - y2;
 
-                this.ctx.fillRect(x, y, 1, h);
+                this.ctx.fillRect(x, y, 2, h);
+                this.ctx.fillRect(x, y2, 2, h2);
             }
 
-            this.ctx.fillText("T° " + String(t), 20, this.halfHeight - 7);
-            this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 18);
+            this.ctx.fillText("    T°: " + (t == 1 ? "1.0000000" : String(t)), 20, 26);
+            this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 26);
         }
     }
 
     class Path {
         constructor(p) {
             this.p = p;
-        }
-
-        shuffle() {
-            for (let i = this.p.length; i; i--) {
-                let j = Math.floor(Math.random() * i);
-                this.p[i - 1] = this.p[j];
-                this.p[i - 1] = this.p[j];
-            }
         }
 
         clear() {
@@ -244,6 +249,10 @@
         static fromObject(o) {
             return new Path(o.map( (c) => [c.x, c.y] ));
         }
+
+        static random(coord) {
+            return new Path( coord.sort( () => { return 0.5 - Math.random(); } ));
+        }
     }
 
     let clear_timeout = () => {
@@ -262,11 +271,11 @@
         } else {
             let p = Path.fromObject(solution[i]);
             p.trace(canvas);
-            result.sa(p, i);
+            result.sa(p, i, solution.length);
 
             setTimeout(function() {
                 output_solution(canvas, result, solution, i+1)
-            }, 200);
+            }, DELAY);
             return 0;
         }
     };
@@ -280,10 +289,13 @@
             result.hide();
         };
 
-        $("random").onclick = () => {
-            canvas.random(50);
-            result.hide();
-        };
+
+        $$("random").forEach((c) => {
+            c.onclick = () => {
+                canvas.random(parseInt(c.dataset['points'])%200);
+                result.hide();
+            };
+        });
 
         $("SA").onclick = () => {
             if(canvas.coord.length > 3) {
@@ -305,8 +317,10 @@
             }
         };
 
+        /*
         $("LBS").onclick = () => {
             clear_timeout();
         }
+        */
     });
 })();

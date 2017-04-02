@@ -17,8 +17,12 @@
 
     <div id="top_toolbar">
         <div>
-            <span id="error_msg"></span>
-            <button id="reset">Reset</button> &nbsp; <button id="random">Random</button>
+            <div style="float:right">
+                <button class="random" data-points="15">Rand 15</button> &nbsp;
+                <button class="random" data-points="50">Rand 50</button> &nbsp;
+                <button class="random" data-points="100">Rand 100</button>
+            </div>
+            <button id="reset">Reset</button>
         </div>
     </div>
 
@@ -26,11 +30,12 @@
 
     <div id="bottom_toolbar">
         <div>
+            <span id="error_msg"></span>
             <button id="SA">Simulated Annealing</button> <!--&nbsp; <button id="LBS">Local Beam Search</button>-->
         </div>
     </div>
 
-    <canvas id="result" height="100" width="500"></canvas>
+    <canvas id="result" height="80" width="500"></canvas>
 
 
     <script type="text/javascript" src="app.min.js"></script>

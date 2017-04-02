@@ -70,12 +70,12 @@ canvas {
 }
 
 #result {
-    margin-top: 20px;
+    margin: 20px 0;
     display: none;
 }
 
 #error_msg {
-    float: right;
+    float: left;
     padding: 10px;
     width: 250px;
     text-align: center;
