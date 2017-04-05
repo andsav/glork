@@ -14,12 +14,16 @@ type Coord struct {
 
 type Path []Coord
 
+type Solver struct {
+	Input	Path `json:"p"`
+	Config	[]float64 `json:"config"`
+}
+
 type Solution []Path
 
 func (a Coord) distance(b Coord) float64 {
 	return math.Sqrt( float64((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y)) )
 }
-
 
 func (p Path) length() float64 {
 	total := 0.0
@@ -50,29 +54,41 @@ func (p Path) neighbour() Path {
 }
 
 // Solves TSP using Simulated Annealing
-func (p Path) SA() Solution {
+func (p Path) SimulatedAnnealing(cooling float64) Solution {
 	rand.Seed(time.Now().Unix())
 
 	var solution Solution
 	p.shuffle()
 
+	if cooling < 0.85 || cooling > 0.99 {
+		cooling = 0.98
+	}
+
 	ap := func(last float64, current float64, t float64) float64 {
-		//log.Printf("%s", last-current)
 		return math.Exp(((last-current)/10000)/t)
 	}
 
-	for t := 1.0; t > 0.00001; t *= 0.98 {
+	for t := 1.0; t > 0.00001; t *= cooling {
 		keep := make(Path, len(p))
 		copy(keep, p)
 		solution = append(solution, keep)
 
 		for i := 0; i < 200; i += 1 {
 			p2 := p.neighbour();
-			if(ap(p.length(), p2.length(), t) > rand.Float64()) {
+			if ap(p.length(), p2.length(), t) > rand.Float64() {
 				copy(p, p2);
 			}
 		}
 	}
+
+	return solution
+}
+
+// Solves TSP using Local Beam Search
+func (p Path) LocalBeamSearch(k int) Solution {
+	rand.Seed(time.Now().Unix())
+
+	var solution Solution
 
 	return solution
 }

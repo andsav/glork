@@ -7,6 +7,11 @@ import (
 )
 
 func main() {
-	router := cors.Default().Handler(NewRouter())
+	router := cors.New(
+		cors.Options{
+			AllowedOrigins: []string{"https://glork.net"},
+			AllowCredentials: true,
+		}).Handler(NewRouter())
+
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

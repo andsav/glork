@@ -3,8 +3,13 @@ html {
 }
 
 body {
-    padding-top: 30px;
+    padding: 20px 0;
     text-align: center;
+}
+
+h1 {
+    margin-top: 0;
+    color: #E6AA68;
 }
 
 #bottom_toolbar {
@@ -79,6 +84,14 @@ canvas {
 #result {
     margin: 20px 0;
     display: none;
+}
+
+.buttons-right {
+    float:right;
+}
+
+.buttons-right button {
+    margin: auto 0;
 }
 
 #error_msg {

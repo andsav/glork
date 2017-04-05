@@ -8,13 +8,30 @@ import (
 	"io/ioutil"
 )
 
+type callback func(Solver) Solution
+
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!")
 }
 
+
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	var input Path
-	//var ret Solution
+	tspSolve(w, r, func(s Solver) Solution {
+		return s.Input.SimulatedAnnealing(s.Config[0])
+	})
+}
+
+
+func TspLSB(w http.ResponseWriter, r *http.Request) {
+	tspSolve(w, r, func(s Solver) Solution {
+		return s.Input.LocalBeamSearch(int(s.Config[0]));
+	});
+}
+
+
+func tspSolve(w http.ResponseWriter, r *http.Request, cb callback) {
+	var input Solver
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
@@ -35,7 +52,7 @@ func TspSA(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(input.SA()); err != nil {
+	if err := json.NewEncoder(w).Encode( cb(input) ); err != nil {
 		panic(err)
 	}
 }

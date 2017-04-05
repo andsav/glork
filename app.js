@@ -149,6 +149,13 @@
             this.ctx.stroke();
         }
 
+        getSASolver(cooling) {
+            return {
+                p: this.path.object,
+                config: [ parseFloat(cooling) ]
+            }
+        }
+
         get coord() {
             return this.path.p;
         }
@@ -165,7 +172,7 @@
             this.ctx.clearRect(0, 0, this.halfWidth, this.c.height);
         }
 
-        sa(path, i = 0, max = 0) {
+        sa(path, i = 0, max = 0, cooling = 0.98) {
             if(i == 0) {
                 this.clear();
                 this.ctx.beginPath();
@@ -180,7 +187,7 @@
                 this.ctx.stroke();
             }
 
-            let t = Math.round(Math.pow(0.98, i) * 10000000) / 10000000,
+            let t = Math.round(Math.pow(cooling, i) * 10000000) / 10000000,
                 length = path.length;
 
             if(i == 1) {
@@ -191,11 +198,12 @@
                 let x = this.halfWidth + this.halfWidth/max * i,
                     y = this.c.height - (length/this.initial) * this.halfHeight*.67,
                     h = this.c.height - y,
+                    w = this.halfWidth/max,
                     y2 = this.halfHeight - t * this.halfHeight,
                     h2 = this.halfHeight - y2;
 
-                this.ctx.fillRect(x, y, 1, h);
-                this.ctx.fillRect(x, y2, 1, h2);
+                this.ctx.fillRect(x, y, w, h);
+                this.ctx.fillRect(x, y2, w, h2);
             }
 
             this.ctx.fillText("    T°: " + (t == 1 ? "1.0000000" : String(t)), 20, 26);
@@ -303,7 +311,7 @@
                 canvas.loading(result);
                 result.show();
 
-                $post(ENDPOINTS.TSP_SA, canvas.path.object, (data) => {
+                $post(ENDPOINTS.TSP_SA, canvas.getSASolver(0.97), (data) => {
                     clear_timeout();
                     output_solution(canvas, result, data, 1);
                 }, (response) => {

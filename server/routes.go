@@ -24,4 +24,10 @@ var routes = Routes{
 		"/tsp/sa",
 		TspSA,
 	},
+	Route{
+		"TspLSB",
+		"POST",
+		"/tsp/lsb",
+		TspSA,
+	},
 }
