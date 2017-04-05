@@ -1,0 +1,114 @@
+html {
+    touch-action: manipulation;
+}
+
+body {
+    padding: 20px 0;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 0;
+    color: #E6AA68;
+}
+
+#bottom_toolbar {
+    margin-top: 15px;
+    width: 100%;
+    text-align:center;
+}
+
+#bottom_toolbar > div {
+    width: 480px;
+    margin: 0 auto;
+    text-align: right;
+}
+
+#top_toolbar {
+    margin-bottom: 15px;
+    width: 100%;
+    text-align:center;
+}
+
+#top_toolbar > div {
+    width: 480px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+button {
+    padding: 10px 15px;
+    background: rgba(32, 69, 124, 0.4);
+    color: #ECDFBD;
+    border: 1px solid #001427;
+
+    text-transform: uppercase;
+    font-weight: bold;
+
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover, button:focus {
+    -webkit-stroke-width: 5px;
+    -webkit-stroke-color: white;
+    -webkit-fill-color: white;
+    text-shadow: 1px 0 20px #E6AA68;
+    outline: none;
+}
+
+canvas {
+    background-color: rgba(32, 69, 124, 0.4);
+    -webkit-filter: none !important;
+    filter: none !important;
+
+    -webkit-box-shadow: 0 0 15px 5px #001427;
+    -moz-box-shadow: 0 0 15px 5px #001427;
+    box-shadow: 0 0 15px 5px #001427;
+
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    border-radius: 12px;
+
+    margin:0 auto;
+
+}
+
+#c {
+    cursor: crosshair;
+}
+
+#result {
+    margin: 20px 0;
+    display: none;
+}
+
+.buttons-right {
+    float:right;
+}
+
+.buttons-right button {
+    margin: auto 0;
+}
+
+#error_msg {
+    float: left;
+    padding: 10px;
+    width: 250px;
+    text-align: center;
+    background-color: #D7263D;
+    color: #ECDFBD;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    font-size: 14px;
+
+    opacity: 0;
+    -webkit-transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -ms-transition: opacity 1s ease-in-out;
+    -o-transition: opacity 1s ease-in-out;
+}

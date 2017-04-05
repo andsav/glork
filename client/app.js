@@ -1,6 +1,13 @@
 (() => {
     'use strict';
 
+    const ENDPOINTS = {
+        TSP_SA: 'https://go.glork.net/tsp/sa',
+        TSP_LSB: 'https://go.glork.net/tsp/lsb'
+    };
+
+    const DELAY = 24; // milliseconds between frame refresh
+
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
     let $ = (id) => document.getElementById(id),
@@ -41,13 +48,6 @@
             err_msg.style.opacity = 0;
         }, 2000);
     };
-
-    const ENDPOINTS = {
-        TSP_SA: 'https://go.glork.net/tsp/sa',
-        TSP_LSB: 'https://go.glork.net/tsp/lsb'
-    };
-
-    const DELAY = 24; // milliseconds between frames
 
     class CanvasBase {
         constructor(id) {
@@ -109,17 +109,17 @@
         drawNode(x, y) {
             this.ctx.fillRect(x-5, y-5, 10, 10);
         }
-        
+
         random(points) {
             this.reset();
-            while(this.coord.length < points) {
+            while(this.coordinates.length < points) {
                 this.placePoint(rand(15, this.c.width-15), rand(15, this.c.height-15))
             }
         }
 
         redraw() {
             this.clear();
-            this.coord.forEach((c) => {
+            this.coordinates.forEach((c) => {
                 this.drawNode(c[0], c[1]);
             });
         }
@@ -130,7 +130,7 @@
             this.path.clear();
         }
 
-        loading(result, path = Path.random( this.coord )) {
+        loading(result, path = Path.random( this.coordinates )) {
             path.trace(this);
             result.sa(path);
 
@@ -156,7 +156,7 @@
             }
         }
 
-        get coord() {
+        get coordinates() {
             return this.path.p;
         }
 
@@ -290,7 +290,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const canvas = new Canvas("c"),
-              result = new Result("result");
+            result = new Result("result");
 
         $("reset").onclick = () => {
             canvas.reset();
@@ -306,7 +306,7 @@
         });
 
         $("SA").onclick = () => {
-            if(canvas.coord.length > 3) {
+            if(canvas.coordinates.length > 3) {
                 clear_timeout();
                 canvas.loading(result);
                 result.show();
@@ -326,9 +326,8 @@
         };
 
         /*
-        $("LBS").onclick = () => {
-            clear_timeout();
-        }
-        */
+         $("LBS").onclick = () => {
+         clear_timeout();
+         };*/
     });
 })();
