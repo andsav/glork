@@ -10,7 +10,6 @@ body {
 h1 {
     margin-top: 0;
     color: #E6AA68;
-    text-decoration: underline;
 }
 
 #bottom_toolbar {
@@ -22,7 +21,7 @@ h1 {
 #bottom_toolbar > div {
     width: 590px;
     margin: 0 auto 10px auto;
-    text-align: right;
+    text-align: center;
 }
 
 #top_toolbar {
@@ -108,9 +107,8 @@ button:hover, button:focus {
     box-shadow: none;
     border: 1px solid #001427;
 
-    height: 37px;
-    position: relative;
-    top: 14px;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .button-group button {
@@ -119,6 +117,12 @@ button:hover, button:focus {
     -moz-border-radius: 0 4px 4px 0;
     border-radius: 0 4px 4px 0;
     border-left: 0;
+
+    display: inline-block;
+    vertical-align: middle;
+
+    height: 52px;
+    padding: auto;
 }
 
 button small {
