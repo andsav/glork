@@ -143,7 +143,7 @@
 
         loading(result, path = Path.random( this.coordinates )) {
             path.trace(this);
-            result.sa(path);
+            result.output_sa_helper(path);
 
             let _this = this;
             setTimeout(() => { _this.loading(result /*, path.neighbour*/ ); }, DELAY);
@@ -160,18 +160,17 @@
             this.ctx.stroke();
         }
 
-        getSASolver(cooling) {
+        get solver() {
             return {
-                p: this.path.object,
-                config: [ parseFloat(cooling) ]
-            }
-        }
-
-        getLBSSolver(k) {
-            return {
-                p: this.path.object,
-                config: [ parseFloat(k) ]
-            }
+                'sa': {
+                    p: this.path.object,
+                    config: [ parseFloat(0.98) ]
+                },
+                'lbs': {
+                    p: this.path.object,
+                    config: [ parseFloat(50) ]
+                }
+            };
         }
 
         get coordinates() {
@@ -190,7 +189,7 @@
             this.ctx.clearRect(0, 0, this.halfWidth, this.c.height);
         }
 
-        sa(path, i = 0, max = 0, cooling = 0.98) {
+        output_sa_helper(path, i = 0, max = 0, cooling = 0.98) {
             if(i === 0) {
                 this.clear();
                 this.ctx.beginPath();
@@ -227,6 +226,30 @@
             this.ctx.fillText("    T°: " + (t === 1 ? "1.0000000" : String(t)), 20, 26);
             this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 26);
         }
+
+        output_sa(canvas, solution, i = 1) {
+            if(i === 1) {
+                clear_timeout();
+            }
+            if(i >= solution.length) {
+                return 0;
+            } else {
+                let p = Path.fromObject(solution[i]);
+                p.trace(canvas);
+                this.output_sa_helper(p, i, solution.length);
+
+                let _this = this;
+                setTimeout(function() {
+                    _this.output_sa(canvas, solution, i+1)
+                }, DELAY);
+
+                return 0;
+            }
+        }
+
+        output_lbs(canvas, solution) {
+
+        }
     }
 
     class Config extends CanvasBase
@@ -241,7 +264,7 @@
 
             let _this = this;
             let click = false;
-            
+
             this.c.onmousemove = function(e) {
                 _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
 
@@ -345,21 +368,6 @@
         $("error_msg").style.opacity = 0;
     };
 
-    let output_solution = (canvas, result, solution, i) => {
-        if(i >= solution.length) {
-            return 0;
-        } else {
-            let p = Path.fromObject(solution[i]);
-            p.trace(canvas);
-            result.sa(p, i, solution.length);
-
-            setTimeout(function() {
-                output_solution(canvas, result, solution, i+1)
-            }, DELAY);
-            return 0;
-        }
-    };
-
     document.addEventListener("DOMContentLoaded", () => {
         const canvas = new Canvas("c"),
             result = new Result("result"),
@@ -378,45 +386,34 @@
             };
         });
 
-        $("SA").onclick = () => {
-            if(canvas.coordinates.length > 3) {
-                clear_timeout();
-                canvas.loading(result);
-                result.show();
+        let solve = (endpoint, input, output) => {
+            return () => {
+                if(canvas.coordinates.length > 3) {
+                    clear_timeout();
+                    canvas.loading(result);
+                    result.show();
 
-                $post(ENDPOINTS.TSP_SA, canvas.getSASolver(0.97), (data) => {
-                    clear_timeout();
-                    output_solution(canvas, result, data, 1);
-                }, (response) => {
-                    clear_timeout();
-                    canvas.redraw();
-                    error(canvas.c, response);
-                });
-            }
-            else {
-                error(canvas.c, "Please define at least 4 coordinates");
+                    $post(endpoint, canvas.solver[input], (data) => {
+                        output(data);
+                    }, (response) => {
+                        clear_timeout();
+                        canvas.redraw();
+                        error(canvas.c, response);
+                    });
+                }
+                else {
+                    error(canvas.c, "Please define at least 4 coordinates");
+                }
             }
         };
 
+        $("SA").onclick = solve(ENDPOINTS.TSP_SA, "sa", (data) => {
+            result.output_sa(canvas, data);
+        });
 
-         $("LBS").onclick = () => {
-             if(canvas.coordinates.length > 3) {
-                 clear_timeout();
-                 canvas.loading(result);
-                 result.show();
+        $("LBS").onclick = solve(ENDPOINTS.TSP_LBS, "lbs", (data) => {
+            result.output_lbs(canvas, data);
+        });
 
-                 $post(ENDPOINTS.TSP_LBS, canvas.getLBSSolver(50), (data) => {
-                     clear_timeout();
-                     output_solution(canvas, result, data, 1);
-                 }, (response) => {
-                     clear_timeout();
-                     canvas.redraw();
-                     error(canvas.c, response);
-                 });
-             }
-             else {
-                 error(canvas.c, "Please define at least 4 coordinates");
-             }
-         };
     });
 })();
