@@ -12,6 +12,8 @@
 
     const FONT = "14pt Courier New";
 
+    const CONFIG_BUTTON_RADIUS = 6;
+
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
     let $ = (id) => document.getElementById(id),
@@ -72,7 +74,14 @@
 
         clear() {
             this.ctx.clearRect(0, 0, this.c.width, this.c.height);
-        };
+        }
+
+        mouse(e) {
+            return {
+                x: e.pageX - this.c.offsetLeft,
+                y: e.pageY - this.c.offsetTop
+            }
+        }
 
         get halfWidth() {
             return this.c.width/2;
@@ -91,10 +100,8 @@
             let _this = this;
 
             this.c.onclick = function(e) {
-                let x = e.pageX - _this.c.offsetLeft,
-                    y = e.pageY - _this.c.offsetTop;
-
-                _this.placePoint(x, y);
+                let m = _this.mouse(e);
+                _this.placePoint(m.x, m.y);
             };
         }
 
@@ -222,6 +229,60 @@
         }
     }
 
+    class Config extends CanvasBase
+    {
+        constructor(id) {
+            super(id);
+
+            this.ctx.lineCap = 'round';
+
+            this.button = {x: this.halfWidth, y: this.halfHeight};
+            this.traceButton();
+
+            let _this = this;
+            let click = false;
+            
+            this.c.onmousemove = function(e) {
+                _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
+
+                if(click) {
+                    _this.button = _this.mouse(e);
+                    _this.traceButton();
+                }
+            };
+
+            this.c.onmousedown = function(e) {
+                let m = _this.mouse(e);
+                if(_this.overButton(m)) {
+                    click = true;
+                    _this.button = m;
+                    _this.traceButton();
+                }
+            };
+
+            this.c.onmouseup = function(e) {
+                click = false;
+            }
+        }
+
+        overButton(m) {
+            return Math.pow((m.x - this.button.x), 2) + Math.pow((m.y - this.button.y), 2) < Math.pow(CONFIG_BUTTON_RADIUS, 2)
+        }
+
+
+        traceButton() {
+            this.clear();
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.button.x, this.button.y);
+            this.ctx.lineTo(this.halfWidth, this.halfHeight);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.arc(this.button.x, this.button.y, CONFIG_BUTTON_RADIUS, 0, 2 * Math.PI, false);
+            this.ctx.fill();
+
+        }
+    }
+
     class Path {
         constructor(p) {
             this.p = p;
@@ -301,7 +362,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const canvas = new Canvas("c"),
-            result = new Result("result");
+            result = new Result("result"),
+            config = $$("config-canvas").map((c) => { return new Config(c.id) });
 
         $("reset").onclick = () => {
             canvas.reset();

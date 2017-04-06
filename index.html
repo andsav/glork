@@ -11,33 +11,39 @@
     <link rel="stylesheet" href="https://andreisavin.com/dist/css/dark.css">
     <link rel="stylesheet" href="/client/style.css">
     <link rel="stylesheet" href="/client/vendor/shake.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-    <title>Demo</title>
+    <title>Traveling Salesman Solver</title>
 </head>
 <body>
-
     <h1>Traveling Salesman Solver</h1>
 
     <div id="top_toolbar">
         <div>
             <div class="buttons-right">
-                <button class="random" data-points="15">Rand 15</button> &nbsp;
-                <button class="random" data-points="50">Rand 50</button> &nbsp;
-                <button class="random" data-points="100">Rand 100</button>
+                <button class="random" data-points="15">Random 15</button>
+                <button class="random" data-points="50">Random 50</button>
+                <button class="random" data-points="100">Random 100</button>
             </div>
             <button id="reset">Reset</button>
         </div>
     </div>
 
-    <canvas id="c" width="500" height="500"></canvas>
+    <canvas id="c" width="600" height="400"></canvas>
 
     <div id="bottom_toolbar">
         <div>
-            <button id="SA">Simulated Annealing</button> &nbsp; <button id="LBS">Local Beam Search</button>
+            <span class="button-group">
+                <canvas class="config-canvas" id="LSB-config" width="60" height="37"></canvas><button id="LBS">Local Beam Search</button>
+            </span>
+            &nbsp;
+            <span class="button-group">
+                <canvas class="config-canvas" id="SA-config" width="60" height="37"></canvas><button id="SA">Simulated Annealing</button>
+            </span>
         </div>
     </div>
 
-    <canvas id="result" height="80" width="500"></canvas>
+    <canvas id="result" height="80" width="600"></canvas>
 
     <div id="error_msg"></div>
 
