@@ -95,9 +95,9 @@ canvas {
 }
 
 #error_msg {
-    float: left;
+    width: 500px;
+    margin:10px auto;
     padding: 10px;
-    width: 250px;
     text-align: center;
     background-color: #D7263D;
     color: #ECDFBD;

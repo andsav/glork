@@ -3,10 +3,14 @@
 
     const ENDPOINTS = {
         TSP_SA: 'https://go.glork.net/tsp/sa',
-        TSP_LSB: 'https://go.glork.net/tsp/lsb'
+        TSP_LBS: 'https://go.glork.net/tsp/lbs'
     };
 
     const DELAY = 24; // milliseconds between frame refresh
+
+    const COLOR = "#E6AA68";
+
+    const FONT = "14pt Courier New";
 
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
@@ -53,7 +57,7 @@
         constructor(id) {
             this.c = $(id);
             this.ctx = this.c.getContext('2d');
-            this.ctx.fillStyle = this.ctx.strokeStyle = "#E6AA68";
+            this.ctx.fillStyle = this.ctx.strokeStyle = COLOR;
             this.ctx.lineWidth = 2;
         }
 
@@ -156,6 +160,13 @@
             }
         }
 
+        getLBSSolver(k) {
+            return {
+                p: this.path.object,
+                config: [ parseFloat(k) ]
+            }
+        }
+
         get coordinates() {
             return this.path.p;
         }
@@ -165,7 +176,7 @@
     class Result extends CanvasBase {
         constructor(id) {
             super(id);
-            this.ctx.font = "14pt Courier New"
+            this.ctx.font = FONT
         }
 
         clear_half() {
@@ -173,7 +184,7 @@
         }
 
         sa(path, i = 0, max = 0, cooling = 0.98) {
-            if(i == 0) {
+            if(i === 0) {
                 this.clear();
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, this.halfHeight);
@@ -190,13 +201,13 @@
             let t = Math.round(Math.pow(cooling, i) * 10000000) / 10000000,
                 length = path.length;
 
-            if(i == 1) {
+            if(i === 1) {
                 this.initial = length;
             }
 
-            if(i != 0) {
+            if(i !== 0) {
                 let x = this.halfWidth + this.halfWidth/max * i,
-                    y = this.c.height - (length/this.initial) * this.halfHeight*.67,
+                    y = Math.max(this.c.height - (length/this.initial) * this.halfHeight*.67, this.halfHeight),
                     h = this.c.height - y,
                     w = this.halfWidth/max,
                     y2 = this.halfHeight - t * this.halfHeight,
@@ -206,7 +217,7 @@
                 this.ctx.fillRect(x, y2, w, h2);
             }
 
-            this.ctx.fillText("    T°: " + (t == 1 ? "1.0000000" : String(t)), 20, 26);
+            this.ctx.fillText("    T°: " + (t === 1 ? "1.0000000" : String(t)), 20, 26);
             this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 26);
         }
     }
@@ -325,9 +336,25 @@
             }
         };
 
-        /*
+
          $("LBS").onclick = () => {
-         clear_timeout();
-         };*/
+             if(canvas.coordinates.length > 3) {
+                 clear_timeout();
+                 canvas.loading(result);
+                 result.show();
+
+                 $post(ENDPOINTS.TSP_LBS, canvas.getLBSSolver(50), (data) => {
+                     clear_timeout();
+                     output_solution(canvas, result, data, 1);
+                 }, (response) => {
+                     clear_timeout();
+                     canvas.redraw();
+                     error(canvas.c, response);
+                 });
+             }
+             else {
+                 error(canvas.c, "Please define at least 4 coordinates");
+             }
+         };
     });
 })();

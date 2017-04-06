@@ -23,7 +23,7 @@ func TspSA(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func TspLSB(w http.ResponseWriter, r *http.Request) {
+func TspLBS(w http.ResponseWriter, r *http.Request) {
 	tspSolve(w, r, func(s Solver) Solution {
 		return s.Input.LocalBeamSearch(int(s.Config[0]));
 	});

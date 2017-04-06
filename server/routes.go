@@ -25,9 +25,9 @@ var routes = Routes{
 		TspSA,
 	},
 	Route{
-		"TspLSB",
+		"TspLBS",
 		"POST",
-		"/tsp/lsb",
-		TspSA,
+		"/tsp/lbs",
+		TspLBS,
 	},
 }
