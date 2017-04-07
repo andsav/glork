@@ -248,6 +248,9 @@
         }
 
         output_lbs(canvas, solution) {
+            const max = Path.fromObject(solution[0]).length,
+                  min = Path.fromObject(solution[solution.length-1]).length;
+
 
         }
     }
@@ -257,33 +260,32 @@
         constructor(id) {
             super(id);
 
-            this.ctx.lineCap = 'round';
+            this.button = this.configToButton;
 
-            this.button = {x: this.halfWidth, y: this.halfHeight};
+            this.ctx.lineCap = 'round';
             this.traceButton();
 
             let _this = this;
             let click = false;
 
-            this.c.onmousemove = function(e) {
-                _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
-
-                if(click) {
-                    _this.button = _this.mouse(e);
-                    _this.traceButton();
-                }
-            };
-
             this.c.onmousedown = function(e) {
                 let m = _this.mouse(e);
                 if(_this.overButton(m)) {
                     click = true;
-                    _this.button = m;
+                }
+            };
+
+            this.c.onmousemove = function(e) {
+                let m = _this.mouse(e);
+                _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
+
+                if(click) {
+                    _this.setConfig(m);
                     _this.traceButton();
                 }
             };
 
-            this.c.onmouseup = function(e) {
+            this.c.onmouseup = function() {
                 click = false;
             }
         }
@@ -302,7 +304,31 @@
             this.ctx.beginPath();
             this.ctx.arc(this.button.x, this.button.y, CONFIG_BUTTON_RADIUS, 0, 2 * Math.PI, false);
             this.ctx.fill();
+        }
 
+        setConfig(m) {
+            this.button = m;
+            this.buttonToConfig()
+        }
+        
+        get x() {
+            return this.c.dataset.x;
+        }
+
+        get y() {
+            return this.c.dataset.y;
+        }
+
+        buttonToConfig() {
+            this.c.dataset.x = ((this.button.x / this.c.width) * (this.c.dataset.maxX - this.c.dataset.minX)) + this.c.dataset.minX;
+            this.c.dataset.y = this.c.dataset.maxY - ((this.button.y / this.c.height) * (this.c.dataset.maxY - this.c.dataset.minY) + this.c.dataset.minY);
+        }
+
+        get configToButton() {
+            return {
+                x: (this.x - this.c.dataset.minX)/(this.c.dataset.maxX - this.c.dataset.minX) * (this.c.width),
+                y: this.c.height - ((this.y - this.c.dataset.minY)/(this.c.dataset.maxY - this.c.dataset.minY) * (this.c.height))
+            }
         }
     }
 
