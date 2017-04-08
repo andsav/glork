@@ -22,7 +22,14 @@
     let isNumeric = (n) => !isNaN(parseFloat(n)) && isFinite(n);
 
     let round = (n, decimals) => (Math.round(n * decimals) / decimals);
-    
+
+    let shuffle = (a) => {
+        for (let i = a.length; i; i--) {
+            let j = Math.floor(Math.random() * i);
+            [a[i - 1], a[j]] = [a[j], a[i - 1]];
+        }
+    };
+
     Array.prototype.random = function () {
         return this[Math.floor((Math.random() * this.length))];
     };
@@ -145,12 +152,19 @@
             this.path.clear();
         }
 
-        loading(result, path = Path.random( this.coordinates )) {
+        sa_loading(result, path = Path.random( this.coordinates )) {
+            result.show();
             path.trace(this);
             result.output_sa_helper(path);
 
             let _this = this;
-            setTimeout(() => { _this.loading(result /*, path.neighbour*/ ); }, DELAY);
+            setTimeout(() => { _this.sa_loading(result /*, path.neighbour*/ ); }, DELAY);
+        }
+
+        lbs_loading(path = Path.random( this.coordinates )) {
+            path.trace(this);
+            let _this = this;
+            setTimeout(() => { _this.lbs_loading(); }, DELAY);
         }
 
         trace(path) {
@@ -223,8 +237,10 @@
                     y2 = this.halfHeight - t * this.halfHeight,
                     h2 = this.halfHeight - y2;
 
+                this.ctx.fillStyle = "#ECDFBD";
                 this.ctx.fillRect(x, y, w, h);
                 this.ctx.fillRect(x, y2, w, h2);
+                this.ctx.fillStyle = "#E6AA68"
             }
 
             this.ctx.fillText("    T°: " + (t === 1 ? "1.0000000" : String(t)), 20, 26);
@@ -240,7 +256,7 @@
             } else {
                 let p = Path.fromObject(solution[i]);
                 p.trace(canvas);
-                this.output_sa_helper(p, i, solution.length);
+                this.output_sa_helper(p, i, solution.length, $('config_sa').dataset.x);
 
                 let _this = this;
                 setTimeout(function() {
@@ -252,10 +268,37 @@
         }
 
         output_lbs(canvas, solution) {
-            const max = Path.fromObject(solution[0]).length,
-                  min = Path.fromObject(solution[solution.length-1]).length;
+            clear_timeout();
+            this.show();
+            this.clear();
 
+            const worst = Path.fromObject(solution[0]),
+                  best = Path.fromObject(solution[solution.length-1]),
+                  max = worst.length,
+                  min = best.length;
 
+            shuffle(solution);
+
+            let i = 0, found_best = false;
+            this.ctx.fillStyle = "#001427";
+            solution.forEach((s) => {
+                let path = Path.fromObject(s),
+                    h = (path.length/max) * (this.c.height * 0.9),
+                    w = this.c.width / solution.length,
+                    y = this.c.height - h,
+                    x = i++ * w;
+
+                if(path.length == min && !found_best) {
+                    this.ctx.fillStyle = "#ECDFBD";
+                    found_best = true;
+                }
+
+                this.ctx.fillRect(x, y, w, h);
+                this.ctx.fillStyle = "#001427";
+            });
+
+            best.trace(canvas);
+            this.ctx.fillStyle = "#E6AA68"
         }
     }
 
@@ -271,6 +314,11 @@
 
             let _this = this;
             let click = false;
+
+            this.c.ontouchstart = function(e) {
+                _this.setConfig(_this.mouse(e));
+                _this.update();
+            };
 
             this.c.onmousedown = function(e) {
                 let m = _this.mouse(e);
@@ -426,12 +474,11 @@
             };
         });
 
-        let solve = (endpoint, input, output) => {
+        let solve = (endpoint, input, output, loading = () => {}) => {
             return () => {
                 if(canvas.coordinates.length > 3) {
                     clear_timeout();
-                    canvas.loading(result);
-                    result.show();
+                    loading();
 
                     $post(endpoint, canvas.solver[input], (data) => {
                         output(data);
@@ -449,11 +496,11 @@
 
         $("SA").onclick = solve(ENDPOINTS.TSP_SA, "sa", (data) => {
             result.output_sa(canvas, data);
-        });
+        }, () => { canvas.sa_loading(result);  });
 
         $("LBS").onclick = solve(ENDPOINTS.TSP_LBS, "lbs", (data) => {
             result.output_lbs(canvas, data);
-        });
+        }, () => { canvas.lbs_loading();  });
 
     });
 })();
