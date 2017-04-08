@@ -127,12 +127,14 @@ button:hover, button:focus {
     display: inline-block;
     vertical-align: middle;
 
-    height: 52px;
+    height: 82px;
     padding: auto;
 }
 
 button small {
-    font-size: 12px;
+    font-size: 11px;
+    text-transform: none;
+    font-weight: normal;
 }
 
 #error_msg {

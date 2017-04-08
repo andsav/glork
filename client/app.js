@@ -19,6 +19,8 @@
     let $ = (id) => document.getElementById(id),
         $$ = (cls) => Array.from(document.getElementsByClassName(cls));
 
+    let isNumeric = (n) => !isNaN(parseFloat(n)) && isFinite(n);
+
     Array.prototype.random = function () {
         return this[Math.floor((Math.random() * this.length))];
     };
@@ -263,7 +265,7 @@
             this.button = this.configToButton;
 
             this.ctx.lineCap = 'round';
-            this.traceButton();
+            this.update();
 
             let _this = this;
             let click = false;
@@ -281,7 +283,7 @@
 
                 if(click) {
                     _this.setConfig(m);
-                    _this.traceButton();
+                    _this.update();
                 }
             };
 
@@ -295,8 +297,9 @@
         }
 
 
-        traceButton() {
+        update() {
             this.clear();
+
             this.ctx.beginPath();
             this.ctx.moveTo(this.button.x, this.button.y);
             this.ctx.lineTo(this.halfWidth, this.halfHeight);
@@ -304,30 +307,36 @@
             this.ctx.beginPath();
             this.ctx.arc(this.button.x, this.button.y, CONFIG_BUTTON_RADIUS, 0, 2 * Math.PI, false);
             this.ctx.fill();
+
+            $(this.data.xHref).innerHTML = Math.round(this.dataF('x') * 100) / 100;
+            $(this.data.yHref).innerHTML = Math.round(this.dataF('y') * 100) / 100;
         }
 
         setConfig(m) {
             this.button = m;
             this.buttonToConfig()
         }
-        
-        get x() {
-            return this.c.dataset.x;
+
+        dataF(x) {
+            return parseFloat(this.c.dataset[x]);
         }
 
-        get y() {
-            return this.c.dataset.y;
+        get data() {
+            return this.c.dataset;
         }
 
         buttonToConfig() {
-            this.c.dataset.x = ((this.button.x / this.c.width) * (this.c.dataset.maxX - this.c.dataset.minX)) + this.c.dataset.minX;
-            this.c.dataset.y = this.c.dataset.maxY - ((this.button.y / this.c.height) * (this.c.dataset.maxY - this.c.dataset.minY) + this.c.dataset.minY);
+            this.data.x = ((this.button.x / this.c.width) * ( this.dataF('maxX') - this.dataF('minX') )) + this.dataF('minX');
+            this.data.y = this.dataF('maxY') - ((this.button.y / this.c.height) * ( this.dataF('maxY') - this.dataF('minY') ) + this.dataF('minY'));
+
+            this.data.x = Math.max(Math.min(this.data.x, this.dataF('maxX')), this.dataF('minX'));
+            this.data.y = Math.max(Math.min(this.data.y, this.dataF('maxY')), this.dataF('minY'));
         }
 
         get configToButton() {
             return {
-                x: (this.x - this.c.dataset.minX)/(this.c.dataset.maxX - this.c.dataset.minX) * (this.c.width),
-                y: this.c.height - ((this.y - this.c.dataset.minY)/(this.c.dataset.maxY - this.c.dataset.minY) * (this.c.height))
+                x: (this.data.x - this.dataF('minX'))/(this.dataF('maxX')- this.dataF('minX')) * (this.c.width),
+                y: this.c.height - ((this.data.y - this.dataF('minY'))/(this.dataF('maxY') - this.dataF('minY')) * (this.c.height))
             }
         }
     }

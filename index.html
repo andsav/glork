@@ -36,8 +36,10 @@
             <span class="button-group">
                 <canvas class="config-canvas"
                         id="LSB-config"
-                        width="60"
-                        height="50"
+                        width="80"
+                        height="80"
+                        data-x-var="k"
+                        data-y-var="i"
                         data-min-x="1"
                         data-max-x="200"
                         data-x-int="true"
@@ -45,24 +47,36 @@
                         data-max-y="3000"
                         data-y-int="true"
                         data-x="50"
-                        data-y="1500"></canvas><!--
-                --><button id="LBS">Local Beam Search</button>
+                        data-y="1500"
+                        data-x-href="lbs_k"
+                        data-y-href="lbs_i"></canvas><!--
+                --><button id="LBS">
+                Local Beam Search<br>
+                <small>(&#945; = <span id="lbs_k">50</span>, i = <span id="lbs_i">1500</span>)</small>
+            </button>
             </span>
             &nbsp;
             <span class="button-group">
                 <canvas class="config-canvas"
                         id="SA-config"
-                        width="60"
-                        height="50"
-                        data-min-x="0.85"
+                        width="80"
+                        height="80"
+                        data-x-var="945"
+                        data-y-var="i"
+                        data-min-x="0.75"
                         data-max-x="0.99"
                         data-x-int="false"
                         data-min-y="1"
                         data-max-y="500"
                         data-y-int="true"
-                        data-x="0.98"
-                        data-y="200"></canvas><!--
-                --><button id="SA">Simulated Annealing</button>
+                        data-x="0.92"
+                        data-y="200"
+                        data-x-href="sa_a"
+                        data-y-href="sa_i"></canvas><!--
+                --><button id="SA">
+                Simulated Annealing<br>
+                <small>(&#945; = <span id="sa_a">0.97</span>, i = <span id="sa_i">200</span>)</small>
+            </button>
             </span>
         </div>
     </div>
