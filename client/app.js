@@ -21,6 +21,8 @@
 
     let isNumeric = (n) => !isNaN(parseFloat(n)) && isFinite(n);
 
+    let round = (n, decimals) => (Math.round(n * decimals) / decimals);
+    
     Array.prototype.random = function () {
         return this[Math.floor((Math.random() * this.length))];
     };
@@ -166,11 +168,11 @@
             return {
                 'sa': {
                     p: this.path.object,
-                    config: [ parseFloat(0.98) ]
+                    config: [ parseFloat($('config_sa').dataset.x), parseFloat($('config_sa').dataset.y) ]
                 },
                 'lbs': {
                     p: this.path.object,
-                    config: [ parseFloat(50) ]
+                    config: [ parseFloat($('config_lsb').dataset.x), parseFloat($('config_lsb').dataset.y) ]
                 }
             };
         }
@@ -206,7 +208,7 @@
                 this.ctx.stroke();
             }
 
-            let t = Math.round(Math.pow(cooling, i) * 10000000) / 10000000,
+            let t = round(Math.pow(cooling, i) , 1e7),
                 length = path.length;
 
             if(i === 1) {
@@ -308,8 +310,8 @@
             this.ctx.arc(this.button.x, this.button.y, CONFIG_BUTTON_RADIUS, 0, 2 * Math.PI, false);
             this.ctx.fill();
 
-            $(this.data.xHref).innerHTML = Math.round(this.dataF('x') * 100) / 100;
-            $(this.data.yHref).innerHTML = Math.round(this.dataF('y') * 100) / 100;
+            $(this.data.xHref).innerHTML = this.data.x;
+            $(this.data.yHref).innerHTML = this.data.y;
         }
 
         setConfig(m) {
@@ -331,6 +333,9 @@
 
             this.data.x = Math.max(Math.min(this.data.x, this.dataF('maxX')), this.dataF('minX'));
             this.data.y = Math.max(Math.min(this.data.y, this.dataF('maxY')), this.dataF('minY'));
+
+            this.data.x = (this.data.xInt == 'true') ? Math.round(this.dataF('x')) : round(this.dataF('x'), 100);
+            this.data.y = (this.data.yInt == 'true') ? Math.round(this.dataF('y')) : round(this.dataF('y'), 100);
         }
 
         get configToButton() {

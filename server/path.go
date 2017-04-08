@@ -83,7 +83,7 @@ func (s Solution) Less(i, j int) bool {
 
 
 // Solves TSP using Simulated Annealing
-func (p Path) SimulatedAnnealing(cooling float64) Solution {
+func (p Path) SimulatedAnnealing(cooling float64, iterations int) Solution {
 	rand.Seed(time.Now().Unix())
 
 	var solution Solution
@@ -91,6 +91,10 @@ func (p Path) SimulatedAnnealing(cooling float64) Solution {
 
 	if cooling < 0.85 || cooling > 0.99 {
 		cooling = 0.98
+	}
+
+	if iterations < 1 || iterations < 500 {
+		iterations = 200
 	}
 
 	ap := func(last float64, current float64, t float64) float64 {
@@ -102,7 +106,7 @@ func (p Path) SimulatedAnnealing(cooling float64) Solution {
 		copy(keep, p)
 		solution = append(solution, keep)
 
-		for i := 0; i < 200; i += 1 {
+		for i := 0; i < iterations; i += 1 {
 			p2 := p.Neighbour()
 			if ap(p.Len(), p2.Len(), t) > rand.Float64() {
 				copy(p, p2)
@@ -114,7 +118,7 @@ func (p Path) SimulatedAnnealing(cooling float64) Solution {
 }
 
 // Solves TSP using Local Beam Search
-func (p Path) LocalBeamSearch(k int) Solution {
+func (p Path) LocalBeamSearch(k int, iterations int) Solution {
 	rand.Seed(time.Now().Unix())
 
 	var solution Solution
@@ -126,11 +130,15 @@ func (p Path) LocalBeamSearch(k int) Solution {
 		k = 1
 	}
 
+	if iterations > 5000 || iterations < 1 {
+		iterations = 2000
+	}
+
 	best := make(chan Path)
 
 	routine := func(pp Path) {
 
-		for i := 0; i < 2000; i += 1 {
+		for i := 0; i < iterations; i += 1 {
 			pp2 := pp.Neighbour()
 			if pp2.Len() < pp.Len() {
 				copy(pp, pp2)

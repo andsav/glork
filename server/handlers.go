@@ -18,14 +18,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func TspSA(w http.ResponseWriter, r *http.Request) {
 	tspSolve(w, r, func(s Solver) Solution {
-		return s.Input.SimulatedAnnealing(s.Config[0])
+		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
 
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
 	tspSolve(w, r, func(s Solver) Solution {
-		return s.Input.LocalBeamSearch(int(s.Config[0]));
+		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 	});
 }
 
