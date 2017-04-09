@@ -1,37 +1,41 @@
-(() => {
-    'use strict';
+(function () {
+    "use strict";
+
 
     // Configuration
-    const
-        ENDPOINTS = {
-            TSP_SA: 'https://go.glork.net/tsp/sa',
-            TSP_LBS: 'https://go.glork.net/tsp/lbs'
-        },
-        DELAY = 30, // milliseconds between frame refresh
-        DEFAULT_COLOR = "#E6AA68",
-        BLACK = "#001427",
-        WHITE = "#ECDFBD",
-        FONT = "14pt Courier New",
-        CONFIG_BUTTON_RADIUS = 6;
+    const ENDPOINTS = {
+        TSP_SA: 'https://go.glork.net/tsp/sa',
+        TSP_LBS: 'https://go.glork.net/tsp/lbs'
+    };
+    const DELAY = 30; // milliseconds between frame refresh
+
+    const DEFAULT_COLOR = "#E6AA68";
+    const BLACK = "#001427";
+    const WHITE = "#ECDFBD";
+
+    const DEFAULT_FONT = "14pt Courier New";
+
+    const CONFIG_BUTTON_RADIUS = 6;
 
 
     // Jquery ^^
-    let $ = (id) => document.getElementById(id),
-        $$ = (cls) => Array.from(document.getElementsByClassName(cls)),
+    let $ = (id) => document.getElementById(id);
 
-        $post = (url, data, success, error) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-            xhr.onload = function () {
-                if (this.status === 200) {
-                    success(JSON.parse(this.responseText));
-                } else {
-                    error(this.response);
-                }
-            };
-            xhr.send(JSON.stringify(data));
+    let $$ = (cls) => Array.from(document.getElementsByClassName(cls));
+
+    let $post = (url, data, success, error) => {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                success(JSON.parse(xhr.responseText));
+            } else {
+                error(xhr.response);
+            }
         };
+        xhr.send(JSON.stringify(data));
+    };
 
 
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
@@ -198,12 +202,12 @@
         get solver() {
             return {
                 'sa': {
-                    p: this.path.object,
-                    config: [parseFloat($('config_sa').dataset.x), parseFloat($('config_sa').dataset.y)]
+                    'p': this.path.object,
+                    'config': [parseFloat($('config_sa').dataset['x']), parseFloat($('config_sa').dataset['y'])]
                 },
                 'lbs': {
-                    p: this.path.object,
-                    config: [parseFloat($('config_lbs').dataset.x), parseFloat($('config_lbs').dataset.y)]
+                    'p': this.path.object,
+                    'config': [parseFloat($('config_lbs').dataset['x']), parseFloat($('config_lbs').dataset['y'])]
                 }
             };
         }
@@ -217,7 +221,9 @@
     class ResultCanvas extends CanvasBase {
         constructor(id) {
             super(id);
-            this.ctx.font = FONT
+            this.ctx.font = DEFAULT_FONT;
+            this.initial = 0;
+            this.cooling = 0;
         }
 
         clear_half() {
@@ -246,6 +252,7 @@
                 this.initial = length;
             }
 
+            this.ctx.fillStyle = WHITE;
             if (i !== 0) {
                 let x = this.halfWidth + this.halfWidth / max * i,
                     y = Math.max(this.c.height - (length / this.initial) * this.halfHeight * .67, this.halfHeight),
@@ -254,20 +261,19 @@
                     y2 = this.halfHeight - t * this.halfHeight,
                     h2 = this.halfHeight - y2;
 
-                this.ctx.fillStyle = WHITE;
                 this.ctx.fillRect(x, y, w, h);
                 this.ctx.fillRect(x, y2, w, h2);
-                this.ctx.fillStyle = DEFAULT_COLOR;
             }
 
             this.ctx.fillText("    T°: " + (t === 1 ? "1.0000000" : String(t)), 20, 26);
             this.ctx.fillText("Length: " + String(length), 20, this.halfHeight + 26);
+            this.ctx.fillStyle = DEFAULT_COLOR;
         }
 
         output_sa(canvas, solution, i = 1) {
             if (i === 1) {
                 clear_timeout();
-                this.cooling = $('config_sa').dataset.x;
+                this.cooling = $('config_sa').dataset['x'];
             }
             if (i >= solution.length) {
                 return 0;
@@ -288,11 +294,11 @@
         loading_lbs() {
             this.show();
             this.clear();
-            let n = parseInt($("config_lbs").dataset.x);
+            let n = parseInt($("config_lbs").dataset['x'], 10);
 
             this.ctx.fillStyle = BLACK;
             for (let i = 0; i < n; ++i) {
-                let h = this.c.height * 0.9,
+                let h = this.c.height * 0.5,
                     w = this.c.width / n,
                     y = this.c.height - h,
                     x = i * w;
@@ -317,13 +323,18 @@
             this.ctx.fillStyle = "#001427";
             solution.forEach((s) => {
                 let path = Path.fromObject(s),
-                    h = (path.length / max) * (this.c.height * 0.9),
+                    h = (path.length / max) * (this.c.height * 0.5),
                     w = this.c.width / solution.length,
                     y = this.c.height - h,
                     x = i++ * w;
 
                 if (path.length == min && !found_best) {
                     this.ctx.fillStyle = WHITE;
+
+                    let offset = this.ctx.measureText(String(min)).width;
+                    console.log(offset);
+                    this.ctx.fillText(min, Math.min(Math.max(x + w/2 - offset/2, 2), this.c.width - offset - 2), 20);
+
                     found_best = true;
                 }
 
@@ -391,8 +402,8 @@
             this.ctx.arc(this.button.x, this.button.y, CONFIG_BUTTON_RADIUS, 0, 2 * Math.PI, false);
             this.ctx.fill();
 
-            $(this.data.xHref).innerHTML = this.data.x;
-            $(this.data.yHref).innerHTML = this.data.y;
+            $(this.data['xHref']).innerHTML = this.data.x;
+            $(this.data['yHref']).innerHTML = this.data.y;
         }
 
         setConfig(m) {
@@ -416,8 +427,8 @@
             this.data.x = Math.max(Math.min(this.data.x, this.dataF('maxX')), this.dataF('minX'));
             this.data.y = Math.max(Math.min(this.data.y, this.dataF('maxY')), this.dataF('minY'));
 
-            this.data.x = (this.data.xInt == 'true') ? Math.round(this.dataF('x')) : round(this.dataF('x'), 100);
-            this.data.y = (this.data.yInt == 'true') ? Math.round(this.dataF('y')) : round(this.dataF('y'), 100);
+            this.data.x = (this.data['xInt'] == 'true') ? Math.round(this.dataF('x')) : round(this.dataF('x'), 100);
+            this.data.y = (this.data['yInt'] == 'true') ? Math.round(this.dataF('y')) : round(this.dataF('y'), 100);
         }
 
         get configToButton() {
@@ -500,13 +511,12 @@
 
         $$("random").forEach((c) => {
             c.onclick = () => {
-                canvas.random(parseInt(c.dataset['points']) % 200);
+                canvas.random(parseInt(c.dataset['points'], 10) % 200);
                 result.hide();
             };
         });
 
-        let solve = (endpoint, input, output, loading = () => {
-        }) => {
+        let solve = (endpoint, input, output, loading) => {
             return () => {
                 if (canvas.coordinates.length > 3) {
                     clear_timeout();
