@@ -142,8 +142,9 @@ button small {
     margin:10px auto;
     padding: 10px;
     text-align: center;
-    background-color: #D7263D;
-    color: #ECDFBD;
+    background-color: #FF9059;
+    font-weight: bold;
+    color: #001427;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;

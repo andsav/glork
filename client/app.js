@@ -1,28 +1,44 @@
 (() => {
     'use strict';
 
-    const ENDPOINTS = {
-        TSP_SA: 'https://go.glork.net/tsp/sa',
-        TSP_LBS: 'https://go.glork.net/tsp/lbs'
-    };
+    // Configuration
+    const
+        ENDPOINTS = {
+            TSP_SA: 'https://go.glork.net/tsp/sa',
+            TSP_LBS: 'https://go.glork.net/tsp/lbs'
+        },
+        DELAY = 30, // milliseconds between frame refresh
+        DEFAULT_COLOR = "#E6AA68",
+        BLACK = "#001427",
+        WHITE = "#ECDFBD",
+        FONT = "14pt Courier New",
+        CONFIG_BUTTON_RADIUS = 6;
 
-    const DELAY = 24; // milliseconds between frame refresh
 
-    const COLOR = "#E6AA68";
+    // Jquery ^^
+    let $ = (id) => document.getElementById(id),
+        $$ = (cls) => Array.from(document.getElementsByClassName(cls)),
 
-    const FONT = "14pt Courier New";
+        $post = (url, data, success, error) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    success(JSON.parse(this.responseText));
+                } else {
+                    error(this.response);
+                }
+            };
+            xhr.send(JSON.stringify(data));
+        };
 
-    const CONFIG_BUTTON_RADIUS = 6;
 
     let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
-    let $ = (id) => document.getElementById(id),
-        $$ = (cls) => Array.from(document.getElementsByClassName(cls));
-
-    let isNumeric = (n) => !isNaN(parseFloat(n)) && isFinite(n);
-
     let round = (n, decimals) => (Math.round(n * decimals) / decimals);
 
+    // Fisher–Yates algorithm
     let shuffle = (a) => {
         for (let i = a.length; i; i--) {
             let j = Math.floor(Math.random() * i);
@@ -30,25 +46,12 @@
         }
     };
 
+    // Quick and dirty return random element form array (not really random)
     Array.prototype.random = function () {
         return this[Math.floor((Math.random() * this.length))];
     };
 
     let rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-    let $post = (url, data, success, error) => {
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xhr.onload = function() {
-            if(this.status === 200) {
-                success(JSON.parse(this.responseText));
-            } else {
-                error(this.response);
-            }
-        };
-        xhr.send(JSON.stringify(data));
-    };
 
     let error = (elem, err) => {
         let err_msg = $("error_msg");
@@ -57,20 +60,30 @@
         err_msg.innerHTML = err;
         err_msg.style.opacity = 1;
 
-        setTimeout(function() {
+        setTimeout(function () {
             elem.classList.remove('shake', 'shake-constant');
         }, 300);
 
-        setTimeout(function() {
+        setTimeout(function () {
             err_msg.style.opacity = 0;
         }, 2000);
+    };
+
+    // Stop all animations in progress
+    let clear_timeout = () => {
+        let highestTimeoutId = setTimeout(";");
+        for (let i = 0; i < highestTimeoutId; i++) {
+            clearTimeout(i);
+        }
+
+        $("error_msg").style.opacity = 0;
     };
 
     class CanvasBase {
         constructor(id) {
             this.c = $(id);
             this.ctx = this.c.getContext('2d');
-            this.ctx.fillStyle = this.ctx.strokeStyle = COLOR;
+            this.ctx.fillStyle = this.ctx.strokeStyle = DEFAULT_COLOR;
             this.ctx.lineWidth = 2;
         }
 
@@ -95,29 +108,29 @@
         }
 
         get halfWidth() {
-            return this.c.width/2;
+            return this.c.width / 2;
         }
 
         get halfHeight() {
-            return this.c.height/2;
+            return this.c.height / 2;
         }
     }
 
-    class Canvas extends CanvasBase {
+    class MainCanvas extends CanvasBase {
         constructor(id) {
             super(id);
 
             this.path = new Path([]);
             let _this = this;
 
-            this.c.onclick = function(e) {
+            this.c.onclick = function (e) {
                 let m = _this.mouse(e);
                 _this.placePoint(m.x, m.y);
             };
         }
 
         placePoint(x, y) {
-            if(x > 12
+            if (x > 12
                 && x < this.c.width - 12
                 && y > 12
                 && y < this.c.height - 12
@@ -129,13 +142,13 @@
         }
 
         drawNode(x, y) {
-            this.ctx.fillRect(x-5, y-5, 10, 10);
+            this.ctx.fillRect(x - 5, y - 5, 10, 10);
         }
 
         random(points) {
             this.reset();
-            while(this.coordinates.length < points) {
-                this.placePoint(rand(15, this.c.width-15), rand(15, this.c.height-15))
+            while (this.coordinates.length < points) {
+                this.placePoint(rand(15, this.c.width - 15), rand(15, this.c.height - 15))
             }
         }
 
@@ -152,27 +165,30 @@
             this.path.clear();
         }
 
-        sa_loading(result, path = Path.random( this.coordinates )) {
+        loading_sa(result, path = Path.random(this.coordinates)) {
             result.show();
             path.trace(this);
             result.output_sa_helper(path);
 
             let _this = this;
-            setTimeout(() => { _this.sa_loading(result /*, path.neighbour*/ ); }, DELAY);
+            setTimeout(() => {
+                _this.loading_sa(result /*, path.neighbour*/);
+            }, DELAY);
         }
 
-        lbs_loading(result, path = Path.random( this.coordinates )) {
-            result.hide();
+        loading_lbs(path = Path.random(this.coordinates)) {
             path.trace(this);
             let _this = this;
-            setTimeout(() => { _this.lbs_loading(result); }, DELAY);
+            setTimeout(() => {
+                _this.loading_lbs();
+            }, DELAY);
         }
 
         trace(path) {
             this.redraw();
             this.ctx.beginPath();
             this.ctx.moveTo(path[0][0], path[0][1]);
-            for(let i=1; i<path.length; ++i) {
+            for (let i = 1; i < path.length; ++i) {
                 this.ctx.lineTo(path[i][0], path[i][1]);
             }
             this.ctx.lineTo(path[0][0], path[0][1]);
@@ -183,11 +199,11 @@
             return {
                 'sa': {
                     p: this.path.object,
-                    config: [ parseFloat($('config_sa').dataset.x), parseFloat($('config_sa').dataset.y) ]
+                    config: [parseFloat($('config_sa').dataset.x), parseFloat($('config_sa').dataset.y)]
                 },
                 'lbs': {
                     p: this.path.object,
-                    config: [ parseFloat($('config_lsb').dataset.x), parseFloat($('config_lsb').dataset.y) ]
+                    config: [parseFloat($('config_lbs').dataset.x), parseFloat($('config_lbs').dataset.y)]
                 }
             };
         }
@@ -198,7 +214,7 @@
 
     }
 
-    class Result extends CanvasBase {
+    class ResultCanvas extends CanvasBase {
         constructor(id) {
             super(id);
             this.ctx.font = FONT
@@ -209,7 +225,7 @@
         }
 
         output_sa_helper(path, i = 0, max = 0, cooling = 0.98) {
-            if(i === 0) {
+            if (i === 0) {
                 this.clear();
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, this.halfHeight);
@@ -223,25 +239,25 @@
                 this.ctx.stroke();
             }
 
-            let t = round(Math.pow(cooling, i) , 1e7),
+            let t = round(Math.pow(cooling, i), 1e7),
                 length = path.length;
 
-            if(i === 1) {
+            if (i === 1) {
                 this.initial = length;
             }
 
-            if(i !== 0) {
-                let x = this.halfWidth + this.halfWidth/max * i,
-                    y = Math.max(this.c.height - (length/this.initial) * this.halfHeight*.67, this.halfHeight),
+            if (i !== 0) {
+                let x = this.halfWidth + this.halfWidth / max * i,
+                    y = Math.max(this.c.height - (length / this.initial) * this.halfHeight * .67, this.halfHeight),
                     h = this.c.height - y,
-                    w = this.halfWidth/max,
+                    w = this.halfWidth / max,
                     y2 = this.halfHeight - t * this.halfHeight,
                     h2 = this.halfHeight - y2;
 
-                this.ctx.fillStyle = "#ECDFBD";
+                this.ctx.fillStyle = WHITE;
                 this.ctx.fillRect(x, y, w, h);
                 this.ctx.fillRect(x, y2, w, h2);
-                this.ctx.fillStyle = "#E6AA68"
+                this.ctx.fillStyle = DEFAULT_COLOR;
             }
 
             this.ctx.fillText("    T°: " + (t === 1 ? "1.0000000" : String(t)), 20, 26);
@@ -249,34 +265,51 @@
         }
 
         output_sa(canvas, solution, i = 1) {
-            if(i === 1) {
+            if (i === 1) {
                 clear_timeout();
+                this.cooling = $('config_sa').dataset.x;
             }
-            if(i >= solution.length) {
+            if (i >= solution.length) {
                 return 0;
             } else {
                 let p = Path.fromObject(solution[i]);
                 p.trace(canvas);
-                this.output_sa_helper(p, i, solution.length, $('config_sa').dataset.x);
+                this.output_sa_helper(p, i, solution.length, this.cooling);
 
                 let _this = this;
-                setTimeout(function() {
-                    _this.output_sa(canvas, solution, i+1)
+                setTimeout(function () {
+                    _this.output_sa(canvas, solution, i + 1)
                 }, DELAY);
 
                 return 0;
             }
         }
 
+        loading_lbs() {
+            this.show();
+            this.clear();
+            let n = parseInt($("config_lbs").dataset.x);
+
+            this.ctx.fillStyle = BLACK;
+            for (let i = 0; i < n; ++i) {
+                let h = this.c.height * 0.9,
+                    w = this.c.width / n,
+                    y = this.c.height - h,
+                    x = i * w;
+
+                this.ctx.fillRect(x, y, w, h);
+            }
+            this.ctx.fillStyle = DEFAULT_COLOR;
+        };
+
         output_lbs(canvas, solution) {
             clear_timeout();
-            this.show();
             this.clear();
 
             const worst = Path.fromObject(solution[0]),
-                  best = Path.fromObject(solution[solution.length-1]),
-                  max = worst.length,
-                  min = best.length;
+                best = Path.fromObject(solution[solution.length - 1]),
+                max = worst.length,
+                min = best.length;
 
             shuffle(solution);
 
@@ -284,13 +317,13 @@
             this.ctx.fillStyle = "#001427";
             solution.forEach((s) => {
                 let path = Path.fromObject(s),
-                    h = (path.length/max) * (this.c.height * 0.9),
+                    h = (path.length / max) * (this.c.height * 0.9),
                     w = this.c.width / solution.length,
                     y = this.c.height - h,
                     x = i++ * w;
 
-                if(path.length == min && !found_best) {
-                    this.ctx.fillStyle = "#ECDFBD";
+                if (path.length == min && !found_best) {
+                    this.ctx.fillStyle = WHITE;
                     found_best = true;
                 }
 
@@ -299,12 +332,11 @@
             });
 
             best.trace(canvas);
-            this.ctx.fillStyle = "#E6AA68"
+            this.ctx.fillStyle = DEFAULT_COLOR
         }
     }
 
-    class Config extends CanvasBase
-    {
+    class ConfigCanvas extends CanvasBase {
         constructor(id) {
             super(id);
 
@@ -316,29 +348,29 @@
             let _this = this;
             let click = false;
 
-            this.c.ontouchstart = function(e) {
+            this.c.ontouchstart = function (e) {
                 _this.setConfig(_this.mouse(e));
             };
 
-            this.c.onmousedown = function(e) {
+            this.c.onmousedown = function (e) {
                 let m = _this.mouse(e);
-                if(_this.overButton(m)) {
+                if (_this.overButton(m)) {
                     click = true;
                 } else {
                     _this.setConfig(m);
                 }
             };
 
-            this.c.onmousemove = function(e) {
+            this.c.onmousemove = function (e) {
                 let m = _this.mouse(e);
                 _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
 
-                if(click) {
+                if (click) {
                     _this.setConfig(m);
                 }
             };
 
-            this.c.onmouseup = function() {
+            this.c.onmouseup = function () {
                 click = false;
             }
         }
@@ -390,8 +422,8 @@
 
         get configToButton() {
             return {
-                x: (this.data.x - this.dataF('minX'))/(this.dataF('maxX')- this.dataF('minX')) * (this.c.width),
-                y: this.c.height - ((this.data.y - this.dataF('minY'))/(this.dataF('maxY') - this.dataF('minY')) * (this.c.height))
+                x: (this.data.x - this.dataF('minX')) / (this.dataF('maxX') - this.dataF('minX')) * (this.c.width),
+                y: this.c.height - ((this.data.y - this.dataF('minY')) / (this.dataF('maxY') - this.dataF('minY')) * (this.c.height))
             }
         }
     }
@@ -419,8 +451,8 @@
 
         get neighbour() {
             let p = this.p,
-                a = rand(0, p.length-1),
-                b = rand(0, p.length-1),
+                a = rand(0, p.length - 1),
+                b = rand(0, p.length - 1),
                 tmp = p[a];
 
             p[a] = p[b];
@@ -430,38 +462,35 @@
         }
 
         get object() {
-            return this.p.map( (c) => {
+            return this.p.map((c) => {
                 return {'x': c[0], 'y': c[1]}
-            } )
+            })
         }
 
         get length() {
-            return this.p.reduce((acc, val, i) => { return acc + dist(val, this.p[(i+1)%this.p.length]); }, 0).toFixed(3);
+            return this.p.reduce((acc, val, i) => {
+                return acc + dist(val, this.p[(i + 1) % this.p.length]);
+            }, 0).toFixed(3);
         }
 
         static fromObject(o) {
-            return new Path(o.map( (c) => [c.x, c.y] ));
+            return new Path(o.map((c) => [c.x, c.y]));
         }
 
         static random(coord) {
-            return new Path( coord.sort( () => { return 0.5 - Math.random(); } ));
+            return new Path(coord.sort(() => {
+                return 0.5 - Math.random();
+            }));
         }
     }
 
-    let clear_timeout = () => {
-
-        let highestTimeoutId = setTimeout(";");
-        for (let i = 0 ; i < highestTimeoutId ; i++) {
-            clearTimeout(i);
-        }
-
-        $("error_msg").style.opacity = 0;
-    };
 
     document.addEventListener("DOMContentLoaded", () => {
-        const canvas = new Canvas("c"),
-            result = new Result("result"),
-            config = $$("config-canvas").map((c) => { return new Config(c.id) });
+        const canvas = new MainCanvas("c"),
+            result = new ResultCanvas("result"),
+            config = $$("config-canvas").map((c) => {
+                return new ConfigCanvas(c.id)
+            });
 
         $("reset").onclick = () => {
             canvas.reset();
@@ -471,14 +500,15 @@
 
         $$("random").forEach((c) => {
             c.onclick = () => {
-                canvas.random(parseInt(c.dataset['points'])%200);
+                canvas.random(parseInt(c.dataset['points']) % 200);
                 result.hide();
             };
         });
 
-        let solve = (endpoint, input, output, loading = () => {}) => {
+        let solve = (endpoint, input, output, loading = () => {
+        }) => {
             return () => {
-                if(canvas.coordinates.length > 3) {
+                if (canvas.coordinates.length > 3) {
                     clear_timeout();
                     loading();
 
@@ -498,11 +528,16 @@
 
         $("SA").onclick = solve(ENDPOINTS.TSP_SA, "sa", (data) => {
             result.output_sa(canvas, data);
-        }, () => { canvas.sa_loading(result);  });
+        }, () => {
+            canvas.loading_sa(result);
+        });
 
         $("LBS").onclick = solve(ENDPOINTS.TSP_LBS, "lbs", (data) => {
             result.output_lbs(canvas, data);
-        }, () => { canvas.lbs_loading(result);  });
+        }, () => {
+            canvas.loading_lbs();
+            result.loading_lbs();
+        });
 
     });
 })();
