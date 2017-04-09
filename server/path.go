@@ -89,6 +89,7 @@ func (p Path) SimulatedAnnealing(cooling float64, iterations int) Solution {
 	var solution Solution
 	p.Shuffle()
 
+	// Bounds and default values
 	if cooling < 0.85 || cooling > 0.99 {
 		cooling = 0.98
 	}
@@ -123,14 +124,12 @@ func (p Path) LocalBeamSearch(k int, iterations int) Solution {
 
 	var solution Solution
 
-	if k > 50 {
-		k = 50
-	}
-	if k < 1 {
-		k = 1
+	// Bounds and default values
+	if k < 1 || k > 200 {
+		k = 200
 	}
 
-	if iterations > 5000 || iterations < 1 {
+	if iterations < 1 || iterations > 3000 {
 		iterations = 2000
 	}
 

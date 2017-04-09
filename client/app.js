@@ -161,10 +161,11 @@
             setTimeout(() => { _this.sa_loading(result /*, path.neighbour*/ ); }, DELAY);
         }
 
-        lbs_loading(path = Path.random( this.coordinates )) {
+        lbs_loading(result, path = Path.random( this.coordinates )) {
+            result.hide();
             path.trace(this);
             let _this = this;
-            setTimeout(() => { _this.lbs_loading(); }, DELAY);
+            setTimeout(() => { _this.lbs_loading(result); }, DELAY);
         }
 
         trace(path) {
@@ -317,13 +318,14 @@
 
             this.c.ontouchstart = function(e) {
                 _this.setConfig(_this.mouse(e));
-                _this.update();
             };
 
             this.c.onmousedown = function(e) {
                 let m = _this.mouse(e);
                 if(_this.overButton(m)) {
                     click = true;
+                } else {
+                    _this.setConfig(m);
                 }
             };
 
@@ -333,7 +335,6 @@
 
                 if(click) {
                     _this.setConfig(m);
-                    _this.update();
                 }
             };
 
@@ -364,7 +365,8 @@
 
         setConfig(m) {
             this.button = m;
-            this.buttonToConfig()
+            this.buttonToConfig();
+            this.update();
         }
 
         dataF(x) {
@@ -500,7 +502,7 @@
 
         $("LBS").onclick = solve(ENDPOINTS.TSP_LBS, "lbs", (data) => {
             result.output_lbs(canvas, data);
-        }, () => { canvas.lbs_loading();  });
+        }, () => { canvas.lbs_loading(result);  });
 
     });
 })();
