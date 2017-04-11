@@ -2,7 +2,8 @@
 
 import { ENDPOINTS, COLOR } from '../../lib/constants.js';
 import { $, $$, $post } from '../../lib/$.js';
-import { dist, round, shuffle, rand, clear_timeout } from '../../lib/helpers.js';
+import { dist, round, shuffle, rand, clear_timeout, error } from '../../lib/helpers.js';
+import { Canvas } from '../../lib/canvas.js';
 
 // Quick and dirty return random element form array (not really random)
 Array.prototype.random = function () {
@@ -14,60 +15,7 @@ const DELAY = 30; // milliseconds between frame refresh
 const DEFAULT_FONT = "14pt Courier New";
 const CONFIG_BUTTON_RADIUS = 6;
 
-let error = (elem, err) => {
-    let err_msg = $("error_msg");
-
-    elem.classList.add('shake', 'shake-constant');
-    err_msg.innerHTML = err;
-    err_msg.style.opacity = 1;
-
-    setTimeout(function () {
-        elem.classList.remove('shake', 'shake-constant');
-    }, 300);
-
-    setTimeout(function () {
-        err_msg.style.opacity = 0;
-    }, 2000);
-};
-
-class CanvasBase {
-    constructor(id) {
-        this.c = $(id);
-        this.ctx = this.c.getContext('2d');
-        this.ctx.fillStyle = this.ctx.strokeStyle = COLOR.DEFAULT;
-        this.ctx.lineWidth = 2;
-    }
-
-    hide() {
-        this.c.style.display = "none";
-    }
-
-    show() {
-        this.c.style.display = "initial";
-        this.c.scrollIntoView();
-    }
-
-    clear() {
-        this.ctx.clearRect(0, 0, this.c.width, this.c.height);
-    }
-
-    mouse(e) {
-        return {
-            x: e.pageX - this.c.offsetLeft,
-            y: e.pageY - this.c.offsetTop
-        }
-    }
-
-    get halfWidth() {
-        return this.c.width / 2;
-    }
-
-    get halfHeight() {
-        return this.c.height / 2;
-    }
-}
-
-class MainCanvas extends CanvasBase {
+class MainCanvas extends Canvas {
     constructor(id) {
         super(id);
 
@@ -79,7 +27,7 @@ class MainCanvas extends CanvasBase {
             _this.placePoint(m.x, m.y);
         };
     }
-
+    
     placePoint(x, y) {
         if (x > 12
             && x < this.c.width - 12
@@ -165,7 +113,7 @@ class MainCanvas extends CanvasBase {
 
 }
 
-class ResultCanvas extends CanvasBase {
+class ResultCanvas extends Canvas {
     constructor(id) {
         super(id);
         this.ctx.font = DEFAULT_FONT;
@@ -293,7 +241,7 @@ class ResultCanvas extends CanvasBase {
     }
 }
 
-class ConfigCanvas extends CanvasBase {
+class ConfigCanvas extends Canvas {
     constructor(id) {
         super(id);
 
