@@ -16,6 +16,19 @@ body {
 h1 {
     margin-top: 0;
     color: #E6AA68;
+    -webkit-transition: text-shadow 0.3s ease-in;
+    -moz-transition: text-shadow 0.3s ease-in;
+    -o-transition: text-shadow 0.3s ease-in;
+    -ms-transition: text-shadow 0.3s ease-in;
+    transition: text-shadow 0.3s ease-in;
+    cursor: default;
+}
+
+h1:hover {
+    -webkit-stroke-width: 5px;
+    -webkit-stroke-color: white;
+    -webkit-fill-color: white;
+    text-shadow: 1px 0 20px #ECDFBD;
 }
 
 #bottom_toolbar {
@@ -155,4 +168,13 @@ button small {
     -moz-transition: opacity 1s ease-in-out;
     -ms-transition: opacity 1s ease-in-out;
     -o-transition: opacity 1s ease-in-out;
+}
+
+.showcase > div {
+    display: inline-block;
+    color: #ECDFBD;
+    width: 200px;
+    padding: 10px;
+    background-color: rgba(0, 20, 39, 0.6);
+    border: 2px solid rgba(0, 20, 39, 0.8);
 }
