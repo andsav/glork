@@ -2,7 +2,7 @@
 
 import { ENDPOINTS, COLOR } from '../../lib/constants.js';
 import { $, $$, $post, $ready } from '../../lib/$.js';
-import { dist, round, shuffle, rand, clear_timeout, error } from '../../lib/helpers.js';
+import { dist, round, shuffle, rand, clear_timeout, error, collision } from '../../lib/helpers.js';
 import { Canvas } from '../../lib/canvas.js';
 
 // Quick and dirty return random element form array (not really random)
@@ -29,7 +29,7 @@ class TSPCanvas extends Canvas {
     }
 
     placePoint(x, y) {
-        if (!this.path.map((co) => dist(co, [x, y]) > 12).includes(false)) {
+        if (!collision(this.path.p, [x, y], 12)) {
             this.path.push([x, y]);
             this.placeNode(x, y);
         }

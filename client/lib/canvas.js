@@ -29,17 +29,13 @@ export class Canvas {
         }
     }
 
-    get halfWidth() {
-        return this.c.width / 2;
-    }
-
-    get halfHeight() {
-        return this.c.height / 2;
-    }
-
-    placeNode(x, y, side = 10) {
+    placeNode(x, y, circle = false, side = 10) {
         if (x > side+2 && x < this.c.width - (side+2) && y > side+2 && y < this.c.height - (side+2)) {
-            this.drawNode(x, y, side);
+            if(circle) {
+                this.drawCircle(x, y, side);
+            } else {
+                this.drawNode(x, y, side);
+            }
         }
     }
 
@@ -47,4 +43,17 @@ export class Canvas {
         this.ctx.fillRect(x - side/2, y - side/2, side, side);
     }
 
+    drawCircle(x, y, diameter = 10) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, diameter/2, 0, 2*Math.PI);
+        this.ctx.fill();
+    }
+
+    get halfWidth() {
+        return this.c.width / 2;
+    }
+
+    get halfHeight() {
+        return this.c.height / 2;
+    }
 }

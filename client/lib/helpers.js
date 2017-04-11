@@ -9,6 +9,8 @@ const ERROR_DIV = $("error_msg");
 // Euclidean distance
 export let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 
+export let collision = (previous, point, r) => previous.map((co) => dist(co, point) > r).includes(false);
+
 // Round float number
 export let round = (n, decimals) => (Math.round(n * decimals) / decimals);
 
