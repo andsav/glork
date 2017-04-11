@@ -36,4 +36,15 @@ export class Canvas {
     get halfHeight() {
         return this.c.height / 2;
     }
+
+    placeNode(x, y, side = 10) {
+        if (x > side+2 && x < this.c.width - (side+2) && y > side+2 && y < this.c.height - (side+2)) {
+            this.drawNode(x, y, side);
+        }
+    }
+
+    drawNode(x, y, side = 10) {
+        this.ctx.fillRect(x - side/2, y - side/2, side, side);
+    }
+
 }

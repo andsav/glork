@@ -19,3 +19,7 @@ export let $post = (url, data, success, error) => {
     };
     xhr.send(JSON.stringify(data));
 };
+
+export let $ready = (fn) => {
+    document.addEventListener("DOMContentLoaded", fn);
+};

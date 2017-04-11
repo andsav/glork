@@ -1,7 +1,7 @@
 "use strict";
 
 import { ENDPOINTS, COLOR } from '../../lib/constants.js';
-import { $, $$, $post } from '../../lib/$.js';
+import { $, $$, $post, $ready } from '../../lib/$.js';
 import { dist, round, shuffle, rand, clear_timeout, error } from '../../lib/helpers.js';
 import { Canvas } from '../../lib/canvas.js';
 
@@ -15,7 +15,7 @@ const DELAY = 30; // milliseconds between frame refresh
 const DEFAULT_FONT = "14pt Courier New";
 const CONFIG_BUTTON_RADIUS = 6;
 
-class MainCanvas extends Canvas {
+class TSPCanvas extends Canvas {
     constructor(id) {
         super(id);
 
@@ -27,21 +27,12 @@ class MainCanvas extends Canvas {
             _this.placePoint(m.x, m.y);
         };
     }
-    
+
     placePoint(x, y) {
-        if (x > 12
-            && x < this.c.width - 12
-            && y > 12
-            && y < this.c.height - 12
-            && !this.path.map((co) => dist(co, [x, y]) > 12).includes(false)) {
-
+        if (!this.path.map((co) => dist(co, [x, y]) > 12).includes(false)) {
             this.path.push([x, y]);
-            this.drawNode(x, y);
+            this.placeNode(x, y);
         }
-    }
-
-    drawNode(x, y) {
-        this.ctx.fillRect(x - 5, y - 5, 10, 10);
     }
 
     random(points) {
@@ -390,8 +381,8 @@ class Path {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const canvas = new MainCanvas("c"),
+$ready(() => {
+    const canvas = new TSPCanvas("c"),
         result = new ResultCanvas("result"),
         config = $$("config-canvas").map((c) => {
             return new ConfigCanvas(c.id)

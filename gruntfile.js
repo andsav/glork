@@ -13,12 +13,29 @@ module.exports = function(grunt) {
                     module_resolution: 'BROWSER',
                     output_wrapper: "(function() {%output%}).call(window);"
                 }
+            },
+            kmeans: {
+                closurePath: "/usr/local/opt/closure-compiler/libexec/",
+                js: ["client/lib/*.js", "client/src/k-means/app.js"],
+                jsOutputFile: "client/dist/k-means.min.js",
+                maxBuffer: 500,
+                options: {
+                    compilation_level: "ADVANCED_OPTIMIZATIONS",
+                    language_in: "ECMASCRIPT6",
+                    language_out: "ECMASCRIPT5_STRICT",
+                    module_resolution: 'BROWSER',
+                    output_wrapper: "(function() {%output%}).call(window);"
+                }
             }
         },
         watch: {
-            "closure-compiler": {
+            tsp: {
                 files: "client/src/tsp/app.js",
-                tasks: ["closure-compiler"]
+                tasks: ["closure-compiler:tsp"]
+            },
+            kmeans: {
+                files: "client/src/k-means/app.js",
+                tasks: ["closure-compiler:kmeans"]
             }
         }
     });
