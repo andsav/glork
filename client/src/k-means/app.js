@@ -1,7 +1,7 @@
-import { COLOR } from '../../lib/constants';
+import { COLOR } from '../../lib/constants.js';
 import { $, $$, $post, $ready } from '../../lib/$.js';
-import { Canvas } from '../../lib/canvas.js';
-import { collision } from '../../lib/helpers.js';
+import { Canvas, SliderCanvas } from '../../lib/canvas.js';
+import { collision, in_circle } from '../../lib/helpers.js';
 
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
@@ -44,14 +44,60 @@ class KCanvas extends Canvas {
     }
 }
 
-class CursorSlider extends Canvas {
+class CursorSlider extends SliderCanvas {
+
     constructor(id, canvas) {
-        super(id);
+        super(id, function(c) {
+            return {
+                x: 20 + ((Math.min(canvas.cursorRadius, MIN_CURSOR_RADIUS) - MIN_CURSOR_RADIUS) / MAX_CURSOR_RADIUS) * (c.width - 40),
+                y: c.halfHeight,
+                r: Math.min(canvas.cursorRadius, MIN_CURSOR_RADIUS) * 2
+            };
+        });
+
+        this.canvas = canvas;
+    }
+
+    overButton(m) {
+        return in_circle(m, this.button, this.button.r);
+    }
+
+    setConfig(m) {
+        let v = (m.x - 20)/(this.width-40) * (MAX_CURSOR_RADIUS - MIN_CURSOR_RADIUS) + MIN_CURSOR_RADIUS;
+        let r = Math.max(MIN_CURSOR_RADIUS, Math.min(MAX_CURSOR_RADIUS, v));
+        this.canvas.updateCursor(r);
+        this.button = {
+            x: Math.max(20, Math.min(this.width-20, m.x)),
+            y: this.halfHeight,
+            r: 2*r
+        };
+        this.update();
+    }
+
+    update() {
+        this.clear();
+        this.drawLine();
+        this.drawCursor();
+    }
+
+    drawLine() {
+        this.ctx.beginPath();
+        this.ctx.moveTo(20, this.halfHeight);
+        this.ctx.lineTo(this.width - 20, this.halfHeight);
+        this.ctx.stroke();
+    }
+
+    drawCursor() {
+        this.ctx.beginPath();
+        this.ctx.arc(this.button.x, this.button.y, 4, 0, 2*Math.PI);
+        this.ctx.fill();
 
         this.ctx.beginPath();
-        this.ctx.arc(MIN_CURSOR_RADIUS*2 + 10, this.halfHeight, MIN_CURSOR_RADIUS*2, 0, 2*Math.PI);
+        this.ctx.arc(this.button.x, this.button.y, this.button.r, 0, 2*Math.PI);
         this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
         this.ctx.fill();
+
+        this.ctx.fillStyle = COLOR.WHITE;
     }
 }
 

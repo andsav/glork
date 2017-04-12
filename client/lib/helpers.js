@@ -11,6 +11,10 @@ export let dist = (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] -
 
 export let collision = (previous, point, r) => previous.map((co) => dist(co, point) > r).includes(false);
 
+export let in_circle = (point, circle, r) => {
+    return Math.pow((point.x - circle.x), 2) + Math.pow((point.y - circle.y), 2) < Math.pow(r, 2);
+};
+
 // Round float number
 export let round = (n, decimals) => (Math.round(n * decimals) / decimals);
 

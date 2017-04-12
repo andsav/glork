@@ -2,8 +2,8 @@
 
 import { ENDPOINTS, COLOR } from '../../lib/constants.js';
 import { $, $$, $post, $ready } from '../../lib/$.js';
-import { dist, round, shuffle, rand, clear_timeout, error, collision } from '../../lib/helpers.js';
-import { Canvas } from '../../lib/canvas.js';
+import { dist, round, in_circle, shuffle, rand, clear_timeout, error, collision } from '../../lib/helpers.js';
+import { Canvas, SliderCanvas } from '../../lib/canvas.js';
 
 // Quick and dirty return random element form array (not really random)
 Array.prototype.random = function () {
@@ -38,7 +38,7 @@ class TSPCanvas extends Canvas {
     random(points) {
         this.reset();
         while (this.coordinates.length < points) {
-            this.placePoint(rand(15, this.c.width - 15), rand(15, this.c.height - 15))
+            this.placePoint(rand(15, this.width - 15), rand(15, this.height - 15))
         }
     }
 
@@ -113,7 +113,7 @@ class ResultCanvas extends Canvas {
     }
 
     clear_half() {
-        this.ctx.clearRect(0, 0, this.halfWidth, this.c.height);
+        this.ctx.clearRect(0, 0, this.halfWidth, this.height);
     }
 
     output_sa_helper(path, i = 0, max = 0, cooling = 0.98) {
@@ -121,7 +121,7 @@ class ResultCanvas extends Canvas {
             this.clear();
             this.ctx.beginPath();
             this.ctx.moveTo(0, this.halfHeight);
-            this.ctx.lineTo(this.c.width, this.halfHeight);
+            this.ctx.lineTo(this.width, this.halfHeight);
             this.ctx.stroke();
         } else {
             this.clear_half();
@@ -141,8 +141,8 @@ class ResultCanvas extends Canvas {
         this.ctx.fillStyle = COLOR.WHITE;
         if (i !== 0) {
             let x = this.halfWidth + this.halfWidth / max * i,
-                y = Math.max(this.c.height - (length / this.initial) * this.halfHeight * .67, this.halfHeight),
-                h = this.c.height - y,
+                y = Math.max(this.height - (length / this.initial) * this.halfHeight * .67, this.halfHeight),
+                h = this.height - y,
                 w = this.halfWidth / max,
                 y2 = this.halfHeight - t * this.halfHeight,
                 h2 = this.halfHeight - y2;
@@ -184,9 +184,9 @@ class ResultCanvas extends Canvas {
 
         this.ctx.fillStyle = COLOR.BLACK;
         for (let i = 0; i < n; ++i) {
-            let h = this.c.height * 0.5,
-                w = this.c.width / n,
-                y = this.c.height - h,
+            let h = this.height * 0.5,
+                w = this.width / n,
+                y = this.height - h,
                 x = i * w;
 
             this.ctx.fillRect(x, y, w, h);
@@ -210,15 +210,15 @@ class ResultCanvas extends Canvas {
         solution.forEach((s) => {
             let path = Path.fromObject(s),
                 h = (path.length / max) * this.halfHeight,
-                w = this.c.width / solution.length,
-                y = this.c.height - h,
+                w = this.width / solution.length,
+                y = this.height - h,
                 x = i++ * w;
 
             if (path.length == min && !found_best) {
                 this.ctx.fillStyle = COLOR.WHITE;
 
                 let offset = this.ctx.measureText(String(min)).width;
-                this.ctx.fillText(min, Math.min(Math.max(x + w/2 - offset/2, 2), this.c.width - offset - 2), 20);
+                this.ctx.fillText(min, Math.min(Math.max(x + w/2 - offset/2, 2), this.width - offset - 2), 20);
 
                 found_best = true;
             }
@@ -232,47 +232,18 @@ class ResultCanvas extends Canvas {
     }
 }
 
-class ConfigCanvas extends Canvas {
+class ConfigCanvas extends SliderCanvas {
     constructor(id) {
-        super(id);
-
-        this.button = this.configToButton;
-
-        this.ctx.lineCap = 'round';
-        this.update();
-
-        let _this = this;
-        let click = false;
-
-        this.c.ontouchstart = function (e) {
-            _this.setConfig(_this.mouse(e));
-        };
-
-        this.c.onmousedown = function (e) {
-            let m = _this.mouse(e);
-            if (!_this.overButton(m)) {
-                _this.setConfig(m);
-            }
-            click = true;
-
-        };
-
-        this.c.onmousemove = function (e) {
-            let m = _this.mouse(e);
-            _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
-
-            if (click) {
-                _this.setConfig(m);
-            }
-        };
-
-        this.c.onmouseup = function () {
-            click = false;
-        }
+        super(id, function(c) {
+            return {
+                x: (c.data.x - c.dataF('minX')) / (c.dataF('maxX') - c.dataF('minX')) * (c.width),
+                y: c.height - ((c.data.y - c.dataF('minY')) / (c.dataF('maxY') - c.dataF('minY')) * (c.height))
+            };
+        });
     }
 
     overButton(m) {
-        return Math.pow((m.x - this.button.x), 2) + Math.pow((m.y - this.button.y), 2) < Math.pow(CONFIG_BUTTON_RADIUS, 2)
+        return in_circle(m, this.button, CONFIG_BUTTON_RADIUS);
     }
 
 
@@ -297,30 +268,15 @@ class ConfigCanvas extends Canvas {
         this.update();
     }
 
-    dataF(x) {
-        return parseFloat(this.c.dataset[x]);
-    }
-
-    get data() {
-        return this.c.dataset;
-    }
-
     buttonToConfig() {
-        this.data.x = ((this.button.x / this.c.width) * ( this.dataF('maxX') - this.dataF('minX') )) + this.dataF('minX');
-        this.data.y = this.dataF('maxY') - ((this.button.y / this.c.height) * ( this.dataF('maxY') - this.dataF('minY') ) + this.dataF('minY'));
+        this.data.x = ((this.button.x / this.width) * ( this.dataF('maxX') - this.dataF('minX') )) + this.dataF('minX');
+        this.data.y = this.dataF('maxY') - ((this.button.y / this.height) * ( this.dataF('maxY') - this.dataF('minY') ) + this.dataF('minY'));
 
         this.data.x = Math.max(Math.min(this.data.x, this.dataF('maxX')), this.dataF('minX'));
         this.data.y = Math.max(Math.min(this.data.y, this.dataF('maxY')), this.dataF('minY'));
 
         this.data.x = (this.data['xInt'] == 'true') ? Math.round(this.dataF('x')) : round(this.dataF('x'), 100);
         this.data.y = (this.data['yInt'] == 'true') ? Math.round(this.dataF('y')) : round(this.dataF('y'), 100);
-    }
-
-    get configToButton() {
-        return {
-            x: (this.data.x - this.dataF('minX')) / (this.dataF('maxX') - this.dataF('minX')) * (this.c.width),
-            y: this.c.height - ((this.data.y - this.dataF('minY')) / (this.dataF('maxY') - this.dataF('minY')) * (this.c.height))
-        }
     }
 }
 

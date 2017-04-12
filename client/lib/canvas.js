@@ -49,11 +49,79 @@ export class Canvas {
         this.ctx.fill();
     }
 
+    get height() {
+        return this.c.height;
+    }
+
+    get width() {
+        return this.c.width;
+    }
+
     get halfWidth() {
         return this.c.width / 2;
     }
 
     get halfHeight() {
         return this.c.height / 2;
+    }
+}
+
+export class SliderCanvas extends Canvas {
+    constructor(id, default_button) {
+        super(id);
+
+        this.button = default_button(this);
+
+        this.ctx.lineCap = 'round';
+        this.update();
+
+        let _this = this;
+        this.click = false;
+
+        this.c.ontouchstart = function (e) {
+            _this.setConfig(_this.mouse(e));
+        };
+
+        this.c.onmousedown = function (e) {
+            let m = _this.mouse(e);
+            if (!_this.overButton(m)) {
+                _this.setConfig(m);
+            }
+            _this.click = true;
+
+        };
+
+        this.c.onmousemove = function (e) {
+            let m = _this.mouse(e);
+            _this.c.style.cursor = _this.overButton(_this.mouse(e)) ? "pointer" : "initial";
+
+            if (_this.click) {
+                _this.setConfig(m);
+            }
+        };
+
+        this.c.onmouseup = function () {
+            _this.click = false;
+        }
+    }
+
+    update() {
+
+    }
+
+    overButton(m) {
+
+    }
+
+    setConfig(m) {
+
+    }
+
+    dataF(x) {
+        return parseFloat(this.c.dataset[x]);
+    }
+
+    get data() {
+        return this.c.dataset;
     }
 }
