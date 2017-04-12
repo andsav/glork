@@ -1,29 +1,50 @@
 import { COLOR } from '../../lib/constants.js';
 import { $, $$, $post, $ready } from '../../lib/$.js';
 import { Canvas, SliderCanvas } from '../../lib/canvas.js';
-import { collision, in_circle } from '../../lib/helpers.js';
+import { collision, in_circle, rand, clear_timeout } from '../../lib/helpers.js';
 
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
+const POINTS_DELAY = 75;
 
 class KCanvas extends Canvas {
     constructor(id) {
         super(id);
 
         this.points = [];
-        this.cursorRadius = MIN_CURSOR_RADIUS;
-        this.updateCursor(MIN_CURSOR_RADIUS);
+        this.cursor_radius = MIN_CURSOR_RADIUS;
+        this.update_cursor(MIN_CURSOR_RADIUS);
 
         let _this = this;
+        this.timer = null;
+        let m = { x: 0, y: 0 };
 
-        this.c.onclick = function (e) {
-            let m = _this.mouse(e);
-            _this.placePoint(m.x, m.y);
+        this.c.onmousedown = function(e) {
+            m = _this.mouse(e);
+            _this.timer = setInterval(function() {
+                _this.placePoint(
+                    m.x + rand(-1 * _this.cursor_radius, _this.cursor_radius),
+                    m.y + rand(-1 * _this.cursor_radius, _this.cursor_radius)
+                );
+            }, POINTS_DELAY);
+        };
+
+        this.c.onmousemove = function(e) {
+            m = _this.mouse(e);
+            if(m.x < 6 || m.y < 6 || m.x > this.width - 6 || m.y > this.height - 6) {
+                clearInterval(_this.timer);
+            }
+        };
+
+        this.c.onmouseup = function() {
+            if(_this.timer) {
+                clearInterval(_this.timer);
+            }
         };
     }
 
-    updateCursor(r) {
-        this.cursorRadius = r;
+    update_cursor(r) {
+        this.cursor_radius = r;
         this.c.style.cursor = 'url(\'data:image/svg+xml;utf8,' +
             '<svg fill="none" ' +
                 'height="' + r*4 + '" ' +
@@ -32,8 +53,6 @@ class KCanvas extends Canvas {
                 'xmlns="http://www.w3.org/2000/svg">' +
             '<circle fill-opacity="0.4" fill="black" cx="' + r + '" cy="' + r + '" r="' + r + '" stroke="none" stroke-width="1" />' +
             '</svg>\') ' + r*2 + ' ' + r*2 + ', auto';
-
-        document.body.style.cursor = 'default';
     }
 
     placePoint(x, y) {
@@ -42,6 +61,12 @@ class KCanvas extends Canvas {
             this.placeNode(x, y, true, 6);
         }
     }
+
+    reset() {
+        clear_timeout();
+        this.clear();
+        this.points = [];
+    }
 }
 
 class CursorSlider extends SliderCanvas {
@@ -49,9 +74,9 @@ class CursorSlider extends SliderCanvas {
     constructor(id, canvas) {
         super(id, function(c) {
             return {
-                x: 20 + ((Math.min(canvas.cursorRadius, MIN_CURSOR_RADIUS) - MIN_CURSOR_RADIUS) / MAX_CURSOR_RADIUS) * (c.width - 40),
+                x: 20 + ((Math.min(canvas.cursor_radius, MIN_CURSOR_RADIUS) - MIN_CURSOR_RADIUS) / MAX_CURSOR_RADIUS) * (c.width - 40),
                 y: c.halfHeight,
-                r: Math.min(canvas.cursorRadius, MIN_CURSOR_RADIUS) * 2
+                r: Math.min(canvas.cursor_radius, MIN_CURSOR_RADIUS) * 2
             };
         });
 
@@ -65,7 +90,7 @@ class CursorSlider extends SliderCanvas {
     setConfig(m) {
         let v = (m.x - 20)/(this.width-40) * (MAX_CURSOR_RADIUS - MIN_CURSOR_RADIUS) + MIN_CURSOR_RADIUS;
         let r = Math.max(MIN_CURSOR_RADIUS, Math.min(MAX_CURSOR_RADIUS, v));
-        this.canvas.updateCursor(r);
+        this.canvas.update_cursor(r);
         this.button = {
             x: Math.max(20, Math.min(this.width-20, m.x)),
             y: this.halfHeight,
@@ -102,6 +127,10 @@ class CursorSlider extends SliderCanvas {
 }
 
 $ready(() => {
-    const canvas = new KCanvas("c");
-    const cursorSlider = new CursorSlider("cursor-slider", canvas);
+    const canvas = new KCanvas("c"),
+          cursorSlider = new CursorSlider("cursor-slider", canvas);
+
+    $("reset").onclick = () => {
+        canvas.reset();
+    };
 });
