@@ -2,7 +2,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
         "closure-compiler": {
             tsp: {
-                closurePath: "/usr/local/opt/closure-compiler/libexec/",
+                closurePath: "/opt/closure",
                 js: ["client/lib/*.js", "client/src/tsp/app.js"],
                 jsOutputFile: "client/dist/tsp.min.js",
                 maxBuffer: 500,
@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                 }
             },
             clustering: {
-                closurePath: "/usr/local/opt/closure-compiler/libexec/",
+                closurePath: "/opt/closure",
                 js: ["client/lib/*.js", "client/src/clustering/app.js"],
                 jsOutputFile: "client/dist/clustering.min.js",
                 maxBuffer: 500,
