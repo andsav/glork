@@ -11,17 +11,21 @@
     <link rel="stylesheet" href="https://andreisavin.com/dist/css/dark.css">
     <link rel="stylesheet" href="/client/style.css">
 
-    <title>K-Means Clustering</title>
+    <title>Clustering - K-Means and DBSCAN</title>
 </head>
 <body class="k-means">
 
-<h1>K-Means Clustering</h1>
+<h1>Clustering</h1>
 
 
 <div id="top_toolbar">
     <div>
         <div class="buttons-right">
-            <canvas id="cursor-slider" class="slider" width="200" height="39"></canvas>
+            <span class="labeled-group">
+                <span>Cursor Size:</span>
+                &nbsp;
+                <canvas id="cursor-slider" class="slider" width="200" height="39"></canvas>
+            </span>
         </div>
         <button id="reset">Reset</button>
     </div>
@@ -35,11 +39,30 @@
         <span class="button-group">
             <canvas class="config-canvas"
                     id="cursor-k"
-                    data-k="2"
-                    width="250"
+                    data-val="2"
+                    data-var="k"
+                    data-min="2"
+                    data-max="10"
+                    data-int="true"
+                    width="150"
                     height="80"></canvas><!--
             --><button id="lloyd">
-                    Lloyd's Algorithm
+                    K-Means
+                </button>
+        </span>
+        &nbsp;
+        <span class="button-group">
+            <canvas class="config-canvas"
+                    id="cursor-e"
+                    data-val="5"
+                    data-var="ε"
+                    data-min="5"
+                    data-max="30"
+                    data-int="false"
+                    width="150"
+                    height="80"></canvas><!--
+            --><button id="dbscan">
+                   DBSCAN
                 </button>
         </span>
     </div>
@@ -47,6 +70,6 @@
 
 <div id="error_msg"></div>
 
-<script type="text/javascript" src="/client/dist/k-means.min.js"></script>
+<script type="text/javascript" src="/client/dist/clustering.min.js"></script>
 </body>
 </html>

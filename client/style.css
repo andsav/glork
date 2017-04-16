@@ -158,6 +158,10 @@ button:hover, button:focus {
     padding: auto;
 }
 
+.labeled-group > span {
+    color: #ECDFBD;
+}
+
 button small {
     font-size: 11px;
     text-transform: none;

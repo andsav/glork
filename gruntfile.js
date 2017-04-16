@@ -14,10 +14,10 @@ module.exports = function(grunt) {
                     output_wrapper: "(function() {%output%}).call(window);"
                 }
             },
-            kmeans: {
+            clustering: {
                 closurePath: "/usr/local/opt/closure-compiler/libexec/",
-                js: ["client/lib/*.js", "client/src/k-means/app.js"],
-                jsOutputFile: "client/dist/k-means.min.js",
+                js: ["client/lib/*.js", "client/src/clustering/app.js"],
+                jsOutputFile: "client/dist/clustering.min.js",
                 maxBuffer: 500,
                 options: {
                     compilation_level: "ADVANCED_OPTIMIZATIONS",
@@ -33,9 +33,9 @@ module.exports = function(grunt) {
                 files: "client/src/tsp/app.js",
                 tasks: ["closure-compiler:tsp"]
             },
-            kmeans: {
-                files: "client/src/k-means/app.js",
-                tasks: ["closure-compiler:kmeans"]
+            clustering: {
+                files: "client/src/clustering/app.js",
+                tasks: ["closure-compiler:clustering"]
             }
         }
     });

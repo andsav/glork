@@ -5,9 +5,7 @@ import {collision, in_circle, rand, clear_timeout, round} from '../../lib/helper
 
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
-const POINTS_DELAY = 75;
-const MIN_K = 2;
-const MAX_K = 10;
+const POINTS_DELAY = 100;
 
 class KCanvas extends Canvas {
     constructor(id) {
@@ -21,24 +19,31 @@ class KCanvas extends Canvas {
         this.timer = null;
         let m = {x: 0, y: 0};
 
-        this.c.onmousedown = function (e) {
+
+        this.c.onmousedown = this.c.ontouchstart = function (e) {
             m = _this.mouse(e);
+
+            _this.placePoint(
+                round(m.x + rand(-1 * _this.cursor_radius, _this.cursor_radius), 1),
+                round(m.y + rand(-1 * _this.cursor_radius, _this.cursor_radius), 1)
+            );
+
             _this.timer = setInterval(function () {
                 _this.placePoint(
-                    m.x + rand(-1 * _this.cursor_radius, _this.cursor_radius),
-                    m.y + rand(-1 * _this.cursor_radius, _this.cursor_radius)
+                    round(m.x + rand(-1 * _this.cursor_radius, _this.cursor_radius), 1),
+                    round(m.y + rand(-1 * _this.cursor_radius, _this.cursor_radius), 1)
                 );
             }, POINTS_DELAY);
         };
 
-        this.c.onmousemove = function (e) {
+        this.c.onmousemove = this.c.ontouchmove = function (e) {
             m = _this.mouse(e);
             if (m.x < 6 || m.y < 6 || m.x > this.width - 6 || m.y > this.height - 6) {
                 clearInterval(_this.timer);
             }
         };
 
-        this.c.onmouseup = function () {
+        this.c.onmouseup = this.c.ontouchend = function () {
             if (_this.timer) {
                 clearInterval(_this.timer);
             }
@@ -68,6 +73,15 @@ class KCanvas extends Canvas {
         clear_timeout();
         this.clear();
         this.points = [];
+    }
+
+    object(config) {
+        return {
+            'p': this.points.map((c) => {
+                return {'x': c[0], 'y': c[1]}
+            }),
+            'config': [ parseFloat(config.data.val) ]
+        };
     }
 }
 
@@ -124,7 +138,7 @@ class CursorSlider extends SliderCanvas {
     }
 }
 
-class KSlider extends SliderCanvas {
+class ConfigSlider extends SliderCanvas {
     constructor(id) {
         super(id, function (c) {
             return {
@@ -140,8 +154,8 @@ class KSlider extends SliderCanvas {
     }
 
     setConfig(m) {
-        this.button.x = Math.max(30, Math.min(this.width - 30, m.x));
-        this.data.k = round((MAX_K - MIN_K) * (this.button.x -30)/(this.width - 60) + MIN_K, 1);
+        this.button.x = Math.max(20, Math.min(this.width - 20, m.x));
+        this.data['val'] = round((this.dataF('max') - this.dataF('min')) * (this.button.x -20)/(this.width - 40) + this.dataF('min'), 1);
         this.button.x = this.buttonToConfig;
 
         this.update();
@@ -152,8 +166,8 @@ class KSlider extends SliderCanvas {
 
         // Line
         this.ctx.beginPath();
-        this.ctx.moveTo(30, this.halfHeight);
-        this.ctx.lineTo(this.width - 30, this.halfHeight);
+        this.ctx.moveTo(20, this.halfHeight);
+        this.ctx.lineTo(this.width - 20, this.halfHeight);
         this.ctx.stroke();
 
         // Cursor
@@ -163,22 +177,28 @@ class KSlider extends SliderCanvas {
         this.ctx.fill();
 
         // Indicator
-        let text = String("k = " + this.dataF('k'));
+        let text = String(this.data['var'] + " = " + this.dataF('val'));
         let offset = this.ctx.measureText(text).width;
         this.ctx.fillText(text, this.button.x - offset/2, this.halfHeight + 22);
     }
 
     get buttonToConfig() {
-        return (this.dataF('k') - MIN_K)/(MAX_K - MIN_K) * (this.width - 60) + 30;
+        return (this.dataF('val') - this.dataF('min'))/(this.dataF('max') - this.dataF('min')) * (this.width - 40) + 20;
     }
 }
 
 $ready(() => {
     const canvas = new KCanvas("c"),
         cursorSlider = new CursorSlider("cursor-slider", canvas),
-        kSlider = new KSlider("cursor-k");
+        kSlider = new ConfigSlider("cursor-k"),
+        eSlider = new ConfigSlider("cursor-e");
 
     $("reset").onclick = () => {
         canvas.reset();
     };
+
+    $("lloyd").onclick = () => {
+        console.log(JSON.stringify(canvas.object(kSlider)));
+    };
+
 });
