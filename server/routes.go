@@ -30,4 +30,10 @@ var routes = Routes{
 		"/tsp/lbs",
 		TspLBS,
 	},
+	Route{
+		"ClusteringKMeans",
+		"POST",
+		"/clustering/kmeans",
+		ClusteringKMeans,
+	},
 }

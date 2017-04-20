@@ -80,7 +80,7 @@ class KCanvas extends Canvas {
             'p': this.points.map((c) => {
                 return {'x': c[0], 'y': c[1]}
             }),
-            'config': [ parseFloat(config.data.val) ]
+            'config': [ parseFloat(config.data['val']) ]
         };
     }
 }

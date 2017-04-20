@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"io"
 	"io/ioutil"
+	"math/rand"
+	"time"
 )
-
-type callback func(Solver) Solution
-
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!")
@@ -17,23 +16,33 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	tspSolve(w, r, func(s Solver) Solution {
+	solve(w, r, func(s Solver) Solution {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
 
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
-	tspSolve(w, r, func(s Solver) Solution {
+	solve(w, r, func(s Solver) Solution {
 		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 	});
 }
 
 
-func tspSolve(w http.ResponseWriter, r *http.Request, cb callback) {
+func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
+	solve(w, r, func(s Solver) Solution {
+		return s.Input.KMeans(int(s.Config[0]));
+	});
+}
+
+
+
+func solve(w http.ResponseWriter, r *http.Request, cb callback) {
 	var input Solver
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+
+	rand.Seed(time.Now().Unix())
 
 	if err != nil {
 		panic(err)
