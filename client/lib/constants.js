@@ -3,8 +3,8 @@
  */
 
 export const ENDPOINTS = {
-    TSP_SA: 'https://go.glork.net/tsp/sa',
-    TSP_LBS: 'https://go.glork.net/tsp/lbs'
+    TSP_SA: 'http://go.glork.net/tsp/sa',
+    TSP_LBS: 'http://go.glork.net/tsp/lbs'
 };
 
 export const COLOR = {

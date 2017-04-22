@@ -19,8 +19,6 @@ type Solver struct {
 
 type Solution []Points
 
-type callback func(Solver) Solution
-
 
 func (a Point) distance(b Point) float64 {
 	return math.Sqrt( float64((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y)) )

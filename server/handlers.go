@@ -8,7 +8,13 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"time"
+	"log"
+	"github.com/gorilla/websocket"
 )
+
+type SingleCallback func(Solver) Solution
+
+type SocketCallback func(*websocket.Conn)
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!")
@@ -16,28 +22,40 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	solve(w, r, func(s Solver) Solution {
+	single(w, r, func(s Solver) Solution {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
 
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
-	solve(w, r, func(s Solver) Solution {
+	single(w, r, func(s Solver) Solution {
 		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 	});
 }
 
-
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
-	solve(w, r, func(s Solver) Solution {
-		return s.Input.KMeans(int(s.Config[0]));
-	});
+
+	socket(w, r, func(c *websocket.Conn) {
+		for {
+			mt, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("Socket read err:", err)
+				break
+			}
+			log.Printf("Received: %s", message)
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				log.Println("Socket write err:", err)
+				break
+			}
+		}
+	})
 }
 
 
 
-func solve(w http.ResponseWriter, r *http.Request, cb callback) {
+func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	var input Solver
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -64,4 +82,29 @@ func solve(w http.ResponseWriter, r *http.Request, cb callback) {
 	if err := json.NewEncoder(w).Encode( cb(input) ); err != nil {
 		panic(err)
 	}
+}
+
+func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("Socket upgrade error:", err)
+		return
+	} else {
+		log.Print("Socket connected")
+	}
+
+
+	defer c.Close()
+
+	cb(c)
+
+	log.Print("Socket disconnected")
 }

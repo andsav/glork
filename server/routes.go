@@ -32,6 +32,12 @@ var routes = Routes{
 	},
 	Route{
 		"ClusteringKMeans",
+		"GET",
+		"/clustering/kmeans",
+		ClusteringKMeans,
+	},
+	Route{
+		"ClusteringKMeans",
 		"POST",
 		"/clustering/kmeans",
 		ClusteringKMeans,

@@ -9,9 +9,10 @@ import (
 func main() {
 	router := cors.New(
 		cors.Options{
-			AllowedOrigins: []string{"https://glork.net"},
+			AllowedOrigins: []string{"http://glork.net"},
 			AllowCredentials: true,
 		}).Handler(NewRouter())
 
+	log.Print("Starting server at :8888")
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

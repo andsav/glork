@@ -24,7 +24,7 @@ module.exports = function(grunt) {
                     language_in: "ECMASCRIPT6",
                     language_out: "ECMASCRIPT5_STRICT",
                     module_resolution: 'BROWSER',
-                    output_wrapper: "(function() {%output%}).call(window);"
+                    output_wrapper: "(function() {%output%}).call(window);",
                 }
             }
         },
