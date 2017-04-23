@@ -1,14 +1,14 @@
 import {COLOR, ENDPOINTS} from '../../lib/constants.js';
 import {$, $$, $post, $ready} from '../../lib/$.js';
 import {Canvas, SliderCanvas} from '../../lib/canvas.js';
-import {collision, in_circle, rand, clear_timeout, round} from '../../lib/helpers.js';
+import {collision, in_circle, rand, clear_timeout, round, error} from '../../lib/helpers.js';
 import {Socket} from '../../lib/socket.js';
 
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
 const POINTS_DELAY = 100;
 
-class KCanvas extends Canvas {
+class MainCanvas extends Canvas {
     constructor(id) {
         super(id);
 
@@ -74,6 +74,27 @@ class KCanvas extends Canvas {
         clear_timeout();
         this.clear();
         this.points = [];
+    }
+
+    update(data) {
+        this.clear();
+
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+        data['c'].forEach((c) => {
+            this.placeNode(c.x, c.y, true, 30);
+        });
+
+
+        for(let i=0; i<data['pp'].length; ++i) {
+            if(data['pp'][i] != null && data['pp'][i].length != 0) {
+                this.ctx.fillStyle = COLOR.CUSTOM[i];
+                data['pp'][i].forEach((p) => {
+                    this.placeNode(p.x, p.y, true, 6);
+                });
+            }
+        }
+
+        this.ctx.fillStyle = COLOR.DEFAULT;
     }
 
     object(config) {
@@ -189,7 +210,7 @@ class ConfigSlider extends SliderCanvas {
 }
 
 $ready(() => {
-    const canvas = new KCanvas("c"),
+    const canvas = new MainCanvas("c"),
         cursorSlider = new CursorSlider("cursor-slider", canvas),
         kSlider = new ConfigSlider("cursor-k"),
         eSlider = new ConfigSlider("cursor-e");
@@ -199,10 +220,16 @@ $ready(() => {
     };
 
     $("lloyd").onclick = () => {
+        let data = canvas.object(kSlider);
+        if(data['config'][0] > data['p'].length) {
+            error(canvas.c, "More clusters than number of points defined");
+        } else {
 
-        let ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(data) {
-            console.log(data);
-        }, canvas.object(kSlider));
+            let ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(d) {
+                canvas.update(d);
+            }, data);
+
+        }
 
     };
 

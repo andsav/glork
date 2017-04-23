@@ -83,6 +83,17 @@ func (pp Points) Neighbour() Points {
 	return pp2
 }
 
+// Returns the central point from a set of points
+func (pp Points) Centroid() Point {
+
+	x, y := 0, 0
+	for _, p := range pp {
+		x += p.X
+		y += p.Y
+	}
+
+	return Point{X:x/len(pp), Y:y/len(pp)}
+}
 
 // Sorting solution
 func (s Solution) Len() int {

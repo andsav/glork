@@ -11,6 +11,18 @@ export const ENDPOINTS = {
 export const COLOR = {
     DEFAULT: "#E6AA68",
     BLACK: "#001427",
-    WHITE: "#ECDFBD"
+    WHITE: "#ECDFBD",
+    CUSTOM: [
+        "#E3F09B",
+        "#87B6A7",
+        "#437C90",
+        "#F7F7F2",
+        "#F45B69",
+        "#7E9181",
+        "#8E9B90",
+        "#E5D4C0",
+        "#FFA69E",
+        "#D1F0B1"
+    ]
 };
 
