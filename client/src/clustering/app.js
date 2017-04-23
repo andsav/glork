@@ -8,13 +8,17 @@ const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
 const POINTS_DELAY = 100;
 
+let ws = null;
+
 class MainCanvas extends Canvas {
     constructor(id) {
         super(id);
 
+        this.updating = false;
+
         this.points = [];
         this.cursor_radius = MIN_CURSOR_RADIUS;
-        this.update_cursor(MIN_CURSOR_RADIUS);
+        this.updateCursor(MIN_CURSOR_RADIUS);
 
         let _this = this;
         this.timer = null;
@@ -51,7 +55,7 @@ class MainCanvas extends Canvas {
         };
     }
 
-    update_cursor(r) {
+    updateCursor(r) {
         this.cursor_radius = r;
         this.c.style.cursor = 'url(\'data:image/svg+xml;utf8,' +
             '<svg fill="none" ' +
@@ -64,19 +68,33 @@ class MainCanvas extends Canvas {
     }
 
     placePoint(x, y) {
+        if(this.updating) {
+            this.stopUpdating();
+        }
+
         if (!collision(this.points, [x, y], 7)) {
             this.points.push([x, y]);
             this.placeNode(x, y, true, 6);
         }
     }
 
+    redraw() {
+        this.clear();
+        this.ctx.fillStyle = COLOR.DEFAULT;
+        this.points.forEach((p) => {
+            this.placeNode(p[0], p[1], true, 6);
+        });
+    }
+
     reset() {
         clear_timeout();
+        this.stopUpdating();
         this.clear();
         this.points = [];
     }
 
     update(data) {
+        this.updating = true;
         this.clear();
 
         this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
@@ -95,6 +113,14 @@ class MainCanvas extends Canvas {
         }
 
         this.ctx.fillStyle = COLOR.DEFAULT;
+    }
+
+    stopUpdating() {
+        this.updating = false;
+        if(ws !== null) {
+            ws.close();
+        }
+        this.redraw();
     }
 
     object(config) {
@@ -128,7 +154,7 @@ class CursorSlider extends SliderCanvas {
     setConfig(m) {
         let v = (m.x - 20) / (this.width - 40) * (MAX_CURSOR_RADIUS - MIN_CURSOR_RADIUS) + MIN_CURSOR_RADIUS;
         let r = Math.max(MIN_CURSOR_RADIUS, Math.min(MAX_CURSOR_RADIUS, v));
-        this.canvas.update_cursor(r);
+        this.canvas.updateCursor(r);
         this.button = {
             x: Math.max(20, Math.min(this.width - 20, m.x)),
             y: this.halfHeight,
@@ -225,7 +251,7 @@ $ready(() => {
             error(canvas.c, "More clusters than number of points defined");
         } else {
 
-            let ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(d) {
+            ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(d) {
                 canvas.update(d);
             }, data);
 

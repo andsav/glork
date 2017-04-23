@@ -39,4 +39,8 @@ export class Socket {
         Ws.send(JSON.stringify(data));
     }
 
+    close() {
+        Ws.close();
+    }
+
 }
