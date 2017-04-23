@@ -58,7 +58,7 @@ func (s *KMSolution) AssignCentroids(r Rectangle) {
 func (pp Points) KMeans(k int, socket *websocket.Conn) {
 	var solution KMSolution
 
-	centroids := make([]Point, k)
+	solution.C = make([]Point, k)
 
 	// Active area
 	r := Rectangle{X0: 1000, X1: 0, Y0: 1000, Y1: 0}
@@ -77,18 +77,22 @@ func (pp Points) KMeans(k int, socket *websocket.Conn) {
 	}
 
 	for i := 0; i < k; i++ {
-		centroids[i] = r.RandomPoint()
+		solution.C[i] = r.RandomPoint()
 	}
 
-	solution.C = centroids
+	for i := 0; i < 21; i++ {
+		keep := make(Points, k)
+		copy(keep, solution.C)
 
-	for i := 0; i < 20; i++ {
 		solution.AssignPoints(pp)
 		solution.Print(socket)
-		time.Sleep(100 * time.Millisecond)
 
 		solution.AssignCentroids(r)
-		solution.Print(socket)
+
+		if keep.eq(Points(solution.C)) {
+			break;
+		}
+
 		time.Sleep(100 * time.Millisecond)
 	}
 

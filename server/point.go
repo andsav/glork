@@ -95,6 +95,16 @@ func (pp Points) Centroid() Point {
 	return Point{X:x/len(pp), Y:y/len(pp)}
 }
 
+
+func (pp Points) eq(pp2 Points) bool {
+	for i := range pp {
+		if pp[i].X != pp2[i].X || pp[i].Y != pp2[i].Y {
+			return false
+		}
+	}
+	return true
+}
+
 // Sorting solution
 func (s Solution) Len() int {
 	return len(s)
