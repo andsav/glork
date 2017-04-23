@@ -1,7 +1,8 @@
-import {COLOR} from '../../lib/constants.js';
+import {COLOR, ENDPOINTS} from '../../lib/constants.js';
 import {$, $$, $post, $ready} from '../../lib/$.js';
 import {Canvas, SliderCanvas} from '../../lib/canvas.js';
 import {collision, in_circle, rand, clear_timeout, round} from '../../lib/helpers.js';
+import {Socket} from '../../lib/socket.js';
 
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
@@ -198,7 +199,11 @@ $ready(() => {
     };
 
     $("lloyd").onclick = () => {
-        console.log(JSON.stringify(canvas.object(kSlider)));
+
+        let ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(data) {
+            console.log(data);
+        }, canvas.object(kSlider));
+
     };
 
 });

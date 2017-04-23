@@ -8,9 +8,9 @@ import (
 
 
 // Solves TSP using Simulated Annealing
-func (p Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
+func (pp Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 	var solution Solution
-	p.Shuffle()
+	pp.Shuffle()
 
 	// Bounds and default values
 	if cooling < 0.85 || cooling > 0.99 {
@@ -26,14 +26,14 @@ func (p Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 	}
 
 	for t := 1.0; t > 0.00001; t *= cooling {
-		keep := make(Points, len(p))
-		copy(keep, p)
+		keep := make(Points, len(pp))
+		copy(keep, pp)
 		solution = append(solution, keep)
 
 		for i := 0; i < iterations; i += 1 {
-			p2 := p.Neighbour()
-			if ap(p.Len(), p2.Len(), t) > rand.Float64() {
-				copy(p, p2)
+			pp2 := pp.Neighbour()
+			if ap(pp.Len(), pp2.Len(), t) > rand.Float64() {
+				copy(pp, pp2)
 			}
 		}
 	}
@@ -42,7 +42,7 @@ func (p Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 }
 
 // Solves TSP using Local Beam Search
-func (p Points) LocalBeamSearch(k int, iterations int) Solution {
+func (pp Points) LocalBeamSearch(k int, iterations int) Solution {
 	var solution Solution
 
 	// Bounds and default values
@@ -69,11 +69,11 @@ func (p Points) LocalBeamSearch(k int, iterations int) Solution {
 	}
 
 	for i := 0; i < k; i++ {
-		go routine(p.Random())
+		go routine(pp.Random())
 	}
 
 	for i := 0; i < k; i++ {
-		keep := make(Points, len(p))
+		keep := make(Points, len(pp))
 		copy(keep, <-best)
 		solution = append(solution, keep)
 	}

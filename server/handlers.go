@@ -14,7 +14,7 @@ import (
 
 type SingleCallback func(Solver) Solution
 
-type SocketCallback func(*websocket.Conn)
+type SocketCallback func(Solver, *websocket.Conn)
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!")
@@ -36,23 +36,10 @@ func TspLBS(w http.ResponseWriter, r *http.Request) {
 
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
 
-	socket(w, r, func(c *websocket.Conn) {
-		for {
-			mt, message, err := c.ReadMessage()
-			if err != nil {
-				log.Println("Socket read err:", err)
-				break
-			}
-			log.Printf("Received: %s", message)
-			err = c.WriteMessage(mt, message)
-			if err != nil {
-				log.Println("Socket write err:", err)
-				break
-			}
-		}
+	socket(w, r, func(s Solver, socket *websocket.Conn) {
+		s.Input.KMeans(int(s.Config[0]), socket)
 	})
 }
-
 
 
 func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
@@ -85,26 +72,43 @@ func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 }
 
 func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
+	var input Solver
+
 	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  2048,
+		WriteBufferSize: 2048,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
 
-	c, err := upgrader.Upgrade(w, r, nil)
+	socket, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print("Socket upgrade error:", err)
+		log.Println("[Socket] upgrade error:", err)
 		return
 	} else {
-		log.Print("Socket connected")
+		log.Println("[Socket] connected")
 	}
 
 
-	defer c.Close()
+	defer socket.Close()
 
-	cb(c)
+	for {
+		messageType, message, err := socket.ReadMessage()
+		if err != nil {
+			log.Println("[Socket] read err:", err)
+			break
+		}
 
-	log.Print("Socket disconnected")
+		log.Printf("[Socket] received %d-type message", messageType)
+
+		if err := json.Unmarshal(message, &input); err != nil {
+			log.Println("[Socket] parsing error:", err)
+			break
+		}
+
+		cb(input, socket)
+	}
+
+	log.Println("[Socket] disconnected")
 }
