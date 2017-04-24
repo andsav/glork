@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"io"
 	"io/ioutil"
@@ -17,16 +16,14 @@ type SingleCallback func(Solver) Solution
 type SocketCallback func(Solver, *websocket.Conn)
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
+	http.Redirect(w, r, "http://glork.net", 301)
 }
-
 
 func TspSA(w http.ResponseWriter, r *http.Request) {
 	single(w, r, func(s Solver) Solution {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
-
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
 	single(w, r, func(s Solver) Solution {
@@ -35,13 +32,18 @@ func TspLBS(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
-
 	socket(w, r, func(s Solver, socket *websocket.Conn) {
 		s.Input.KMeans(int(s.Config[0]), socket)
 	})
 }
 
+func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
+	socket(w, r, func(s Solver, socket *websocket.Conn) {
+		s.Input.DBSCAN(s.Config[0], 3, socket)
+	})
+}
 
+// Single response handler
 func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	var input Solver
 
@@ -66,11 +68,12 @@ func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode( cb(input) ); err != nil {
+	if err := json.NewEncoder(w).Encode(cb(input)); err != nil {
 		panic(err)
 	}
 }
 
+// Websocket handler
 func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 	var input Solver
 
@@ -90,7 +93,6 @@ func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 		log.Println("[Socket] connected")
 	}
 
-
 	defer socket.Close()
 
 	for {
@@ -103,7 +105,7 @@ func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 		log.Printf("[Socket] received %d-type message", messageType)
 
 		if err := json.Unmarshal(message, &input); err != nil {
-			log.Println("[Socket] parsing error:", err)
+			log.Println("[Socket] json unmarshal error:", err)
 			break
 		}
 
@@ -111,4 +113,21 @@ func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 	}
 
 	log.Println("[Socket] disconnected")
+}
+
+// Send json-encoded data over a web socket
+func Send(data interface{}, socket *websocket.Conn) bool {
+	ret, err := json.Marshal(data)
+	if err != nil {
+		log.Println("[Socket] json marshal err:", err)
+		return false
+	}
+
+	err = socket.WriteMessage(websocket.TextMessage, ret)
+	if err != nil {
+		log.Println("[Socket] send err:", err)
+		return false
+	}
+
+	return true
 }

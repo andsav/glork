@@ -37,9 +37,9 @@ var routes = Routes{
 		ClusteringKMeans,
 	},
 	Route{
-		"ClusteringKMeans",
-		"POST",
-		"/clustering/kmeans",
-		ClusteringKMeans,
+		"ClusteringDBSCAN",
+		"GET",
+		"/clustering/dbscan",
+		ClusteringDBSCAN,
 	},
 }

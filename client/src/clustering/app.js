@@ -93,7 +93,7 @@ class MainCanvas extends Canvas {
         this.points = [];
     }
 
-    update(data) {
+    updateKMS(data) {
         this.updating = true;
         this.clear();
 
@@ -113,6 +113,10 @@ class MainCanvas extends Canvas {
         }
 
         this.ctx.fillStyle = COLOR.DEFAULT;
+    }
+
+    updateDBSCAN(data) {
+        console.log(data);
     }
 
     stopUpdating() {
@@ -203,7 +207,11 @@ class ConfigSlider extends SliderCanvas {
 
     setConfig(m) {
         this.button.x = Math.max(20, Math.min(this.width - 20, m.x));
-        this.data['val'] = round((this.dataF('max') - this.dataF('min')) * (this.button.x -20)/(this.width - 40) + this.dataF('min'), 1);
+        this.data['val'] = round(
+            (this.dataF('max') - this.dataF('min')) * (this.button.x -20)/(this.width - 40) + this.dataF('min'),
+            (this.data['int'] == 'true' ? 1 : 1000)
+        );
+
         this.button.x = this.buttonToConfig;
 
         this.update();
@@ -252,11 +260,16 @@ $ready(() => {
         } else {
 
             ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(d) {
-                canvas.update(d);
+                canvas.updateKMS(d);
             }, data);
 
         }
+    };
 
+    $("dbscan").onclick = () => {
+        ws = new Socket(ENDPOINTS.CLUSTERING_DBSCAN, function(d) {
+                canvas.updateDBSCAN(d);
+            }, canvas.object(eSlider));
     };
 
 });

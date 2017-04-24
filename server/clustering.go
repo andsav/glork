@@ -2,9 +2,8 @@ package main
 
 import (
 	"time"
-	"encoding/json"
-	"log"
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 type KMSolution struct {
@@ -12,15 +11,7 @@ type KMSolution struct {
 	PP	[]Points	`json:"pp"`
 }
 
-func (s KMSolution) Print(socket *websocket.Conn) {
-	ret, err := json.Marshal( s )
-	if err == nil {
-		err := socket.WriteMessage(websocket.TextMessage, ret)
-		if err != nil {
-			log.Println("[Socket] write err:", err)
-		}
-	}
-}
+type DBSCANSolution map[Point]int
 
 func (s *KMSolution) AssignPoints(pp Points) {
 	s.PP = make([]Points, len(s.C))
@@ -55,8 +46,34 @@ func (s *KMSolution) AssignCentroids(r Rectangle) {
 	}
 }
 
+func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
+	reverse := make(map[int]Points)
+
+	for p, cluster := range s {
+		if _, exists := reverse[cluster]; !exists {
+			reverse[cluster] = make(Points, 0, len(s))
+		}
+
+		reverse[cluster] = append(reverse[cluster], p)
+	}
+
+	log.Print(reverse)
+
+	ret := make([]Points, 0, len(reverse))
+
+	for _, pp := range reverse {
+		ret = append(ret, pp)
+	}
+
+	return Send(ret, socket)
+}
+
 func (pp Points) KMeans(k int, socket *websocket.Conn) {
 	var solution KMSolution
+
+	if k < 2 || k > 10 {
+		k = 2
+	}
 
 	solution.C = make([]Point, k)
 
@@ -80,21 +97,50 @@ func (pp Points) KMeans(k int, socket *websocket.Conn) {
 		solution.C[i] = r.RandomPoint()
 	}
 
-	for i := 0; i < 21; i++ {
+	for i := 0; i < 100; i++ {
 		keep := make(Points, k)
 		copy(keep, solution.C)
 
 		solution.AssignPoints(pp)
-		solution.Print(socket)
+
+		if Send(solution, socket) == false {
+			break
+		}
 
 		solution.AssignCentroids(r)
 
 		if keep.eq(Points(solution.C)) {
-			break;
+			break
 		}
 
 		time.Sleep(100 * time.Millisecond)
 	}
+}
 
+func (pp Points) Region(origin Point, eps float64) Points {
+	var ret Points
 
+	for _, p := range pp {
+		if origin.distance(p) <= eps {
+			ret = append(ret, p)
+		}
+	}
+
+	return ret
+}
+
+func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
+	solution := make(DBSCANSolution)
+
+	/*
+	@todo
+	for _, p := range pp {
+		solution[p] = random_int(0, 5)
+	}
+
+	log.Print(solution)
+
+	*/
+
+	solution.Send(socket)
 }
