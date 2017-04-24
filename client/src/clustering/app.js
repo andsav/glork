@@ -115,8 +115,33 @@ class MainCanvas extends Canvas {
         this.ctx.fillStyle = COLOR.DEFAULT;
     }
 
-    updateDBSCAN(data) {
-        console.log(data);
+    updateDBSCAN(data, config) {
+        this.updating = true;
+        this.clear();
+
+        let final = (data[data.length-1].length == 0);
+
+        if(final) {
+            data.pop();
+        } else {
+            this.ctx.fillStyle = "#16161D";
+        }
+
+        for(let i=0; i<data.length; ++i) {
+            if(final) {
+                this.ctx.fillStyle = COLOR.CUSTOM[i];
+            }
+
+            data[i].forEach((p) => {
+                this.placeNode(p.x, p.y, true, parseInt(config.data['val']));
+            });
+        }
+
+        this.ctx.fillStyle = COLOR.DEFAULT;
+
+        this.points.forEach((p) => {
+            this.placeNode(p[0], p[1], true, 6);
+        });
     }
 
     stopUpdating() {
@@ -268,7 +293,7 @@ $ready(() => {
 
     $("dbscan").onclick = () => {
         ws = new Socket(ENDPOINTS.CLUSTERING_DBSCAN, function(d) {
-                canvas.updateDBSCAN(d);
+                canvas.updateDBSCAN(d, eSlider);
             }, canvas.object(eSlider));
     };
 

@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 	"github.com/gorilla/websocket"
-	"log"
 )
 
 type KMSolution struct {
@@ -12,6 +11,8 @@ type KMSolution struct {
 }
 
 type DBSCANSolution map[Point]int
+
+const Noise = -1
 
 func (s *KMSolution) AssignPoints(pp Points) {
 	s.PP = make([]Points, len(s.C))
@@ -46,10 +47,14 @@ func (s *KMSolution) AssignCentroids(r Rectangle) {
 	}
 }
 
-func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
+func (s DBSCANSolution) Send(socket *websocket.Conn, final bool) bool {
 	reverse := make(map[int]Points)
 
 	for p, cluster := range s {
+		if cluster == Noise {
+			continue
+		}
+
 		if _, exists := reverse[cluster]; !exists {
 			reverse[cluster] = make(Points, 0, len(s))
 		}
@@ -57,14 +62,17 @@ func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 		reverse[cluster] = append(reverse[cluster], p)
 	}
 
-	log.Print(reverse)
-
 	ret := make([]Points, 0, len(reverse))
 
 	for _, pp := range reverse {
 		ret = append(ret, pp)
 	}
 
+	if final {
+		ret = append(ret, Points{})
+	}
+
+	time.Sleep(25 * time.Millisecond)
 	return Send(ret, socket)
 }
 
@@ -141,24 +149,32 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
 		neighbours := pp.Region(p, eps)
 
 		if len(neighbours) < min_points {
-			solution[p] = -1
+			solution[p] = Noise
 		} else {
 			c++
 			solution[p] = c
-			for _, np := range neighbours {
+			solution.Send(socket, false)
+
+			for i := 0; i < len(neighbours); i++ {
+				np := neighbours[i]
 				if _, exists := solution[np]; exists {
 					continue
 				}
 
 				solution[np] = c
+				solution.Send(socket, false)
+
 				npp := pp.Region(np, eps)
 				if len(npp) >= min_points {
 					neighbours = append(neighbours, npp...)
 				}
 			}
+
 		}
 
 	}
 
-	solution.Send(socket)
+
+	solution.Send(socket, true)
+
 }
