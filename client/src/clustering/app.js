@@ -97,9 +97,9 @@ class MainCanvas extends Canvas {
         this.updating = true;
         this.clear();
 
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
         data['c'].forEach((c) => {
-            this.placeNode(c.x, c.y, true, 30);
+            this.drawCircle(c.x, c.y, 25);
         });
 
 
@@ -133,15 +133,17 @@ class MainCanvas extends Canvas {
             }
 
             data[i].forEach((p) => {
-                this.placeNode(p.x, p.y, true, parseInt(config.data['val']));
+                this.drawCircle(p.x, p.y, parseInt(config.data['val']));
             });
         }
 
-        this.ctx.fillStyle = COLOR.DEFAULT;
+        this.ctx.fillStyle = final ? "rgba(0, 0, 0, 0.6)" : COLOR.DEFAULT;
 
         this.points.forEach((p) => {
             this.placeNode(p[0], p[1], true, 6);
         });
+
+        this.ctx.fillStyle = COLOR.DEFAULT;
     }
 
     stopUpdating() {
