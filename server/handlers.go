@@ -126,6 +126,7 @@ func Send(data interface{}, socket *websocket.Conn) bool {
 	err = socket.WriteMessage(websocket.TextMessage, ret)
 	if err != nil {
 		log.Println("[Socket] send err:", err)
+		socket.Close()
 		return false
 	}
 

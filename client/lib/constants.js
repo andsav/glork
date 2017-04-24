@@ -5,8 +5,8 @@
 export const ENDPOINTS = {
     TSP_SA: 'http://go.glork.net/tsp/sa',
     TSP_LBS: 'http://go.glork.net/tsp/lbs',
-    CLUSTERING_KMEANS: 'ws://138.197.131.239:8888/clustering/kmeans',
-    CLUSTERING_DBSCAN: 'ws://138.197.131.239:8888/clustering/dbscan'
+    CLUSTERING_KMEANS: 'ws://go.glork.net/clustering/kmeans',
+    CLUSTERING_DBSCAN: 'ws://go.glork.net/clustering/dbscan'
 };
 
 export const COLOR = {

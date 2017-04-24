@@ -130,17 +130,35 @@ func (pp Points) Region(origin Point, eps float64) Points {
 }
 
 func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
-	solution := make(DBSCANSolution)
+	solution, c := make(DBSCANSolution), 0
 
-	/*
-	@todo
+
 	for _, p := range pp {
-		solution[p] = random_int(0, 5)
+		if _, exists := solution[p]; exists {
+			continue
+		}
+
+		neighbours := pp.Region(p, eps)
+
+		if len(neighbours) < min_points {
+			solution[p] = -1
+		} else {
+			c++
+			solution[p] = c
+			for _, np := range neighbours {
+				if _, exists := solution[np]; exists {
+					continue
+				}
+
+				solution[np] = c
+				npp := pp.Region(np, eps)
+				if len(npp) >= min_points {
+					neighbours = append(neighbours, npp...)
+				}
+			}
+		}
+
 	}
-
-	log.Print(solution)
-
-	*/
 
 	solution.Send(socket)
 }
