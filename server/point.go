@@ -38,6 +38,7 @@ func (r Rectangle) RandomPoint() Point {
 	};
 }
 
+
 func (a Point) distance(b Point) float64 {
 	return math.Sqrt( float64((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y)) )
 }
@@ -71,6 +72,10 @@ func (pp Points) Random() Points {
 	return pp2
 }
 
+func (pp Points) RandomPoint() Point {
+	return pp[rand.Intn(len(pp))]
+}
+
 // Return a neighbour of the path
 func (pp Points) Neighbour() Points {
 	a, b := rand.Int() % len(pp), rand.Int() % len(pp)
@@ -95,7 +100,7 @@ func (pp Points) Centroid() Point {
 	return Point{X:x/len(pp), Y:y/len(pp)}
 }
 
-
+// Returns true if two points are equal
 func (pp Points) eq(pp2 Points) bool {
 	for i := range pp {
 		if pp[i].X != pp2[i].X || pp[i].Y != pp2[i].Y {
@@ -103,6 +108,19 @@ func (pp Points) eq(pp2 Points) bool {
 		}
 	}
 	return true
+}
+
+// Returns all points within a radius `eps` of `origin`
+func (pp Points) Region(origin Point, eps float64) Points {
+	var ret Points
+
+	for _, p := range pp {
+		if origin.distance(p) <= eps {
+			ret = append(ret, p)
+		}
+	}
+
+	return ret
 }
 
 // Sorting solution

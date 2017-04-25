@@ -324,6 +324,7 @@ $ready(() => {
                 },
                 data,
                 function () {
+                    canvas.updateKMS(canvas.data);
                     canvas.voronoi()
                 });
         }

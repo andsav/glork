@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"io"
 	"io/ioutil"
-	"math/rand"
-	"time"
 	"log"
 	"github.com/gorilla/websocket"
 )
@@ -48,8 +46,6 @@ func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	var input Solver
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-
-	rand.Seed(time.Now().Unix())
 
 	if err != nil {
 		panic(err)

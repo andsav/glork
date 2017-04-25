@@ -1,24 +1,53 @@
 package main
 
 import (
+	"math"
 	"time"
 	"github.com/gorilla/websocket"
 )
+
+
+/*
+ *	K-Means
+ */
+
 
 type KMSolution struct {
 	C	Points		`json:"c"`
 	PP	[]Points	`json:"pp"`
 }
 
-type DBSCANSolution map[Point]int
+// K-means performs better if initial centroids are spread out
+// The first centroid is assigned at random and subsequent centroids are the farthest apart from all the previous
+func (s *KMSolution) InitializeCentroids(k int, pp Points) {
+	s.C = make(Points, k)
 
-const Noise = -1
+	s.C[0] = pp.RandomPoint()
 
+	for i := 1; i < k; i++ {
+
+		maxD, bestP := 0.0, pp[0]
+		for _, p := range pp {
+			d := 0.0
+			for j := 0; j < i; j++ {
+				d += p.distance(s.C[j])
+			}
+			if maxD < d {
+				maxD = d
+				bestP = p
+			}
+		}
+
+		s.C[i] = bestP
+	}
+}
+
+// Group points by assigning them to the centroid that is nearest to them
 func (s *KMSolution) AssignPoints(pp Points) {
 	s.PP = make([]Points, len(s.C))
 
 	for _, p := range pp {
-		minD, minI := 1000.0, 0
+		minD, minI := math.Inf(1), 0
 		for i, c := range s.C {
 			d := c.distance(p)
 			if(d < minD) {
@@ -31,21 +60,62 @@ func (s *KMSolution) AssignPoints(pp Points) {
 	}
 }
 
-func (s *KMSolution) AssignCentroids(r Rectangle) {
+// Re-calculate the centroid for each group of points
+func (s *KMSolution) AssignCentroids(pp Points) {
 	s.C = make(Points, len(s.PP))
 
-	for i, pp := range s.PP {
+	for i, spp := range s.PP {
 		var c Point
 
-		if len(pp) == 0 {
-			c = r.RandomPoint()
+		if len(spp) == 0 {
+			c = pp.RandomPoint()
 		} else {
-			c = pp.Centroid()
+			c = spp.Centroid()
 		}
 
 		s.C[i] = c
 	}
 }
+
+func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
+	var solution KMSolution
+
+	if k < 2 || k > 10 {
+		k = 2
+	}
+
+	solution.InitializeCentroids(k, pp)
+
+	for i := 0; i < 100; i++ {
+		keep := make(Points, k)
+		copy(keep, solution.C)
+
+		solution.AssignPoints(pp)
+
+		if Send(solution, socket) == false {
+			break
+		}
+
+		solution.AssignCentroids(pp)
+
+		if keep.eq(Points(solution.C)) {
+			break
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	socket.Close()
+	return false
+}
+
+/*
+ *	DBSCAN
+ */
+
+type DBSCANSolution map[Point]int
+
+const Noise = -1
 
 func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 	reverse := make(map[int]Points)
@@ -72,69 +142,6 @@ func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 	return Send(ret, socket)
 }
 
-func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
-	var solution KMSolution
-
-	if k < 2 || k > 10 {
-		k = 2
-	}
-
-	solution.C = make([]Point, k)
-
-	// Active area
-	r := Rectangle{X0: 1000, X1: 0, Y0: 1000, Y1: 0}
-	for _, p := range pp {
-		if p.X < r.X0 {
-			r.X0 = p.X
-		} else if p.X > r.X1 {
-			r.X1 = p.X
-		}
-
-		if p.Y < r.Y0 {
-			r.Y0 = p.Y
-		} else if p.Y > r.Y1 {
-			r.Y1 = p.Y
-		}
-	}
-
-	for i := 0; i < k; i++ {
-		solution.C[i] = r.RandomPoint()
-	}
-
-	for i := 0; i < 100; i++ {
-		keep := make(Points, k)
-		copy(keep, solution.C)
-
-		solution.AssignPoints(pp)
-
-		if Send(solution, socket) == false {
-			break
-		}
-
-		solution.AssignCentroids(r)
-
-		if keep.eq(Points(solution.C)) {
-			break
-		}
-
-		time.Sleep(100 * time.Millisecond)
-	}
-
-	socket.Close()
-	return false
-}
-
-func (pp Points) Region(origin Point, eps float64) Points {
-	var ret Points
-
-	for _, p := range pp {
-		if origin.distance(p) <= eps {
-			ret = append(ret, p)
-		}
-	}
-
-	return ret
-}
 
 func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) bool {
 	solution, c := make(DBSCANSolution), 0
