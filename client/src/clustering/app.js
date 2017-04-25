@@ -1,7 +1,7 @@
 import {COLOR, ENDPOINTS} from '../../lib/constants.js';
 import {$, $$, $post, $ready} from '../../lib/$.js';
 import {Canvas, SliderCanvas} from '../../lib/canvas.js';
-import {collision, in_circle, rand, clear_timeout, round, error} from '../../lib/helpers.js';
+import {collision, in_circle, rand, clear_timeout, round, error, dist} from '../../lib/helpers.js';
 import {Socket} from '../../lib/socket.js';
 
 const MIN_CURSOR_RADIUS = 4;
@@ -69,7 +69,7 @@ class MainCanvas extends Canvas {
     }
 
     placePoint(x, y) {
-        if(this.updating) {
+        if (this.updating) {
             this.stopUpdating();
         }
 
@@ -96,16 +96,18 @@ class MainCanvas extends Canvas {
 
     updateKMS(data) {
         this.updating = true;
+        this.data = data;
+
         this.clear();
 
+        // Place centroids
         this.ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
         data['c'].forEach((c) => {
             this.drawCircle(c.x, c.y, 25);
         });
 
-
-        for(let i=0; i<data['pp'].length; ++i) {
-            if(data['pp'][i] != null && data['pp'][i].length != 0) {
+        for (let i = 0; i < data['pp'].length; ++i) {
+            if (data['pp'][i] != null && data['pp'][i].length != 0) {
                 this.ctx.fillStyle = COLOR.CUSTOM[i];
                 data['pp'][i].forEach((p) => {
                     this.placeNode(p.x, p.y, true, 6);
@@ -116,23 +118,52 @@ class MainCanvas extends Canvas {
         this.ctx.fillStyle = COLOR.DEFAULT;
     }
 
+    voronoi() {
+        let points = {};
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                let distances = this.data['c'].map((p) => dist([p.x, p.y], [x, y]));
+                let color = COLOR.CUSTOM[distances.indexOf(Math.min(...distances))];
+
+                if (!(color in points)) {
+                    points[color] = [];
+                }
+
+                points[color].push([x, y]);
+            }
+        }
+
+        this.clear();
+        for (let color in points) {
+            this.ctx.fillStyle = color;
+            for (let i = 0; i < points[color].length; ++i) {
+                this.ctx.fillRect(points[color][i][0], points[color][i][1], 1, 1);
+            }
+        }
+
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        this.points.forEach((p) => {
+            this.placeNode(p[0], p[1], true, 6);
+        });
+    }
+
     updateDBSCAN(data, config, final = false) {
         this.updating = true;
         this.data = data;
 
         this.clear();
 
-        if(!final) {
+        if (!final) {
             this.ctx.fillStyle = "#16161D";
         }
 
-        for(let i=0; i<data.length; ++i) {
-            if(final) {
+        for (let i = 0; i < data.length; ++i) {
+            if (final) {
                 this.ctx.fillStyle = COLOR.CUSTOM[i];
             }
 
             data[i].forEach((p) => {
-                this.drawCircle(p.x, p.y, Math.ceil(1.2*config.data['val']));
+                this.drawCircle(p.x, p.y, Math.ceil(1.2 * config.data['val']));
             });
         }
 
@@ -147,7 +178,7 @@ class MainCanvas extends Canvas {
 
     stopUpdating() {
         this.updating = false;
-        if(ws !== null) {
+        if (ws !== null) {
             ws.close();
         }
         this.redraw();
@@ -158,7 +189,7 @@ class MainCanvas extends Canvas {
             'p': this.points.map((c) => {
                 return {'x': c[0], 'y': c[1]}
             }),
-            'config': [ parseFloat(config.data['val']) ]
+            'config': [parseFloat(config.data['val'])]
         };
     }
 }
@@ -234,7 +265,7 @@ class ConfigSlider extends SliderCanvas {
     setConfig(m) {
         this.button.x = Math.max(20, Math.min(this.width - 20, m.x));
         this.data['val'] = round(
-            (this.dataF('max') - this.dataF('min')) * (this.button.x -20)/(this.width - 40) + this.dataF('min'),
+            (this.dataF('max') - this.dataF('min')) * (this.button.x - 20) / (this.width - 40) + this.dataF('min'),
             (this.data['int'] == 'true' ? 1 : 1000)
         );
 
@@ -261,11 +292,11 @@ class ConfigSlider extends SliderCanvas {
         // Indicator
         let text = String(this.data['var'] + " = " + this.dataF('val'));
         let offset = this.ctx.measureText(text).width;
-        this.ctx.fillText(text, this.button.x - offset/2, this.halfHeight + 22);
+        this.ctx.fillText(text, this.button.x - offset / 2, this.halfHeight + 22);
     }
 
     get buttonToConfig() {
-        return (this.dataF('val') - this.dataF('min'))/(this.dataF('max') - this.dataF('min')) * (this.width - 40) + 20;
+        return (this.dataF('val') - this.dataF('min')) / (this.dataF('max') - this.dataF('min')) * (this.width - 40) + 20;
     }
 }
 
@@ -281,31 +312,34 @@ $ready(() => {
 
     $("lloyd").onclick = () => {
         let data = canvas.object(kSlider);
-        if(canvas.points.length < 5) {
+        if (canvas.points.length < 5) {
             error(canvas.c, "Please define at least 5 points");
-        } else if(data['config'][0] > data['p'].length) {
+        } else if (data['config'][0] > data['p'].length) {
             error(canvas.c, "More clusters than number of points defined");
         } else {
             ws = new Socket(
                 ENDPOINTS.CLUSTERING_KMEANS,
-                function(d) {
+                function (d) {
                     canvas.updateKMS(d);
                 },
-                data);
+                data,
+                function () {
+                    canvas.voronoi()
+                });
         }
     };
 
     $("dbscan").onclick = () => {
-        if(canvas.points.length < 5) {
+        if (canvas.points.length < 5) {
             error(canvas.c, "Please define at least 5 points");
         } else {
             ws = new Socket(
                 ENDPOINTS.CLUSTERING_DBSCAN,
-                function(d) {
+                function (d) {
                     canvas.updateDBSCAN(d, eSlider);
                 },
                 canvas.object(eSlider),
-                function() {
+                function () {
                     canvas.updateDBSCAN(canvas.data, eSlider, true);
                 });
         }
