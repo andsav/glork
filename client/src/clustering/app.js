@@ -15,6 +15,7 @@ class MainCanvas extends Canvas {
         super(id);
 
         this.updating = false;
+        this.data = [];
 
         this.points = [];
         this.cursor_radius = MIN_CURSOR_RADIUS;
@@ -115,15 +116,13 @@ class MainCanvas extends Canvas {
         this.ctx.fillStyle = COLOR.DEFAULT;
     }
 
-    updateDBSCAN(data, config) {
+    updateDBSCAN(data, config, final = false) {
         this.updating = true;
+        this.data = data;
+
         this.clear();
 
-        let final = (data[data.length-1].length == 0);
-
-        if(final) {
-            data.pop();
-        } else {
+        if(!final) {
             this.ctx.fillStyle = "#16161D";
         }
 
@@ -133,7 +132,7 @@ class MainCanvas extends Canvas {
             }
 
             data[i].forEach((p) => {
-                this.drawCircle(p.x, p.y, parseInt(config.data['val']));
+                this.drawCircle(p.x, p.y, Math.ceil(1.2*config.data['val']));
             });
         }
 
@@ -282,21 +281,34 @@ $ready(() => {
 
     $("lloyd").onclick = () => {
         let data = canvas.object(kSlider);
-        if(data['config'][0] > data['p'].length) {
+        if(canvas.points.length < 5) {
+            error(canvas.c, "Please define at least 5 points");
+        } else if(data['config'][0] > data['p'].length) {
             error(canvas.c, "More clusters than number of points defined");
         } else {
-
-            ws = new Socket(ENDPOINTS.CLUSTERING_KMEANS, function(d) {
-                canvas.updateKMS(d);
-            }, data);
-
+            ws = new Socket(
+                ENDPOINTS.CLUSTERING_KMEANS,
+                function(d) {
+                    canvas.updateKMS(d);
+                },
+                data);
         }
     };
 
     $("dbscan").onclick = () => {
-        ws = new Socket(ENDPOINTS.CLUSTERING_DBSCAN, function(d) {
-                canvas.updateDBSCAN(d, eSlider);
-            }, canvas.object(eSlider));
+        if(canvas.points.length < 5) {
+            error(canvas.c, "Please define at least 5 points");
+        } else {
+            ws = new Socket(
+                ENDPOINTS.CLUSTERING_DBSCAN,
+                function(d) {
+                    canvas.updateDBSCAN(d, eSlider);
+                },
+                canvas.object(eSlider),
+                function() {
+                    canvas.updateDBSCAN(canvas.data, eSlider, true);
+                });
+        }
     };
 
 });

@@ -13,7 +13,7 @@ import (
 
 type SingleCallback func(Solver) Solution
 
-type SocketCallback func(Solver, *websocket.Conn)
+type SocketCallback func(Solver, *websocket.Conn) bool
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "http://glork.net", 301)
@@ -32,14 +32,14 @@ func TspLBS(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
-	socket(w, r, func(s Solver, socket *websocket.Conn) {
-		s.Input.KMeans(int(s.Config[0]), socket)
+	socket(w, r, func(s Solver, socket *websocket.Conn) bool {
+		return s.Input.KMeans(int(s.Config[0]), socket)
 	})
 }
 
 func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
-	socket(w, r, func(s Solver, socket *websocket.Conn) {
-		s.Input.DBSCAN(s.Config[0], 3, socket)
+	socket(w, r, func(s Solver, socket *websocket.Conn) bool {
+		return s.Input.DBSCAN(s.Config[0], 3, socket)
 	})
 }
 
@@ -109,7 +109,9 @@ func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 			break
 		}
 
-		cb(input, socket)
+		if !cb(input, socket) {
+			break
+		}
 	}
 
 	log.Println("[Socket] disconnected")

@@ -3,9 +3,10 @@ import { error } from './helpers.js';
 export let Ws = null;
 
 export class Socket {
-    constructor(endpoint, receiveFn, initialData = null) {
+    constructor(endpoint, receiveFn, initialData = null, closeFn = function() {}) {
         if((window["WebSocket"])) {
             if(Ws) {
+                Ws.onclose = function() {};
                 Ws.close();
             }
 
@@ -25,7 +26,7 @@ export class Socket {
                 receiveFn(data);
             };
 
-            Ws.onclose = function() {};
+            Ws.onclose = closeFn;
             window.onbeforeunload = function() {
                 Ws.close()
             }
@@ -40,6 +41,7 @@ export class Socket {
     }
 
     close() {
+        Ws.onclose = function() {};
         Ws.close();
     }
 

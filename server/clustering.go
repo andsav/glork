@@ -47,7 +47,7 @@ func (s *KMSolution) AssignCentroids(r Rectangle) {
 	}
 }
 
-func (s DBSCANSolution) Send(socket *websocket.Conn, final bool) bool {
+func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 	reverse := make(map[int]Points)
 
 	for p, cluster := range s {
@@ -68,15 +68,11 @@ func (s DBSCANSolution) Send(socket *websocket.Conn, final bool) bool {
 		ret = append(ret, pp)
 	}
 
-	if final {
-		ret = append(ret, Points{})
-	}
-
 	time.Sleep(25 * time.Millisecond)
 	return Send(ret, socket)
 }
 
-func (pp Points) KMeans(k int, socket *websocket.Conn) {
+func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
 	var solution KMSolution
 
 	if k < 2 || k > 10 {
@@ -123,6 +119,9 @@ func (pp Points) KMeans(k int, socket *websocket.Conn) {
 
 		time.Sleep(100 * time.Millisecond)
 	}
+
+	socket.Close()
+	return false
 }
 
 func (pp Points) Region(origin Point, eps float64) Points {
@@ -137,9 +136,8 @@ func (pp Points) Region(origin Point, eps float64) Points {
 	return ret
 }
 
-func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
+func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) bool {
 	solution, c := make(DBSCANSolution), 0
-
 
 	for _, p := range pp {
 		if _, exists := solution[p]; exists {
@@ -153,7 +151,7 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
 		} else {
 			c++
 			solution[p] = c
-			solution.Send(socket, false)
+			solution.Send(socket)
 
 			for i := 0; i < len(neighbours); i++ {
 				np := neighbours[i]
@@ -162,7 +160,7 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
 				}
 
 				solution[np] = c
-				solution.Send(socket, false)
+				solution.Send(socket)
 
 				npp := pp.Region(np, eps)
 				if len(npp) >= min_points {
@@ -174,7 +172,8 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) {
 
 	}
 
-
-	solution.Send(socket, true)
+	solution.Send(socket)
+	socket.Close()
+	return false
 
 }
