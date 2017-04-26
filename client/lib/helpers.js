@@ -1,8 +1,8 @@
 /*
-    Common helper functions
+ Common helper functions
  */
 
-import { $ } from './$.js';
+import {$} from './$.js';
 
 const ERROR_DIV = $("error_msg");
 
@@ -28,6 +28,13 @@ export let shuffle = (a) => {
 
 // Return a random integer between min and max
 export let rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Returns a random number according to a Gaussian distribution N(0, 1) (Box–Muller transform)
+export let gaussian = () => {
+    let u = 1 - Math.random();
+    let v = 1 - Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+};
 
 // Stop all animations in progress
 export let clear_timeout = () => {

@@ -11,7 +11,6 @@ import (
  *	K-Means
  */
 
-
 type KMSolution struct {
 	C	Points		`json:"c"`
 	PP	[]Points	`json:"pp"`
@@ -77,6 +76,12 @@ func (s *KMSolution) AssignCentroids(pp Points) {
 	}
 }
 
+// Send solution through socket
+func (s KMSolution) Send(socket *websocket.Conn) bool {
+	time.Sleep(50 * time.Millisecond)
+	return Send(ret, socket)
+}
+
 func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
 	var solution KMSolution
 
@@ -92,7 +97,7 @@ func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
 
 		solution.AssignPoints(pp)
 
-		if Send(solution, socket) == false {
+		if solution.Send(socket) == false {
 			break
 		}
 
@@ -101,8 +106,6 @@ func (pp Points) KMeans(k int, socket *websocket.Conn) bool {
 		if keep.eq(Points(solution.C)) {
 			break
 		}
-
-		time.Sleep(100 * time.Millisecond)
 	}
 
 	socket.Close()
@@ -117,6 +120,7 @@ type DBSCANSolution map[Point]int
 
 const Noise = -1
 
+// Convert solution to desired format and send through socket
 func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 	reverse := make(map[int]Points)
 

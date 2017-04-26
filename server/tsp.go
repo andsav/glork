@@ -21,6 +21,7 @@ func (pp Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 		iterations = 200
 	}
 
+	// Acceptance probability
 	ap := func(last float64, current float64, t float64) float64 {
 		return math.Exp(((last-current)/10000)/t)
 	}
@@ -28,6 +29,8 @@ func (pp Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 	for t := 1.0; t > 0.00001; t *= cooling {
 		keep := make(Points, len(pp))
 		copy(keep, pp)
+
+		// Send all solutions for visualization
 		solution = append(solution, keep)
 
 		for i := 0; i < iterations; i += 1 {
@@ -56,6 +59,7 @@ func (pp Points) LocalBeamSearch(k int, iterations int) Solution {
 
 	best := make(chan Points)
 
+	// Each point will perform hill climbing in its neighbourhood
 	routine := func(pp Points) {
 
 		for i := 0; i < iterations; i += 1 {
@@ -68,6 +72,7 @@ func (pp Points) LocalBeamSearch(k int, iterations int) Solution {
 		best <- pp
 	}
 
+	// Select k random points and perform hill climbing concurrently
 	for i := 0; i < k; i++ {
 		go routine(pp.Random())
 	}
@@ -78,6 +83,7 @@ func (pp Points) LocalBeamSearch(k int, iterations int) Solution {
 		solution = append(solution, keep)
 	}
 
+	// Send every solution found for visualization
 	sort.Sort(solution)
 
 	return solution

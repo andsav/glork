@@ -1,9 +1,10 @@
 import {COLOR, ENDPOINTS} from '../../lib/constants.js';
-import {$, $$, $post, $ready} from '../../lib/$.js';
+import {$, $ready} from '../../lib/$.js';
 import {Canvas, SliderCanvas} from '../../lib/canvas.js';
-import {collision, in_circle, rand, clear_timeout, round, error, dist} from '../../lib/helpers.js';
+import {collision, in_circle, rand, clear_timeout, round, error, dist, gaussian} from '../../lib/helpers.js';
 import {Socket} from '../../lib/socket.js';
 
+const MIN_POINTS = 5;
 const MIN_CURSOR_RADIUS = 4;
 const MAX_CURSOR_RADIUS = 30;
 const POINTS_DELAY = 100;
@@ -79,6 +80,12 @@ class MainCanvas extends Canvas {
         }
     }
 
+    placeGaussian(x, y, n) {
+        for(let i=0; i<n; ++i) {
+            this.placePoint(parseInt(x+gaussian()*n/3), parseInt(y+gaussian()*n/3));
+        }
+    }
+
     redraw() {
         this.clear();
         this.ctx.fillStyle = COLOR.DEFAULT;
@@ -94,6 +101,22 @@ class MainCanvas extends Canvas {
         this.points = [];
     }
 
+    randomPoints(n = 800, points = null, reset = true) {
+        if(reset) {
+            this.reset();
+        }
+
+        if(points == null) {
+            for(let i = 0; i < n; ++i) {
+                this.placePoint(rand(6, this.width-6), rand(6, this.height-6));
+            }
+        } else {
+            for(let i=0; i<points.length; ++i) {
+                this.placeGaussian(...points[i], n);
+            }
+        }
+    }
+
     updateKMS(data) {
         this.updating = true;
         this.data = data;
@@ -101,7 +124,7 @@ class MainCanvas extends Canvas {
         this.clear();
 
         // Place centroids
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+        this.ctx.fillStyle = COLOR.DARKEN[0];
         data['c'].forEach((c) => {
             this.drawCircle(c.x, c.y, 25);
         });
@@ -141,7 +164,7 @@ class MainCanvas extends Canvas {
             }
         }
 
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        this.ctx.fillStyle = COLOR.DARKEN[2];
         this.points.forEach((p) => {
             this.placeNode(p[0], p[1], true, 6);
         });
@@ -167,7 +190,7 @@ class MainCanvas extends Canvas {
             });
         }
 
-        this.ctx.fillStyle = final ? "rgba(0, 0, 0, 0.6)" : COLOR.DEFAULT;
+        this.ctx.fillStyle = final ? COLOR.DARKEN[2] : COLOR.DEFAULT;
 
         this.points.forEach((p) => {
             this.placeNode(p[0], p[1], true, 6);
@@ -242,7 +265,7 @@ class CursorSlider extends SliderCanvas {
         // Indicator
         this.ctx.beginPath();
         this.ctx.arc(this.button.x, this.button.y, this.button.r, 0, 2 * Math.PI);
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        this.ctx.fillStyle = COLOR.DARKEN[1];
         this.ctx.fill();
     }
 }
@@ -260,6 +283,13 @@ class ConfigSlider extends SliderCanvas {
 
     overButton(m) {
         return in_circle(m, this.button, this.button.r);
+    }
+
+    setVal(v) {
+        this.setConfig({
+            x: 20 + (v-this.dataF('min'))/this.dataF('max') * (this.width - 40),
+            y: this.halfHeight
+        });
     }
 
     setConfig(m) {
@@ -312,8 +342,8 @@ $ready(() => {
 
     $("lloyd").onclick = () => {
         let data = canvas.object(kSlider);
-        if (canvas.points.length < 5) {
-            error(canvas.c, "Please define at least 5 points");
+        if (canvas.points.length < MIN_POINTS) {
+            error(canvas.c, "Please define at least " + MIN_POINTS + " points");
         } else if (data['config'][0] > data['p'].length) {
             error(canvas.c, "More clusters than number of points defined");
         } else {
@@ -331,8 +361,8 @@ $ready(() => {
     };
 
     $("dbscan").onclick = () => {
-        if (canvas.points.length < 5) {
-            error(canvas.c, "Please define at least 5 points");
+        if (canvas.points.length < MIN_POINTS) {
+            error(canvas.c, "Please define at least " + MIN_POINTS + " points");
         } else {
             ws = new Socket(
                 ENDPOINTS.CLUSTERING_DBSCAN,
@@ -345,5 +375,71 @@ $ready(() => {
                 });
         }
     };
+
+    $("random").onclick = () => {
+        canvas.randomPoints(800);
+    };
+
+    $("circles").onclick = () => {
+        canvas.randomPoints(80,
+            [
+                [canvas.width/3, canvas.height/3],
+                [2*canvas.width/3, canvas.height/3],
+                [canvas.width/2, 2*canvas.height/3]
+            ]);
+
+        kSlider.setVal(3);
+    };
+
+    $("donut").onclick = () => {
+        let circle = [];
+        let steps = 20;
+        for (let i = 0; i < steps; i++) {
+            circle.push([
+                (canvas.halfWidth + 130 * Math.cos(2 * Math.PI * i / steps)),
+                (canvas.halfHeight + 130 * Math.sin(2 * Math.PI * i / steps))
+            ]);
+        }
+
+        canvas.randomPoints(25, circle);
+        canvas.randomPoints(50, [[canvas.halfWidth, canvas.halfHeight]], false);
+
+        kSlider.setVal(2);
+    };
+
+    $("smiley").onclick = () => {
+        let circle = [];
+        let steps = 27;
+        for (let i = 0; i < steps; i++) {
+            circle.push([
+                (canvas.halfWidth + 145 * Math.cos(2 * Math.PI * i / steps)),
+                (canvas.halfHeight + 155 * Math.sin(2 * Math.PI * i / steps))
+            ]);
+        }
+
+        // Face
+        canvas.randomPoints(20, circle);
+
+        // Eyes
+        canvas.randomPoints(20, [
+            [0.4*canvas.width, 0.4*canvas.height],
+            [0.6*canvas.width, 0.4*canvas.height]
+        ], false);
+
+        // Smile
+        canvas.randomPoints(15, [
+            [0.375*canvas.width, 0.625*canvas.height],
+            [0.4*canvas.width, 0.65*canvas.height],
+            [0.425*canvas.width, 0.675*canvas.height],
+            [0.45*canvas.width, 0.7*canvas.height],
+            [0.475*canvas.width, 0.725*canvas.height],
+            [0.5*canvas.width, 0.73*canvas.height],
+            [0.525*canvas.width, 0.725*canvas.height],
+            [0.55*canvas.width, 0.7*canvas.height],
+            [0.575*canvas.width, 0.675*canvas.height],
+            [0.6*canvas.width, 0.65*canvas.height],
+            [0.625*canvas.width, 0.625*canvas.height]
+        ], false);
+    }
 
 });

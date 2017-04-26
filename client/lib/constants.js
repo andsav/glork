@@ -24,6 +24,11 @@ export const COLOR = {
         "#E5D4C0",
         "#FFA69E",
         "#D1F0B1"
+    ],
+    DARKEN: [
+        "rgba(0, 0, 0, 0.3)",
+        "rgba(0, 0, 0, 0.4)",
+        "rgba(0, 0, 0, 0.6)"
     ]
 };
 
