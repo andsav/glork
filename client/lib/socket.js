@@ -14,12 +14,11 @@ export class Socket {
 
             let _this = this;
 
-            Ws.onopen = function() {
-                console.log("Socket connection");
-                if(initialData) {
+            if(initialData) {
+                Ws.onopen = function() {
                     _this.send(initialData);
-                }
-            };
+                };
+            }
 
             Ws.onmessage = function(e) {
                 let data = JSON.parse(e.data);

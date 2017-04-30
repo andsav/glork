@@ -1,9 +1,9 @@
 "use strict";
 
-import { ENDPOINTS, COLOR } from '../../lib/constants.js';
-import { $, $$, $post, $ready } from '../../lib/$.js';
-import { dist, round, in_circle, shuffle, rand, clear_timeout, error, collision } from '../../lib/helpers.js';
-import { Canvas, SliderCanvas } from '../../lib/canvas.js';
+import {ENDPOINTS, COLOR} from '../../lib/constants.js';
+import {$, $$, $post, $ready} from '../../lib/$.js';
+import {dist, round, in_circle, shuffle, rand, clear_timeout, error, collision} from '../../lib/helpers.js';
+import {Canvas, SliderCanvas} from '../../lib/canvas.js';
 
 // Quick and dirty return random element form array (not really random)
 Array.prototype.random = function () {
@@ -218,7 +218,7 @@ class ResultCanvas extends Canvas {
                 this.ctx.fillStyle = COLOR.WHITE;
 
                 let offset = this.ctx.measureText(String(min)).width;
-                this.ctx.fillText(min, Math.min(Math.max(x + w/2 - offset/2, 2), this.width - offset - 2), 20);
+                this.ctx.fillText(min, Math.min(Math.max(x + w / 2 - offset / 2, 2), this.width - offset - 2), 20);
 
                 found_best = true;
             }
@@ -234,7 +234,7 @@ class ResultCanvas extends Canvas {
 
 class ConfigCanvas extends SliderCanvas {
     constructor(id) {
-        super(id, function(c) {
+        super(id, function (c) {
             return {
                 x: (c.data.x - c.dataF('minX')) / (c.dataF('maxX') - c.dataF('minX')) * (c.width),
                 y: c.height - ((c.data.y - c.dataF('minY')) / (c.dataF('maxY') - c.dataF('minY')) * (c.height))

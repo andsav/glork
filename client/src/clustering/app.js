@@ -81,8 +81,8 @@ class MainCanvas extends Canvas {
     }
 
     placeGaussian(x, y, n) {
-        for(let i=0; i<n; ++i) {
-            this.placePoint(parseInt(x+gaussian()*n/3), parseInt(y+gaussian()*n/3));
+        for (let i = 0; i < n; ++i) {
+            this.placePoint(parseInt(x + gaussian() * n / 3), parseInt(y + gaussian() * n / 3));
         }
     }
 
@@ -101,17 +101,17 @@ class MainCanvas extends Canvas {
         this.points = [];
     }
 
-    randomPoints(n = 800, points = null, reset = true) {
-        if(reset) {
+    randomPoints(n = 500, points = null, reset = true) {
+        if (reset) {
             this.reset();
         }
 
-        if(points == null) {
-            for(let i = 0; i < n; ++i) {
-                this.placePoint(rand(6, this.width-6), rand(6, this.height-6));
+        if (points == null) {
+            for (let i = 0; i < n; ++i) {
+                this.placePoint(rand(6, this.width - 6), rand(6, this.height - 6));
             }
         } else {
-            for(let i=0; i<points.length; ++i) {
+            for (let i = 0; i < points.length; ++i) {
                 this.placeGaussian(...points[i], n);
             }
         }
@@ -287,7 +287,7 @@ class ConfigSlider extends SliderCanvas {
 
     setVal(v) {
         this.setConfig({
-            x: 20 + (v-this.dataF('min'))/this.dataF('max') * (this.width - 40),
+            x: 20 + (v - this.dataF('min')) / this.dataF('max') * (this.width - 40),
             y: this.halfHeight
         });
     }
@@ -377,15 +377,15 @@ $ready(() => {
     };
 
     $("random").onclick = () => {
-        canvas.randomPoints(800);
+        canvas.randomPoints(500);
     };
 
     $("circles").onclick = () => {
         canvas.randomPoints(80,
             [
-                [canvas.width/3, canvas.height/3],
-                [2*canvas.width/3, canvas.height/3],
-                [canvas.width/2, 2*canvas.height/3]
+                [canvas.width / 3, canvas.height / 3],
+                [2 * canvas.width / 3, canvas.height / 3],
+                [canvas.width / 2, 2 * canvas.height / 3]
             ]);
 
         kSlider.setVal(3);
@@ -422,23 +422,23 @@ $ready(() => {
 
         // Eyes
         canvas.randomPoints(20, [
-            [0.4*canvas.width, 0.4*canvas.height],
-            [0.6*canvas.width, 0.4*canvas.height]
+            [0.4 * canvas.width, 0.4 * canvas.height],
+            [0.6 * canvas.width, 0.4 * canvas.height]
         ], false);
 
         // Smile
         canvas.randomPoints(15, [
-            [0.375*canvas.width, 0.625*canvas.height],
-            [0.4*canvas.width, 0.65*canvas.height],
-            [0.425*canvas.width, 0.675*canvas.height],
-            [0.45*canvas.width, 0.7*canvas.height],
-            [0.475*canvas.width, 0.725*canvas.height],
-            [0.5*canvas.width, 0.73*canvas.height],
-            [0.525*canvas.width, 0.725*canvas.height],
-            [0.55*canvas.width, 0.7*canvas.height],
-            [0.575*canvas.width, 0.675*canvas.height],
-            [0.6*canvas.width, 0.65*canvas.height],
-            [0.625*canvas.width, 0.625*canvas.height]
+            [0.375 * canvas.width, 0.625 * canvas.height],
+            [0.4 * canvas.width, 0.65 * canvas.height],
+            [0.425 * canvas.width, 0.675 * canvas.height],
+            [0.45 * canvas.width, 0.7 * canvas.height],
+            [0.475 * canvas.width, 0.725 * canvas.height],
+            [0.5 * canvas.width, 0.73 * canvas.height],
+            [0.525 * canvas.width, 0.725 * canvas.height],
+            [0.55 * canvas.width, 0.7 * canvas.height],
+            [0.575 * canvas.width, 0.675 * canvas.height],
+            [0.6 * canvas.width, 0.65 * canvas.height],
+            [0.625 * canvas.width, 0.625 * canvas.height]
         ], false);
     }
 

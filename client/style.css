@@ -24,6 +24,10 @@ h1 {
     cursor: default;
 }
 
+h1 a {
+    color: #E6AA68;
+}
+
 h1:hover {
     -webkit-stroke-width: 5px;
     -webkit-stroke-color: white;
@@ -173,6 +177,7 @@ button:hover, button:focus {
 
 .labeled-group > span {
     color: #ECDFBD;
+    font-size: 14px;
 }
 
 button small {
@@ -210,6 +215,10 @@ button small {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+
+    -webkit-box-shadow: 0 0 5px 2px #001427;
+    -moz-box-shadow: 0 0 5px 2px #001427;
+    box-shadow: 0 0 5px 2px #001427;
 }
 
 .showcase a:hover img {
@@ -222,7 +231,7 @@ button small {
     display: block;
     margin: 0;
 
-    filter: blur(1px) grayscale(20%);
+    filter: grayscale(40%);
 
     -webkit-border-radius: 0 0 4px 4px;
     -moz-border-radius: 0 0 4px 4px;
@@ -237,12 +246,11 @@ button small {
 .showcase span {
     display: block;
 
-
     -webkit-border-radius: 4px 4px 0 0;
     -moz-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;
 
-    background-color: #001427;
+    background-color: rgba(0, 20, 39, 0.8);
     color: #ECDFBD;
     width: 200px;
     text-align: center;
