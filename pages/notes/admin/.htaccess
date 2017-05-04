@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Notes Admin"
+AuthUserFile /var/www/html/glork/.htpasswd
+Require valid-user

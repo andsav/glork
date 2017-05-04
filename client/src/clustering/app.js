@@ -82,7 +82,7 @@ class MainCanvas extends Canvas {
 
     placeGaussian(x, y, n) {
         for (let i = 0; i < n; ++i) {
-            this.placePoint(parseInt(x + gaussian() * n / 3), parseInt(y + gaussian() * n / 3));
+            this.placePoint(parseInt(x + gaussian() * n / 3, 10), parseInt(y + gaussian() * n / 3, 10));
         }
     }
 

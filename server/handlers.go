@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type SingleCallback func(Solver) Solution
+type SingleCallback func(Solver) interface{}
 
 type SocketCallback func(Solver, *websocket.Conn) bool
 
@@ -18,13 +18,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	single(w, r, func(s Solver) Solution {
+	single(w, r, func(s Solver) interface{} {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
-	single(w, r, func(s Solver) Solution {
+	single(w, r, func(s Solver) interface{} {
 		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 	});
 }
@@ -39,6 +39,15 @@ func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
 	socket(w, r, func(s Solver, socket *websocket.Conn) bool {
 		return s.Input.DBSCAN(s.Config[0], 3, socket)
 	})
+}
+
+func NotesList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(GetNotesList()); err != nil {
+		panic(err)
+	}
 }
 
 // Single response handler

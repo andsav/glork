@@ -1,0 +1,52 @@
+h1 a {
+    text-decoration: none;
+    color: #302f6e !important;
+}
+
+#notes {
+    margin-bottom: 20px;
+}
+
+#loading {
+    position: relative;
+    left: 44%;
+    width: 0;
+    height: 0;
+    border-right: 5vw solid #f77e4d;
+    border-top: 5vw solid #f7d34d;
+    border-left: 5vw solid #302f6e;
+    border-bottom: 5vw solid #000b20;
+    border-radius: 5vw;
+    -moz-border-radius: 5vw;
+    -webkit-border-radius: 5vw;
+    animation: load 1.5s linear 0s infinite;
+    -moz-animation: load 1.5s linear 0s infinite;
+    -webkit-animation: load 1.5s linear 0s infinite;
+}
+
+@keyframes load {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@-moz-keyframes load {
+    from {
+        -moz-transform: rotate(0deg);
+    }
+    to {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes load {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}

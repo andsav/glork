@@ -6,10 +6,9 @@ import (
 	"sort"
 )
 
-
 // Solves TSP using Simulated Annealing
-func (pp Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
-	var solution Solution
+func (pp Points) SimulatedAnnealing(cooling float64, iterations int) PointsSolution {
+	var solution PointsSolution
 	pp.Shuffle()
 
 	// Bounds and default values
@@ -45,8 +44,8 @@ func (pp Points) SimulatedAnnealing(cooling float64, iterations int) Solution {
 }
 
 // Solves TSP using Local Beam Search
-func (pp Points) LocalBeamSearch(k int, iterations int) Solution {
-	var solution Solution
+func (pp Points) LocalBeamSearch(k int, iterations int) PointsSolution {
+	var solution PointsSolution
 
 	// Bounds and default values
 	if k < 1 || k > 200 {

@@ -17,7 +17,7 @@ type Solver struct {
 	Config []float64 `json:"config"`
 }
 
-type Solution []Points
+type PointsSolution []Points
 
 
 type Rectangle struct {
@@ -124,14 +124,14 @@ func (pp Points) Region(origin Point, eps float64) Points {
 }
 
 // Sorting solution
-func (s Solution) Len() int {
+func (s PointsSolution) Len() int {
 	return len(s)
 }
 
-func (s Solution) Swap(i, j int) {
+func (s PointsSolution) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (s Solution) Less(i, j int) bool {
+func (s PointsSolution) Less(i, j int) bool {
 	return s[i].Len() > s[j].Len();
 }

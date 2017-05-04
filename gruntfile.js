@@ -26,6 +26,19 @@ module.exports = function(grunt) {
                     module_resolution: 'BROWSER',
                     output_wrapper: "(function() {%output%}).call(window);",
                 }
+            },
+            notes: {
+                closurePath: "/opt/closure",
+                js: ["client/lib/*.js", "client/src/notes/app.js"],
+                jsOutputFile: "client/dist/notes.min.js",
+                maxBuffer: 500,
+                options: {
+                    compilation_level: "ADVANCED_OPTIMIZATIONS",
+                    language_in: "ECMASCRIPT6",
+                    language_out: "ECMASCRIPT5_STRICT",
+                    module_resolution: 'BROWSER',
+                    output_wrapper: "(function() {%output%}).call(window);",
+                }
             }
         },
         watch: {
@@ -36,6 +49,10 @@ module.exports = function(grunt) {
             clustering: {
                 files: "client/src/clustering/app.js",
                 tasks: ["closure-compiler:clustering"]
+            },
+            notes: {
+                files: "client/src/notes/app.js",
+                tasks: ["closure-compiler:notes"]
             }
         }
     });

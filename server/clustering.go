@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-
 /*
  *	K-Means
  */
@@ -79,7 +78,7 @@ func (s *KMSolution) AssignCentroids(pp Points) {
 // Send solution through socket
 func (s KMSolution) Send(socket *websocket.Conn) bool {
 	time.Sleep(50 * time.Millisecond)
-	return Send(ret, socket)
+	return Send(s, socket)
 }
 
 func (pp Points) KMeans(k int, socket *websocket.Conn) bool {

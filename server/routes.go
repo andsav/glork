@@ -42,4 +42,10 @@ var routes = Routes{
 		"/clustering/dbscan",
 		ClusteringDBSCAN,
 	},
+	Route{
+		"NotesList",
+		"GET",
+		"/notes/list",
+		NotesList,
+	},
 }
