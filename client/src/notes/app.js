@@ -111,6 +111,10 @@ let generate_form = (title, fields, submit) => {
 let route = (path) => {
     path = path.split(/\/notes\/*/)[1];
 
+    if(typeof path === "undefined") {
+        path = "error";
+    }
+
     if (path == "" || path == "all") {
         title();
         active("all");
@@ -166,6 +170,54 @@ let route = (path) => {
             );
         });
     }
+    else if (path.endsWith('.change')) {
+        active();
+        $get(ENDPOINTS.NOTES_SINGLE + path.split(".change")[0], (original) => {
+            content(generate_form("Add note", {
+                "password": {
+                    "type": "password"
+                },
+                "title": {
+                    "type": "text",
+                    "value": original['title']
+                },
+                "url": {
+                    "type": "text",
+                    "value": original['url']
+                },
+                "content": {
+                    "type": "textarea",
+                    "value": original['content']
+                },
+                "tags": {
+                    "type": "text",
+                    "value": original['tags'].join(', ')
+                }
+            }, (e) => {
+                e.preventDefault();
+
+                let form_data = serialize(e.target);
+                let data = {
+                    "note": {
+                        "title": form_data["title"],
+                        "url": form_data["url"],
+                        "content": form_data["content"],
+                        "tags": form_data["tags"].split(/,\s*/)
+                    },
+                    "id": original['url'],
+                    "password": form_data["password"],
+                };
+
+                $post(ENDPOINTS.NOTES_UPDATE, data, (d) => {
+                    if(d) {
+                        goto("/notes/" + form_data["url"] + ".html", form_data["title"]);
+                    }
+                });
+
+                return false;
+            }));
+        });
+    }
     else if (path == "add") {
         active();
         content(generate_form("Add note", {
@@ -201,7 +253,7 @@ let route = (path) => {
 
             $post(ENDPOINTS.NOTES_UPDATE, data, (d) => {
                 if(d) {
-                    route("/notes/all");
+                    goto("/notes/all");
                 }
             });
 
@@ -214,13 +266,15 @@ let route = (path) => {
     }
 };
 
+let goto = (path, title = "") => {
+    loading();
+    window.history.pushState(null, "Notes" + ((title == "") ? " - " + title : ""), path);
+    route(path);
+};
+
 let handle_click = (e) => {
     if (e.target.localName == 'a' && e.target.target != "_blank") {
-        loading();
-
-        window.history.pushState(null, "Notes - " + e.target.innerHTML, e.target.href);
-        route(e.target.href);
-
+        goto(e.target.href, e.target.innerHTML);
         e.preventDefault();
         return false;
     }

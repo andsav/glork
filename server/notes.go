@@ -107,7 +107,7 @@ func CheckPassword(password string, session *mgo.Session) bool {
 
 func (n Note) Update(id string, password string) bool {
 	return change(func(c *mgo.Collection) bool {
-		return false
+		return c.Update(bson.M{"url": id}, n) == nil
 	}, password);
 }
 
