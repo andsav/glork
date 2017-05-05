@@ -24,13 +24,15 @@ let title = (before = "", after = "") => {
             : "") +
         '<a href="/notes">Notes</a>' +
         after;
+
+    document.title = ((before !== "") ? before + " " : "") + "Notes" + after;
 };
 
 let display_single = (data) => {
     title(data.title);
 
     content(
-        '<ul class="tags-aside">' +
+        '<ul class="tags aside">' +
             data['tags'].map((c) => { return '<li><a href="/notes/' + c +'.tag">' + c + '</a></li>'; }).join('') +
         '</ul>' +
         "<h2>" + data.title + "</h2>" +
@@ -66,7 +68,11 @@ let route = (path) => {
         active("tags");
         $get(ENDPOINTS.NOTES_TAGS, (data) => {
             content(
-                "<pre>" + JSON.stringify(data) + "</pre>"
+                '<div style="text-align:center"><ul class="tags">' +
+                    data.map((tag) => {
+                        return '<li><a href="/notes/' + tag['_id'] +'.tag">' + tag['_id'] + ' (' + tag['count'] + ')</a></li>';
+                    }).join('') +
+                '</ul></div>'
             );
         });
     }
@@ -84,7 +90,14 @@ let route = (path) => {
         active("tags");
         $get(ENDPOINTS.NOTES_TAG + tag, (data) => {
             content(
-                "<pre>" + JSON.stringify(data) + "</pre>"
+                "<h2>All notes for <em>" + tag + "</em></h2>" +
+                "<ul>" + data.map((d) => {
+
+                    return '<li>' +
+                        '<a href="/notes/' + d.url + '.html">' + d.title + '</a>' +
+                        '</li>';
+
+                }).join("") + "</ul>"
             );
         });
     }

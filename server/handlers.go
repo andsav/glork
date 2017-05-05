@@ -10,53 +10,89 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type SingleCallback func(Solver) interface{}
+type SingleCallback func(interface{}) interface{}
 
-type SocketCallback func(Solver, *websocket.Conn) bool
+type SocketCallback func(interface{}, *websocket.Conn) bool
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "http://glork.net", 301)
 }
 
+/*
+	Notes
+ */
 func NotesList(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetNotesList());
+	single(w, r, GetAllNotes());
 }
 
 func NotesSingle(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetNotesSingle(mux.Vars(r)["url"]));
+	single(w, r, GetSingleNote(mux.Vars(r)["url"]));
 }
 
 func NotesRandom(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetNotesRandom());
+	single(w, r, GetRandomNote());
 }
 
 func NotesTags(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetNotesTags());
+	single(w, r, GetAllTags());
 }
 
+func NotesTag(w http.ResponseWriter, r *http.Request) {
+	single(w, r, GetNotesByTag(mux.Vars(r)["tag"]));
+}
 
+/*
+	TSP
+ */
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	single_cb(w, r, func(s Solver) interface{} {
-		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
-	})
+	var input PointsSolver
+	single_input(w, r, func(i interface{}) interface{} {
+		s, ok := i.(*PointsSolver); if ok {
+			return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
+		} else {
+			log.Println("Cannot cast to PointsSolver", i)
+			return i
+		}
+	}, &input)
 }
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
-	single_cb(w, r, func(s Solver) interface{} {
-		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
-	});
+	var input PointsSolver
+	single_input(w, r, func(i interface{}) interface{} {
+		s, ok := i.(*PointsSolver); if ok {
+			return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
+		} else {
+			log.Println("Cannot cast to PointsSolver", i)
+			return i
+		}
+	}, &input);
 }
 
+/*
+	Clustering
+ */
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
-	socket(w, r, func(s Solver, socket *websocket.Conn) bool {
-		return s.Input.KMeans(int(s.Config[0]), socket)
-	})
+	var input PointsSolver
+	socket(w, r, func(i interface{}, socket *websocket.Conn) bool {
+		s, ok := i.(*PointsSolver); if ok {
+			return s.Input.KMeans(int(s.Config[0]), socket)
+		} else {
+			log.Println("Cannot cast to PointsSolver", i)
+			return false
+		}
+	}, &input)
 }
 
 func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
-	socket(w, r, func(s Solver, socket *websocket.Conn) bool {
-		return s.Input.DBSCAN(s.Config[0], 3, socket)
-	})
+	var input PointsSolver
+	socket(w, r, func(i interface{}, socket *websocket.Conn) bool {
+		s, ok := i.(*PointsSolver); if ok {
+			return s.Input.DBSCAN(s.Config[0], 3, socket)
+		} else {
+			log.Println("Cannot cast to PointsSolver", i)
+			return false
+		}
+	}, &input)
 }
 
 // Single response handler
@@ -69,10 +105,8 @@ func single(w http.ResponseWriter, r *http.Request, ret interface{}) {
 	}
 }
 
-// Single response handler with callback
-func single_cb(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
-	var input Solver
-
+// Single response handler with input
+func single_input(w http.ResponseWriter, r *http.Request, cb SingleCallback, input interface{}) {
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
 	if err != nil {
@@ -81,7 +115,7 @@ func single_cb(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	if err := r.Body.Close(); err != nil {
 		panic(err)
 	}
-	if err := json.Unmarshal(body, &input); err != nil {
+	if err := json.Unmarshal(body, input); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422)
 		if err := json.NewEncoder(w).Encode(err); err != nil {
@@ -98,9 +132,7 @@ func single_cb(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 }
 
 // Websocket handler
-func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
-	var input Solver
-
+func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback, input interface{}) {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  2048,
 		WriteBufferSize: 2048,
@@ -128,7 +160,7 @@ func socket(w http.ResponseWriter, r *http.Request, cb SocketCallback) {
 
 		log.Printf("[Socket] received %d-type message", messageType)
 
-		if err := json.Unmarshal(message, &input); err != nil {
+		if err := json.Unmarshal(message, input); err != nil {
 			log.Println("[Socket] json unmarshal error:", err)
 			break
 		}

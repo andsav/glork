@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -15,23 +14,22 @@ type Query interface {
 type GetQuery func(*mgo.Collection) (Query, bool)
 
 type Note struct {
-	Title	string		`json:"title"`
-	URL	string		`json:"url"`
-	Content	string		`json:"content"`
-	Tags	[]string 	`json:"tags"`
+	Title   string		`json:"title"`
+	URL     string  	`json:"url"`
+	Content string   	`json:"content"`
+	Tags    []string        `json:"tags"`
 }
 
 type Notes []Note
 
-
 type Tag struct {
-	Id	string	`json:"_id" bson:"_id"`
-	Count	int		`json:"count"`
+	Id    	string		`json:"_id" bson:"_id"`
+	Count 	int		`json:"count"`
 }
 
 type Tags []Tag
 
-func GetNotesList() Notes {
+func GetAllNotes() Notes {
 	var notes Notes
 
 	get(func(c *mgo.Collection) (Query, bool) {
@@ -41,7 +39,17 @@ func GetNotesList() Notes {
 	return notes
 }
 
-func GetNotesSingle(url string) Note {
+func GetNotesByTag(tag string) Notes {
+	var notes Notes
+
+	get(func(c *mgo.Collection) (Query, bool) {
+		return c.Find(bson.M{ "tags":  tag }).Sort("-$natural"), true
+	}, &notes)
+
+	return notes
+}
+
+func GetSingleNote(url string) Note {
 	var note Note
 
 	get(func(c *mgo.Collection) (Query, bool) {
@@ -51,31 +59,31 @@ func GetNotesSingle(url string) Note {
 	return note
 }
 
-func GetNotesRandom() Note {
+func GetRandomNote() Note {
 	var note Note
 
 	get(func(c *mgo.Collection) (Query, bool) {
-		return c.Pipe([]bson.M{ { "$sample": bson.M{ "size" : 1 } } }), false
+		return c.Pipe([]bson.M{{"$sample": bson.M{"size" : 1 } } }), false
 	}, &note)
 
 	return note
 }
 
-func GetNotesTags() Tags {
+func GetAllTags() Tags {
 	var tags Tags
 
 	get(func(c *mgo.Collection) (Query, bool) {
 		return c.Pipe([]bson.M{
-			{ "$unwind": "$tags" },
-			{ "$project": bson.M{ "tags": 1 } },
-			{ "$group": bson.M{
+			{"$unwind": "$tags" },
+			{"$project": bson.M{"tags": 1 } },
+			{"$group": bson.M{
 				"_id": "$tags",
-				"count": bson.M{ "$sum": 1 } } } }), true
+				"count": bson.M{"$sum": 1 } } },
+			{"$sort": bson.M{"count" : -1 } } }), true
 	}, &tags)
 
 	return tags
 }
-
 
 func get(cb GetQuery, result interface{}) {
 	session, err := mgo.Dial("localhost")
@@ -90,7 +98,7 @@ func get(cb GetQuery, result interface{}) {
 
 	q, multi := cb(c)
 
-	if(multi) {
+	if (multi) {
 		err = q.All(result)
 	} else {
 		err = q.One(result)

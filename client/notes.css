@@ -51,11 +51,12 @@ table.bordered td {
     padding: 10px;
 }
 
-.tags-aside {
+
+.aside {
     float: right;
 }
 
-.tags-aside li {
+.tags li {
     display: inline-block;
     padding: 7px;
     background-color: rgba(48, 47, 110, 0.2);
@@ -63,11 +64,11 @@ table.bordered td {
     text-indent: 0 !important;
 }
 
-.tags-aside li:hover {
+.tags li:hover {
     background-color: rgba(48, 47, 110, 0.16);
 }
 
-.tags-aside li:before {
+.tags li:before {
     content: none !important;
 }
 

@@ -66,4 +66,10 @@ var routes = Routes{
 		"/notes/tags",
 		NotesTags,
 	},
+	Route{
+		"NotesTag",
+		"GET",
+		"/notes/tag/{tag}",
+		NotesTag,
+	},
 }

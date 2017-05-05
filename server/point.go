@@ -12,9 +12,9 @@ type Point struct {
 
 type Points []Point
 
-type Solver struct {
-	Input  Points `json:"p"`
-	Config []float64 `json:"config"`
+type PointsSolver struct {
+	Input  Points 		`json:"p"`
+	Config []float64 	`json:"config"`
 }
 
 type PointsSolution []Points
