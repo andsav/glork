@@ -72,4 +72,10 @@ var routes = Routes{
 		"/notes/tag/{tag}",
 		NotesTag,
 	},
+	Route{
+		"UpdateTags",
+		"POST",
+		"/note",
+		NotesUpdate,
+	},
 }

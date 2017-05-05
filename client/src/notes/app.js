@@ -1,5 +1,6 @@
 import {$, $$, $ready, $post, $get} from '../../lib/$.js';
 import {ENDPOINTS} from '../../lib/constants.js';
+import {serialize} from '../../lib/helpers.js';
 
 let loading = () => {
     $("loading").style.display = "block";
@@ -8,12 +9,19 @@ let loading = () => {
 
 let content = (html) => {
     $("loading").style.display = "none";
-    $("content").innerHTML = html;
+    if (typeof html == "object") {
+        $("content").innerHTML = "";
+        $("content").appendChild(html)
+    } else {
+        $("content").innerHTML = html;
+    }
 };
 
 let active = (a = null) => {
-    $$("active").forEach((c) => { c.className = "" });
-    if(a) {
+    $$("active").forEach((c) => {
+        c.className = ""
+    });
+    if (a) {
         $("link_" + a).className = "active";
     }
 };
@@ -33,7 +41,9 @@ let display_single = (data) => {
 
     content(
         '<ul class="tags aside">' +
-            data['tags'].map((c) => { return '<li><a href="/notes/' + c +'.tag">' + c + '</a></li>'; }).join('') +
+        data['tags'].map((c) => {
+            return '<li><a href="/notes/' + c + '.tag">' + c + '</a></li>';
+        }).join('') +
         '</ul>' +
         "<h2>" + data.title + "</h2>" +
         "<div>" + data.content + "</div>"
@@ -43,10 +53,65 @@ let display_single = (data) => {
     MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 };
 
+let generate_form = (title, fields, submit) => {
+    let form = document.createElement("form");
+
+    form.innerHTML = "<h2>" + title + "</h2>";
+
+    for (let key in fields) {
+        if (!fields[key].hasOwnProperty("value")) {
+            fields[key]["value"] = "";
+        }
+
+        let group = document.createElement("div");
+        group.className = "form-group";
+
+        let label = document.createElement('label');
+        label.for = label.innerHTML = key;
+        group.appendChild(label);
+
+        let input;
+        if(fields[key]['type'] == "textarea") {
+            input = document.createElement('textarea');
+            input.name = input.id = key;
+            input.innerHTML = fields[key]['value'];
+            input.onkeydown = function (e) {
+                if (e.keyCode === 9) {
+                    let v = this.value,
+                        s = this.selectionStart,
+                        e = this.selectionEnd;
+
+                    this.value = v.substring(0, s) + '\t' + v.substring(e);
+                    this.selectionStart = this.selectionEnd = s + 1;
+
+                    return false;
+                }
+            };
+        } else {
+            input = document.createElement('input');
+            input.type = fields[key]['type'];
+            input.name = input.id = key;
+            input.value = fields[key]['value'];
+        }
+        group.appendChild(input);
+
+        form.appendChild(group);
+    }
+
+    let button = document.createElement("button");
+    button.type = "submit";
+    button.innerHTML = "Submit";
+
+    form.appendChild(button);
+    form.onsubmit = submit;
+
+    return form;
+};
+
 let route = (path) => {
     path = path.split(/\/notes\/*/)[1];
 
-    if(path == "" || path == "all") {
+    if (path == "" || path == "all") {
         title();
         active("all");
 
@@ -63,28 +128,28 @@ let route = (path) => {
             );
         });
     }
-    else if(path == "tags") {
+    else if (path == "tags") {
         title();
         active("tags");
         $get(ENDPOINTS.NOTES_TAGS, (data) => {
             content(
                 '<div style="text-align:center"><ul class="tags">' +
-                    data.map((tag) => {
-                        return '<li><a href="/notes/' + tag['_id'] +'.tag">' + tag['_id'] + ' (' + tag['count'] + ')</a></li>';
-                    }).join('') +
+                data.map((tag) => {
+                    return '<li><a href="/notes/' + tag['id'] + '.tag">' + tag['id'] + ' (' + tag['count'] + ')</a></li>';
+                }).join('') +
                 '</ul></div>'
             );
         });
     }
-    else if(path == "random") {
+    else if (path == "random") {
         active("rand");
         $get(ENDPOINTS.NOTES_RANDOM, display_single);
     }
-    else if(path.endsWith(".html")) {
+    else if (path.endsWith(".html")) {
         active();
         $get(ENDPOINTS.NOTES_SINGLE + path.split(".html")[0], display_single);
     }
-    else if(path.endsWith('.tag')) {
+    else if (path.endsWith('.tag')) {
         let tag = path.split(".tag")[0];
         title(tag.replace('-', ' '));
         active("tags");
@@ -101,6 +166,48 @@ let route = (path) => {
             );
         });
     }
+    else if (path == "add") {
+        active();
+        content(generate_form("Add note", {
+            "password": {
+                "type": "password"
+            },
+            "title": {
+                "type": "text"
+            },
+            "url": {
+                "type": "text"
+            },
+            "content": {
+                "type": "textarea"
+            },
+            "tags": {
+                "type": "text"
+            }
+        }, (e) => {
+            e.preventDefault();
+
+            let form_data = serialize(e.target);
+            let data = {
+                "note": {
+                    "title": form_data["title"],
+                    "url": form_data["url"],
+                    "content": form_data["content"],
+                    "tags": form_data["tags"].split(/,\s*/)
+                },
+                "id": "",
+                "password": form_data["password"],
+            };
+
+            $post(ENDPOINTS.NOTES_UPDATE, data, (d) => {
+                if(d) {
+                    route("/notes/all");
+                }
+            });
+
+            return false;
+        }));
+    }
     else {
         title();
         content("Not found!");
@@ -108,7 +215,7 @@ let route = (path) => {
 };
 
 let handle_click = (e) => {
-    if(e.target.localName == 'a' && e.target.target != "_blank") {
+    if (e.target.localName == 'a' && e.target.target != "_blank") {
         loading();
 
         window.history.pushState(null, "Notes - " + e.target.innerHTML, e.target.href);

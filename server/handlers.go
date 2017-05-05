@@ -41,6 +41,22 @@ func NotesTag(w http.ResponseWriter, r *http.Request) {
 	single(w, r, GetNotesByTag(mux.Vars(r)["tag"]));
 }
 
+func NotesUpdate(w http.ResponseWriter, r *http.Request) {
+	var input NoteData
+	single_input(w, r, func(i interface{}) interface{} {
+		n, ok := i.(*NoteData); if ok {
+			if(n.Id == "") {
+				return n.N.Add(n.Password)
+			} else {
+				return n.N.Update(n.Id, n.Password)
+			}
+		} else {
+			log.Println("Cannot cast to NoteData", i)
+			return i
+		}
+	}, &input);
+}
+
 /*
 	TSP
  */

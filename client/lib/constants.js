@@ -11,7 +11,8 @@ export const ENDPOINTS = {
     NOTES_SINGLE: "http://go.glork.net/note/",
     NOTES_RANDOM: "http://go.glork.net/notes/random",
     NOTES_TAGS: "http://go.glork.net/notes/tags",
-    NOTES_TAG: "http://go.glork.net/notes/tag/"
+    NOTES_TAG: "http://go.glork.net/notes/tag/",
+    NOTES_UPDATE: "http://go.glork.net/note"
 };
 
 export const COLOR = {

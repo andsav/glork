@@ -36,6 +36,19 @@ export let gaussian = () => {
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 };
 
+// Pack form data into a key => value map
+export let serialize = (form) => {
+    let data = {};
+
+    form.querySelectorAll("input, textarea").forEach(
+        (input) => {
+            data[input.id] = input.value;
+        }
+    );
+
+    return data;
+};
+
 // Stop all animations in progress
 export let clear_timeout = () => {
     let highestTimeoutId = setTimeout(";");

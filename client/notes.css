@@ -72,6 +72,50 @@ table.bordered td {
     content: none !important;
 }
 
+form {
+    max-width: 800px;
+}
+
+form .form-group {
+    display: block;
+    margin: 20px 0;
+}
+
+form label {
+    display: block;
+    text-decoration: underline;
+    margin-bottom: 5px;
+    text-transform: capitalize;
+}
+
+form input, form textarea {
+    display: block;
+    width: 100%;
+    padding: .5rem .75rem;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: #000b20;
+    background-color: #fff;
+}
+
+form textarea {
+    min-height: 400px;
+}
+
+form button {
+    display: inline-block;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #302f6e;
+    color: white;
+    border: 1px solid transparent;
+    padding: .5rem 1rem;
+    font-size: 1rem;
+}
+
+
 @keyframes load {
     from {
         transform: rotate(0deg);

@@ -4,6 +4,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 type Query interface {
@@ -11,7 +13,8 @@ type Query interface {
 	One(result interface{}) error
 }
 
-type GetQuery func(*mgo.Collection) (Query, bool)
+type GetQueryCallback func(*mgo.Collection) (Query, bool)
+type ChangeQueryCallback func(*mgo.Collection) bool
 
 type Note struct {
 	Title   string		`json:"title"`
@@ -20,10 +23,16 @@ type Note struct {
 	Tags    []string        `json:"tags"`
 }
 
+type NoteData struct {
+	N		Note	`json:"note"`
+	Id		string	`json:"id"`
+	Password	string	`json:"password"`
+}
+
 type Notes []Note
 
 type Tag struct {
-	Id    	string		`json:"_id" bson:"_id"`
+	Id    	string		`json:"id" bson:"_id"`
 	Count 	int		`json:"count"`
 }
 
@@ -85,7 +94,48 @@ func GetAllTags() Tags {
 	return tags
 }
 
-func get(cb GetQuery, result interface{}) {
+func CheckPassword(password string, session *mgo.Session) bool {
+	h := sha256.New()
+	h.Write([]byte(password))
+	hash := hex.EncodeToString(h.Sum(nil))
+
+	c := session.DB("notes").C("password")
+	count, err := c.Find(bson.M{"password": hash}).Count()
+
+	return err == nil && count != 0
+}
+
+func (n Note) Update(id string, password string) bool {
+	return change(func(c *mgo.Collection) bool {
+		return false
+	}, password);
+}
+
+func (n Note) Add(password string) bool {
+	return change(func(c *mgo.Collection) bool {
+		return c.Insert(n) == nil
+	}, password);
+}
+
+func change(cb ChangeQueryCallback, password string) bool {
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Println("Database error: ", err)
+		return false;
+	}
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+
+	if !CheckPassword(password, session) {
+		log.Println("Wrong password ", password)
+		return false;
+	}
+
+	c := session.DB("notes").C("notes")
+	return cb(c)
+}
+
+func get(cb GetQueryCallback, result interface{}) {
 	session, err := mgo.Dial("localhost")
 	if err != nil {
 		log.Println("Database error: ", err)
