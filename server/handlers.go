@@ -30,6 +30,11 @@ func NotesRandom(w http.ResponseWriter, r *http.Request) {
 	single(w, r, GetNotesRandom());
 }
 
+func NotesTags(w http.ResponseWriter, r *http.Request) {
+	single(w, r, GetNotesTags());
+}
+
+
 func TspSA(w http.ResponseWriter, r *http.Request) {
 	single_cb(w, r, func(s Solver) interface{} {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))

@@ -30,9 +30,9 @@ let display_single = (data) => {
     title(data.title);
 
     content(
-        '<span class="tags-aside">' +
-            data['tags'].map((c) => { return '<a href="/notes/' + c +'.tag">' + c + '</a>'; }).join(', ') +
-        '</span>' +
+        '<ul class="tags-aside">' +
+            data['tags'].map((c) => { return '<li><a href="/notes/' + c +'.tag">' + c + '</a></li>'; }).join('') +
+        '</ul>' +
         "<h2>" + data.title + "</h2>" +
         "<div>" + data.content + "</div>"
     );

@@ -60,4 +60,10 @@ var routes = Routes{
 		"/notes/random",
 		NotesRandom,
 	},
+	Route{
+		"NotesTags",
+		"GET",
+		"/notes/tags",
+		NotesTags,
+	},
 }

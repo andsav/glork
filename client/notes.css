@@ -53,8 +53,22 @@ table.bordered td {
 
 .tags-aside {
     float: right;
-    padding: 5px;
+}
+
+.tags-aside li {
+    display: inline-block;
+    padding: 7px;
     background-color: rgba(48, 47, 110, 0.2);
+    margin: 0 3px;
+    text-indent: 0 !important;
+}
+
+.tags-aside li:hover {
+    background-color: rgba(48, 47, 110, 0.16);
+}
+
+.tags-aside li:before {
+    content: none !important;
 }
 
 @keyframes load {

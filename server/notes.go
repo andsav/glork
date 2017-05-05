@@ -7,6 +7,13 @@ import (
 	"log"
 )
 
+type Query interface {
+	All(result interface{}) error
+	One(result interface{}) error
+}
+
+type GetQuery func(*mgo.Collection) (Query, bool)
+
 type Note struct {
 	Title	string		`json:"title"`
 	URL	string		`json:"url"`
@@ -16,25 +23,20 @@ type Note struct {
 
 type Notes []Note
 
+
+type Tag struct {
+	Id	string	`json:"_id" bson:"_id"`
+	Count	int		`json:"count"`
+}
+
+type Tags []Tag
+
 func GetNotesList() Notes {
 	var notes Notes
 
-	session, err := mgo.Dial("localhost")
-	if err != nil {
-		log.Println("Database error: ", err)
-		return notes
-	}
-	defer session.Close()
-
-	session.SetMode(mgo.Monotonic, true)
-
-	c := session.DB("notes").C("notes")
-
-	err = c.Find(bson.M{}).All(&notes)
-	if err != nil {
-		log.Println("Database error: ", err)
-		return notes
-	}
+	get(func(c *mgo.Collection) (Query, bool) {
+		return c.Find(bson.M{}).Sort("-$natural"), true
+	}, &notes)
 
 	return notes
 }
@@ -42,22 +44,9 @@ func GetNotesList() Notes {
 func GetNotesSingle(url string) Note {
 	var note Note
 
-	session, err := mgo.Dial("localhost")
-	if err != nil {
-		log.Println("Database error: ", err)
-		return note
-	}
-	defer session.Close()
-
-	session.SetMode(mgo.Monotonic, true)
-
-	c := session.DB("notes").C("notes")
-
-	err = c.Find(bson.M{"url": url}).One(&note)
-	if err != nil {
-		log.Println("Database error: ", err)
-		return note
-	}
+	get(func(c *mgo.Collection) (Query, bool) {
+		return c.Find(bson.M{"url": url}), false
+	}, &note)
 
 	return note
 }
@@ -65,22 +54,50 @@ func GetNotesSingle(url string) Note {
 func GetNotesRandom() Note {
 	var note Note
 
+	get(func(c *mgo.Collection) (Query, bool) {
+		return c.Pipe([]bson.M{ { "$sample": bson.M{ "size" : 1 } } }), false
+	}, &note)
+
+	return note
+}
+
+func GetNotesTags() Tags {
+	var tags Tags
+
+	get(func(c *mgo.Collection) (Query, bool) {
+		return c.Pipe([]bson.M{
+			{ "$unwind": "$tags" },
+			{ "$project": bson.M{ "tags": 1 } },
+			{ "$group": bson.M{
+				"_id": "$tags",
+				"count": bson.M{ "$sum": 1 } } } }), true
+	}, &tags)
+
+	return tags
+}
+
+
+func get(cb GetQuery, result interface{}) {
 	session, err := mgo.Dial("localhost")
 	if err != nil {
 		log.Println("Database error: ", err)
-		return note
+		return;
 	}
 	defer session.Close()
 
 	session.SetMode(mgo.Monotonic, true)
-
 	c := session.DB("notes").C("notes")
 
-	err = c.Pipe([]bson.M{ { "$sample": bson.M{ "size" : 1 } } }).One(&note)
-	if err != nil {
-		log.Println("Database error: ", err)
-		return note
+	q, multi := cb(c)
+
+	if(multi) {
+		err = q.All(result)
+	} else {
+		err = q.One(result)
 	}
 
-	return note
+	if err != nil {
+		log.Println("Database error: ", err)
+		return;
+	}
 }
