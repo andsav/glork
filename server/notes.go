@@ -38,3 +38,49 @@ func GetNotesList() Notes {
 
 	return notes
 }
+
+func GetNotesSingle(url string) Note {
+	var note Note
+
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Println("Database error: ", err)
+		return note
+	}
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, true)
+
+	c := session.DB("notes").C("notes")
+
+	err = c.Find(bson.M{"url": url}).One(&note)
+	if err != nil {
+		log.Println("Database error: ", err)
+		return note
+	}
+
+	return note
+}
+
+func GetNotesRandom() Note {
+	var note Note
+
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Println("Database error: ", err)
+		return note
+	}
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, true)
+
+	c := session.DB("notes").C("notes")
+
+	err = c.Pipe([]bson.M{ { "$sample": bson.M{ "size" : 1 } } }).One(&note)
+	if err != nil {
+		log.Println("Database error: ", err)
+		return note
+	}
+
+	return note
+}

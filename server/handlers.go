@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"github.com/gorilla/websocket"
+	"github.com/gorilla/mux"
 )
 
 type SingleCallback func(Solver) interface{}
@@ -17,14 +18,26 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "http://glork.net", 301)
 }
 
+func NotesList(w http.ResponseWriter, r *http.Request) {
+	single(w, r, GetNotesList());
+}
+
+func NotesSingle(w http.ResponseWriter, r *http.Request) {
+	single(w, r, GetNotesSingle(mux.Vars(r)["url"]));
+}
+
+func NotesRandom(w http.ResponseWriter, r *http.Request) {
+	single(w, r, GetNotesRandom());
+}
+
 func TspSA(w http.ResponseWriter, r *http.Request) {
-	single(w, r, func(s Solver) interface{} {
+	single_cb(w, r, func(s Solver) interface{} {
 		return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 	})
 }
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
-	single(w, r, func(s Solver) interface{} {
+	single_cb(w, r, func(s Solver) interface{} {
 		return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 	});
 }
@@ -41,17 +54,18 @@ func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func NotesList(w http.ResponseWriter, r *http.Request) {
+// Single response handler
+func single(w http.ResponseWriter, r *http.Request, ret interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(GetNotesList()); err != nil {
+	if err := json.NewEncoder(w).Encode(ret); err != nil {
 		panic(err)
 	}
 }
 
-// Single response handler
-func single(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
+// Single response handler with callback
+func single_cb(w http.ResponseWriter, r *http.Request, cb SingleCallback) {
 	var input Solver
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))

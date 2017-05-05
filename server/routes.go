@@ -48,4 +48,16 @@ var routes = Routes{
 		"/notes/list",
 		NotesList,
 	},
+	Route{
+		"NotesSingle",
+		"GET",
+		"/note/{url}",
+		NotesSingle,
+	},
+	Route{
+		"NotesRandom",
+		"GET",
+		"/notes/random",
+		NotesRandom,
+	},
 }

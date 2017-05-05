@@ -24,6 +24,39 @@ h1 a {
     -webkit-animation: load 1.5s linear 0s infinite;
 }
 
+dl {
+    width: 100%;
+    border: 1px solid #f77e4d;
+    border-left: 10px solid #f77e4d;
+    padding: 10px;
+    background-color: rgba(250, 229, 150, 0.7);
+}
+
+dt {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+dt:not(:first-child) {
+    margin-top: 20px;
+}
+
+li:not(:first-child), li > ul > li {
+    margin-top: 10px;
+}
+
+table.bordered td {
+    margin-top: 20px;
+    border: 1px solid #000b20;
+    padding: 10px;
+}
+
+.tags-aside {
+    float: right;
+    padding: 5px;
+    background-color: rgba(48, 47, 110, 0.2);
+}
+
 @keyframes load {
     from {
         transform: rotate(0deg);

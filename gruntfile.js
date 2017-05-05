@@ -38,6 +38,7 @@ module.exports = function(grunt) {
                     language_out: "ECMASCRIPT5_STRICT",
                     module_resolution: 'BROWSER',
                     output_wrapper: "(function() {%output%}).call(window);",
+                    "externs": "client/build/externs.js"
                 }
             }
         },

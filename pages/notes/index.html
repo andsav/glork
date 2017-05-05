@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://andreisavin.com/dist/css/main.css">
     <link rel="stylesheet" href="https://andreisavin.com/dist/css/bright.css">
     <link rel="stylesheet" href="/client/notes.css">
+    <link rel="stylesheet" href="/client/vendor/prism.css">
 
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
@@ -21,16 +22,18 @@
     <title>Notes - Andrei Savin</title>
 </head>
 <body>
+
 <header id="header" class="opened">
-    <h1><a href="/notes">Notes</a></h1>
+    <h1 id="title"><a href="/notes">Notes</a></h1>
     <nav id="nav">
         <ul>
-            <li><a class="active" href="/notes/all">All</a></li>
-            <li><a href="/notes/tags">Tags</a></li>
-            <li><a href="/notes/random">Random</a></li>
+            <li><a id="link_all" href="/notes/all">All</a></li>
+            <li><a id="link_tags" href="/notes/tags">Tags</a></li>
+            <li><a id="link_rand" href="/notes/random">Random</a></li>
         </ul>
     </nav>
 </header>
+
 <div id="pages" class="">
     <div id="notes" class="shown">
         <div id="loading"></div>
@@ -38,6 +41,7 @@
     </div>
 </div>
 
+<script type="text/javascript" src="/client/vendor/prism.js" data-manual></script>
 <script type="text/javascript" src="/client/dist/notes.min.js"></script>
 
 </body>
