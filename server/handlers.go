@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"encoding/base64"
 	"net/http"
 	"io"
 	"io/ioutil"
@@ -22,39 +23,57 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	Notes
  */
 func NotesList(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetAllNotes());
+	single(w, r, GetAllNotes())
 }
 
 func NotesSingle(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetSingleNote(mux.Vars(r)["url"]));
+	single(w, r, GetSingleNote(mux.Vars(r)["url"]))
 }
 
 func NotesRandom(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetRandomNote());
+	single(w, r, GetRandomNote())
 }
 
 func NotesTags(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetAllTags());
+	single(w, r, GetAllTags())
 }
 
 func NotesTag(w http.ResponseWriter, r *http.Request) {
-	single(w, r, GetNotesByTag(mux.Vars(r)["tag"]));
+	single(w, r, GetNotesByTag(mux.Vars(r)["tag"]))
+}
+
+func NotesCreate(w http.ResponseWriter, r *http.Request) {
+	var input NoteData
+	single_input(w, r, func(i interface{}) interface{} {
+		n, ok := i.(*NoteData); if ok {
+			return n.N.Add(n.Password)
+		} else {
+			log.Println("Cannot cast to NoteData", i)
+			return i
+		}
+	}, &input);
 }
 
 func NotesUpdate(w http.ResponseWriter, r *http.Request) {
 	var input NoteData
 	single_input(w, r, func(i interface{}) interface{} {
 		n, ok := i.(*NoteData); if ok {
-			if(n.Id == "") {
-				return n.N.Add(n.Password)
-			} else {
-				return n.N.Update(n.Id, n.Password)
-			}
+			return n.N.Update(mux.Vars(r)["url"], n.Password)
 		} else {
 			log.Println("Cannot cast to NoteData", i)
 			return i
 		}
-	}, &input);
+	}, &input)
+}
+
+func NotesDelete(w http.ResponseWriter, r *http.Request) {
+	password, err := base64.StdEncoding.DecodeString(mux.Vars(r)["password"])
+	if err != nil {
+		log.Println("Cannot base64 decode", mux.Vars(r)["password"])
+	} else {
+		single(w, r, DeleteNote(mux.Vars(r)["url"], string(password)))
+	}
+
 }
 
 /*
@@ -81,7 +100,7 @@ func TspLBS(w http.ResponseWriter, r *http.Request) {
 			log.Println("Cannot cast to PointsSolver", i)
 			return i
 		}
-	}, &input);
+	}, &input)
 }
 
 /*

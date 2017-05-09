@@ -55,6 +55,18 @@ var routes = Routes{
 		NotesSingle,
 	},
 	Route{
+		"NotesUpdate",
+		"PUT",
+		"/note/{url}",
+		NotesUpdate,
+	},
+	Route{
+		"NotesDelete",
+		"DELETE",
+		"/note/{url}/{password}",
+		NotesDelete,
+	},
+	Route{
 		"NotesRandom",
 		"GET",
 		"/notes/random",
@@ -73,9 +85,9 @@ var routes = Routes{
 		NotesTag,
 	},
 	Route{
-		"UpdateTags",
+		"NotesCreate",
 		"POST",
 		"/note",
-		NotesUpdate,
+		NotesCreate,
 	},
 }

@@ -25,7 +25,6 @@ type Note struct {
 
 type NoteData struct {
 	N		Note	`json:"note"`
-	Id		string	`json:"id"`
 	Password	string	`json:"password"`
 }
 
@@ -42,7 +41,7 @@ func GetAllNotes() Notes {
 	var notes Notes
 
 	get(func(c *mgo.Collection) (Query, bool) {
-		return c.Find(bson.M{}).Sort("-$natural"), true
+		return c.Find(bson.M{}).Select(bson.M{ "title":  1, "url": 1 }).Sort("-_id"), true
 	}, &notes)
 
 	return notes
@@ -52,7 +51,7 @@ func GetNotesByTag(tag string) Notes {
 	var notes Notes
 
 	get(func(c *mgo.Collection) (Query, bool) {
-		return c.Find(bson.M{ "tags":  tag }).Sort("-$natural"), true
+		return c.Find(bson.M{ "tags":  tag }).Select(bson.M{ "title":  1, "url": 1 }).Sort("-_id"), true
 	}, &notes)
 
 	return notes
@@ -114,6 +113,12 @@ func (n Note) Update(id string, password string) bool {
 func (n Note) Add(password string) bool {
 	return change(func(c *mgo.Collection) bool {
 		return c.Insert(n) == nil
+	}, password);
+}
+
+func DeleteNote(id string, password string) bool {
+	return change(func(c *mgo.Collection) bool {
+		return c.Remove(bson.M{"url": id}) == nil
 	}, password);
 }
 

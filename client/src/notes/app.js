@@ -1,4 +1,4 @@
-import {$, $$, $ready, $post, $get} from '../../lib/$.js';
+import {$, $$, $ready, $ajax, $post, $get} from '../../lib/$.js';
 import {ENDPOINTS} from '../../lib/constants.js';
 import {serialize} from '../../lib/helpers.js';
 
@@ -71,18 +71,33 @@ let generate_form = (title, fields, submit) => {
         group.appendChild(label);
 
         let input;
-        if(fields[key]['type'] == "textarea") {
+        if (fields[key]['type'] == "textarea") {
             input = document.createElement('textarea');
             input.name = input.id = key;
             input.innerHTML = fields[key]['value'];
             input.onkeydown = function (e) {
                 if (e.keyCode === 9) {
-                    let v = this.value,
-                        s = this.selectionStart,
-                        e = this.selectionEnd;
+                    e.preventDefault();
+                    let val = e.target.value,
+                        s0 = e.target.selectionStart,
+                        s1 = e.target.selectionEnd;
 
-                    this.value = v.substring(0, s) + '\t' + v.substring(e);
-                    this.selectionStart = this.selectionEnd = s + 1;
+                    e.target.value = val.substring(0, s0) + '\t' + val.substring(s1);
+                    e.target.selectionStart = e.target.selectionEnd = s0 + 1;
+
+                    return false;
+                } else if(e.keyCode == 13) {
+                    e.preventDefault();
+                    let val = e.target.value,
+                        s0 = e.target.selectionStart,
+                        s1 = e.target.selectionEnd,
+                        before = val.substring(0, s0),
+                        after = val.substring(s1),
+                        current_line = before.split("\n").pop(),
+                        current_indent = current_line.match(/^\s*/)[0];
+
+                    e.target.value = before + '\n' + current_indent + after;
+                    e.target.selectionStart = e.target.selectionEnd = s0 + 1 + current_indent.length;
 
                     return false;
                 }
@@ -111,7 +126,7 @@ let generate_form = (title, fields, submit) => {
 let route = (path) => {
     path = path.split(/\/notes\/*/)[1];
 
-    if(typeof path === "undefined") {
+    if (typeof path === "undefined") {
         path = "error";
     }
 
@@ -173,7 +188,7 @@ let route = (path) => {
     else if (path.endsWith('.change')) {
         active();
         $get(ENDPOINTS.NOTES_SINGLE + path.split(".change")[0], (original) => {
-            content(generate_form("Add note", {
+            content(generate_form("Change note", {
                 "password": {
                     "type": "password"
                 },
@@ -204,19 +219,43 @@ let route = (path) => {
                         "content": form_data["content"],
                         "tags": form_data["tags"].split(/,\s*/)
                     },
-                    "id": original['url'],
                     "password": form_data["password"],
                 };
 
-                $post(ENDPOINTS.NOTES_UPDATE, data, (d) => {
-                    if(d) {
-                        goto("/notes/" + form_data["url"] + ".html", form_data["title"]);
-                    }
-                });
+                $ajax('PUT',
+                    ENDPOINTS.NOTES_SINGLE + original['url'],
+                    data,
+                    (d) => {
+                        if (d) {
+                            goto("/notes/" + form_data["url"] + ".html", form_data["title"]);
+                        }
+                    });
 
                 return false;
             }));
         });
+    }
+    else if (path.endsWith('.delete')) {
+        content(generate_form("Delete note", {
+            "password": {
+                "type": "password"
+            }
+        }, (e) => {
+            e.preventDefault();
+
+            let form_data = serialize(e.target);
+
+            $ajax('DELETE',
+                ENDPOINTS.NOTES_SINGLE + path.split(".delete")[0] + "/" + window.btoa(form_data['password']),
+                false,
+                (d) => {
+                    if (d) {
+                        goto("/notes/all");
+                    }
+                });
+
+            return false;
+        }));
     }
     else if (path == "add") {
         active();
@@ -251,11 +290,14 @@ let route = (path) => {
                 "password": form_data["password"],
             };
 
-            $post(ENDPOINTS.NOTES_UPDATE, data, (d) => {
-                if(d) {
-                    goto("/notes/all");
-                }
-            });
+            $post(
+                ENDPOINTS.NOTES_CREATE,
+                data,
+                (d) => {
+                    if (d) {
+                        goto("/notes/all");
+                    }
+                });
 
             return false;
         }));

@@ -54,13 +54,14 @@ table.bordered td {
 
 .aside {
     float: right;
+    margin-top: -15px;
 }
 
 .tags li {
     display: inline-block;
     padding: 7px;
     background-color: rgba(48, 47, 110, 0.2);
-    margin: 0 3px;
+    margin: 5px 3px;
     text-indent: 0 !important;
 }
 
@@ -115,6 +116,19 @@ form button {
     font-size: 1rem;
 }
 
+acronym {
+    text-decoration: none;
+    cursor: help;
+}
+
+table {
+    width: 100%;
+}
+
+table img {
+    width: 100%;
+    max-width: 500px;
+}
 
 @keyframes load {
     from {
@@ -123,6 +137,10 @@ form button {
     to {
         transform: rotate(360deg);
     }
+}
+
+h4 {
+    text-decoration: underline;
 }
 
 @-moz-keyframes load {

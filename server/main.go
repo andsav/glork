@@ -15,6 +15,7 @@ func main() {
 		cors.Options{
 			AllowedOrigins: []string{"http://glork.net"},
 			AllowCredentials: true,
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		}).Handler(NewRouter())
 
 	log.Print("Starting server at :8888")
