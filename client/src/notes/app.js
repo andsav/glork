@@ -1,6 +1,7 @@
 import {$, $$, $ready, $ajax, $post, $get} from '../../lib/$.js';
 import {ENDPOINTS} from '../../lib/constants.js';
 import {serialize} from '../../lib/helpers.js';
+import {Editor} from '../../lib/editor.js';
 
 let loading = () => {
     $("loading").style.display = "block";
@@ -46,7 +47,9 @@ let display_single = (data) => {
         }).join('') +
         '</ul>' +
         "<h2>" + data.title + "</h2>" +
-        "<div>" + data.content + "</div>"
+        '<div id="note-content">' + data.content.replace(/<h3>(.+)<\/h3>/, (match, section) => {
+            return '<h3 id="' + section.toLowerCase().split(/\s+/).join('-') + '">' + section + '</h3>';
+        }) + "</div>"
     );
 
     Prism.highlightAll();
@@ -71,43 +74,16 @@ let generate_form = (title, fields, submit) => {
         group.appendChild(label);
 
         let input;
+
         if (fields[key]['type'] == "textarea") {
-            input = document.createElement('textarea');
-            input.name = input.id = key;
-            input.innerHTML = fields[key]['value'];
-            input.onkeydown = function (e) {
-                if (e.keyCode === 9) {
-                    e.preventDefault();
-                    let val = e.target.value,
-                        s0 = e.target.selectionStart,
-                        s1 = e.target.selectionEnd;
-
-                    e.target.value = val.substring(0, s0) + '\t' + val.substring(s1);
-                    e.target.selectionStart = e.target.selectionEnd = s0 + 1;
-
-                    return false;
-                } else if(e.keyCode == 13) {
-                    e.preventDefault();
-                    let val = e.target.value,
-                        s0 = e.target.selectionStart,
-                        s1 = e.target.selectionEnd,
-                        before = val.substring(0, s0),
-                        after = val.substring(s1),
-                        current_line = before.split("\n").pop(),
-                        current_indent = current_line.match(/^\s*/)[0];
-
-                    e.target.value = before + '\n' + current_indent + after;
-                    e.target.selectionStart = e.target.selectionEnd = s0 + 1 + current_indent.length;
-
-                    return false;
-                }
-            };
+            input = (new Editor(key, fields[key]['value'])).elem;
         } else {
             input = document.createElement('input');
             input.type = fields[key]['type'];
             input.name = input.id = key;
             input.value = fields[key]['value'];
         }
+
         group.appendChild(input);
 
         form.appendChild(group);
