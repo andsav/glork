@@ -73,3 +73,36 @@ export let error = (elem, err) => {
         ERROR_DIV.style.opacity = 0;
     }, 2000);
 };
+
+// Split an array into chunks
+export let chunk = (array, chunks) => {
+    if (chunks < 1 || Object.prototype.toString.call(array) !== '[object Array]') {
+        return null;
+    }
+
+    let chunk_size = Math.floor(array.length/chunks);
+
+    let x,
+        c = -1,
+        arr = [];
+
+    for(let i = 0; i < array.length; ++i) {
+        if (x = i % chunk_size) {
+            arr[c][x] = array[i];
+        } else {
+            arr[++c] = [array[i]];
+        }
+    }
+
+    if(arr.length > chunks) {
+        while(arr[arr.length-1].length !== 0) {
+            for(let i = 0; i < arr.length - 1; ++i) {
+                arr[i].push(arr[i + 1].shift());
+            }
+        }
+
+        arr.pop();
+    }
+
+    return arr;
+};

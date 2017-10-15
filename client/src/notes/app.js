@@ -1,6 +1,6 @@
 import {$, $$, $ready, $ajax, $post, $get} from '../../lib/$.js';
 import {ENDPOINTS} from '../../lib/constants.js';
-import {serialize} from '../../lib/helpers.js';
+import {serialize, chunk} from '../../lib/helpers.js';
 import {Editor} from '../../lib/editor.js';
 
 let loading = () => {
@@ -9,12 +9,14 @@ let loading = () => {
 };
 
 let content = (html) => {
+    let $content = $("content");
+
     $("loading").style.display = "none";
-    if (typeof html == "object") {
-        $("content").innerHTML = "";
-        $("content").appendChild(html)
+    if (typeof html === "object") {
+        $content.innerHTML = "";
+        $content.appendChild(html)
     } else {
-        $("content").innerHTML = html;
+        $content.innerHTML = html;
     }
 };
 
@@ -29,7 +31,7 @@ let active = (a = null) => {
 
 let title = (before = "", after = "") => {
     $("title").innerHTML = ((before !== "")
-            ? "<span style='text-transform: capitalize'>" + before + "</span>" + " "
+            ? `<span style='text-transform: capitalize'>${before}</span> `
             : "") +
         '<a href="/notes">Notes</a>' +
         after;
@@ -43,7 +45,7 @@ let display_single = (data) => {
     content(
         '<ul class="tags aside">' +
         data['tags'].map((c) => {
-            return '<li><a href="/notes/' + c + '.tag">' + c + '</a></li>';
+            return `<li><a href="/notes/${c}.tag">${c}</a></li>`;
         }).join('') +
         '</ul>' +
         "<h2>" + data.title + "</h2>" +
@@ -75,7 +77,7 @@ let generate_form = (title, fields, submit) => {
 
         let input;
 
-        if (fields[key]['type'] == "textarea") {
+        if (fields[key]['type'] === "textarea") {
             input = (new Editor(key, fields[key]['value'])).elem;
         } else {
             input = document.createElement('input');
@@ -106,37 +108,29 @@ let route = (path) => {
         path = "error";
     }
 
-    if (path == "" || path == "all") {
+    if (path === "" || path === "all") {
         title();
         active("all");
 
         $get(ENDPOINTS.NOTES_LIST, (data) => {
-            content(
-                "<h2>All Notes</h2>" +
-                "<ul>" + data.map((d) => {
+            let columns = chunk(data, 3),
+                html = columns.map((col) => {
+                    let list = col.map((d) => `<li><a href="/notes/${d.url}.html">${d.title}</a></li>`).join('');
+                    return `<div class="col"><ul>${list}</ul></div>`;
+                }).join('');
 
-                    return '<li>' +
-                        '<a href="/notes/' + d.url + '.html">' + d.title + '</a>' +
-                        '</li>';
-
-                }).join("") + "</ul>"
-            );
+            content(`<h2>All Notes</h2><div class="row">${html}</div>`);
         });
     }
-    else if (path == "tags") {
+    else if (path === "tags") {
         title();
         active("tags");
         $get(ENDPOINTS.NOTES_TAGS, (data) => {
-            content(
-                '<div style="text-align:center"><ul class="tags">' +
-                data.map((tag) => {
-                    return '<li><a href="/notes/' + tag['id'] + '.tag">' + tag['id'] + ' (' + tag['count'] + ')</a></li>';
-                }).join('') +
-                '</ul></div>'
-            );
+            let tags_list =  data.map((tag) => `<li><a href="/notes/${tag['id']}.tag">${tag['id']} (${tag['count']})</a></li>`).join('');
+            content(`<div style="text-align:center"><ul class="tags">${tags_list}</ul></div>`);
         });
     }
-    else if (path == "random") {
+    else if (path === "random") {
         active("rand");
         $get(ENDPOINTS.NOTES_RANDOM, display_single);
     }
@@ -149,16 +143,8 @@ let route = (path) => {
         title(tag.replace('-', ' '));
         active("tags");
         $get(ENDPOINTS.NOTES_TAG + tag, (data) => {
-            content(
-                "<h2>All notes for <em>" + tag + "</em></h2>" +
-                "<ul>" + data.map((d) => {
-
-                    return '<li>' +
-                        '<a href="/notes/' + d.url + '.html">' + d.title + '</a>' +
-                        '</li>';
-
-                }).join("") + "</ul>"
-            );
+            let notes_list = data.map((d) => `<li><a href="/notes/${d.url}.html">${d.title}</a></li>`).join("");
+            content(`<h2>All notes for <em>${tag}</em></h2><ul>${notes_list}</ul>`);
         });
     }
     else if (path.endsWith('.change')) {
@@ -233,7 +219,7 @@ let route = (path) => {
             return false;
         }));
     }
-    else if (path == "add") {
+    else if (path === "add") {
         active();
         content(generate_form("Add note", {
             "password": {
@@ -286,12 +272,12 @@ let route = (path) => {
 
 let goto = (path, title = "") => {
     loading();
-    window.history.pushState(null, "Notes" + ((title == "") ? " - " + title : ""), path);
+    window.history.pushState(null, "Notes" + ((title === "") ? " - " + title : ""), path);
     route(path);
 };
 
 let handle_click = (e) => {
-    if (e.target.localName == 'a' && e.target.target != "_blank") {
+    if (e.target.localName === 'a' && e.target.target !== "_blank") {
         goto(e.target.href, e.target.innerHTML);
         e.preventDefault();
         return false;
