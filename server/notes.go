@@ -6,6 +6,7 @@ import (
 	"log"
 	"crypto/sha256"
 	"encoding/hex"
+	"time"
 )
 
 type Query interface {
@@ -17,22 +18,24 @@ type GetQueryCallback func(*mgo.Collection) (Query, bool)
 type ChangeQueryCallback func(*mgo.Collection) bool
 
 type Note struct {
-	Title   string		`json:"title"`
-	URL     string  	`json:"url"`
-	Content string   	`json:"content"`
-	Tags    []string        `json:"tags"`
+	Id    		bson.ObjectId	`json:"id" bson:"_id,omitempty"`
+	Title   	string		`json:"title"`
+	URL     	string  	`json:"url"`
+	Content 	string   	`json:"content"`
+	Modified	time.Time	`json:"modified,omitempty" bson:",omitempty"`
+	Tags    	[]string        `json:"tags"`
 }
 
 type NoteData struct {
-	N		Note	`json:"note"`
-	Password	string	`json:"password"`
+	N		Note		`json:"note"`
+	Password	string		`json:"password"`
 }
 
 type Notes []Note
 
 type Tag struct {
-	Id    	string		`json:"id" bson:"_id"`
-	Count 	int		`json:"count"`
+	Id    		string		`json:"id" bson:"_id"`
+	Count 		int		`json:"count"`
 }
 
 type Tags []Tag
@@ -105,6 +108,7 @@ func CheckPassword(password string, session *mgo.Session) bool {
 }
 
 func (n Note) Update(id string, password string) bool {
+	n.Modified = time.Now()
 	return change(func(c *mgo.Collection) bool {
 		return c.Update(bson.M{"url": id}, n) == nil
 	}, password);

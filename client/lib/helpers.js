@@ -76,33 +76,30 @@ export let error = (elem, err) => {
 
 // Split an array into chunks
 export let chunk = (array, chunks) => {
-    if (chunks < 1 || Object.prototype.toString.call(array) !== '[object Array]') {
-        return null;
-    }
-
-    let chunk_size = Math.floor(array.length/chunks);
-
-    let x,
-        c = -1,
-        arr = [];
+    let chunk_size = Math.floor(array.length/chunks),
+        ret = [];
 
     for(let i = 0; i < array.length; ++i) {
-        if (x = i % chunk_size) {
-            arr[c][x] = array[i];
+        let e = array[i];
+        if(i % chunk_size === 0) {
+            ret.push([e]);
         } else {
-            arr[++c] = [array[i]];
+            ret[ret.length-1].push(e);
         }
     }
 
-    if(arr.length > chunks) {
-        while(arr[arr.length-1].length !== 0) {
-            for(let i = 0; i < arr.length - 1; ++i) {
-                arr[i].push(arr[i + 1].shift());
+    if(ret.length > chunks) {
+        while(ret[ret.length-1].length !== 0) {
+            for(let i = 0; i < ret.length - 1; ++i) {
+                ret[i].push(ret[i + 1].shift());
             }
         }
 
-        arr.pop();
+        ret.pop();
     }
 
-    return arr;
+    return ret;
 };
+
+// Get date from mongodb ObjectId field
+export let objectId2date = (id) => new Date(parseInt(id.substring(0, 8), 16) * 1000);

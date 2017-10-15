@@ -1,6 +1,6 @@
 import {$, $$, $ready, $ajax, $post, $get} from '../../lib/$.js';
 import {ENDPOINTS} from '../../lib/constants.js';
-import {serialize, chunk} from '../../lib/helpers.js';
+import {serialize, chunk, objectId2date} from '../../lib/helpers.js';
 import {Editor} from '../../lib/editor.js';
 
 let loading = () => {
@@ -37,22 +37,48 @@ let title = (before = "", after = "") => {
         after;
 
     document.title = ((before !== "") ? before + " " : "") + "Notes" + after;
+
+    $("underheader").style.display = "none";
+};
+
+let date_span = (d) => {
+    let split = d.toISOString().split('T');
+    return `<span title="${split[0]} ${split[1].slice(0, 8)}">${split[0]}</span>`
+};
+
+let date = (created, modified = null) => {
+    let $underheader = $("underheader");
+
+    $underheader.innerHTML = `<strong>Created</strong>:&nbsp;&nbsp;${date_span(created)}`;
+
+    if(modified !== null) {
+        $underheader.innerHTML += `&nbsp;&nbsp;&nbsp; <strong>Modified</strong>:&nbsp;&nbsp;${date_span(modified)}`;
+    }
+
+    $underheader.style.display = "block";
 };
 
 let display_single = (data) => {
     title(data.title);
+    console.log(data);
 
-    content(
-        '<ul class="tags aside">' +
-        data['tags'].map((c) => {
-            return `<li><a href="/notes/${c}.tag">${c}</a></li>`;
-        }).join('') +
-        '</ul>' +
-        "<h2>" + data.title + "</h2>" +
-        '<div id="note-content">' + data.content.replace(/<h3>(.+)<\/h3>/, (match, section) => {
-            return '<h3 id="' + section.toLowerCase().split(/\s+/).join('-') + '">' + section + '</h3>';
-        }) + "</div>"
-    );
+    data['modified'] = new Date(data['modified']);
+    if(data['modified'].getYear() < 0) {
+        data['modified'] = null;
+    }
+
+    date(objectId2date(data['id']), data['modified']);
+
+    let content_html = '<div id="note-content">' + data.content.replace(/<h3>(.+)<\/h3>/g, (match, section) => {
+        let anchor = section.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).join('-');
+        return `<span class="anchor" id="${anchor}"></span><h3><span>${section}</span>&nbsp;<small><a href="#${anchor}">#</a></small></h3>`;
+    }) + "</div>";
+
+    let tags_list = data['tags'].map((c) => `<li><a href="/notes/${c}.tag" rel="tag">${c}</a></li>`).join(''),
+        tags_html = `<ul class="tags aside">${tags_list}</ul>`,
+        title_html = `<h2>${data.title}</h2>`;
+
+    content(tags_html + title_html + content_html);
 
     Prism.highlightAll();
     MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
@@ -277,7 +303,7 @@ let goto = (path, title = "") => {
 };
 
 let handle_click = (e) => {
-    if (e.target.localName === 'a' && e.target.target !== "_blank") {
+    if (e.target.localName === 'a' && e.target.target !== "_blank" && e.target.href.indexOf('#') === -1) {
         goto(e.target.href, e.target.innerHTML);
         e.preventDefault();
         return false;
