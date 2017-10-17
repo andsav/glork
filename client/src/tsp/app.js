@@ -5,7 +5,7 @@ import {Canvas, SliderCanvas} from '../../lib/canvas.js'
 
 // Quick and dirty return random element form array (not really random)
 Array.prototype.random = function () {  // eslint-disable-line
-  return this[Math.floor((Math.random() * this.length))]
+  return this[~~((Math.random() * this.length))]
 }
 
 // Configuration
