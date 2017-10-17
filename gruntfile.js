@@ -11,7 +11,8 @@ module.exports = function(grunt) {
                     language_in: "ECMASCRIPT6",
                     language_out: "ECMASCRIPT5_STRICT",
                     module_resolution: 'BROWSER',
-                    output_wrapper: "(function() {%output%}).call(window);"
+                    output_wrapper: "(function() {%output%}).call(window);",
+                    externs: "client/build/externs.js"
                 }
             },
             clustering: {
@@ -25,6 +26,7 @@ module.exports = function(grunt) {
                     language_out: "ECMASCRIPT5_STRICT",
                     module_resolution: 'BROWSER',
                     output_wrapper: "(function() {%output%}).call(window);",
+                    externs: "client/build/externs.js"
                 }
             },
             notes: {
@@ -38,7 +40,7 @@ module.exports = function(grunt) {
                     language_out: "ECMASCRIPT5_STRICT",
                     module_resolution: 'BROWSER',
                     output_wrapper: "(function() {%output%}).call(window);",
-                    "externs": "client/build/externs.js"
+                    externs: "client/build/externs.js"
                 }
             }
         },
