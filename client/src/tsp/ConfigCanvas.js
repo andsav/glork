@@ -1,5 +1,5 @@
 import {$} from '../../lib/$.js'
-import {round, inCircle} from '../../lib/helpers.js'
+import {inCircle, round} from '../../lib/helpers.js'
 import {SliderCanvas} from '../../lib/canvas.js'
 import {CONFIG_BUTTON_RADIUS} from './config.js'
 

@@ -1,5 +1,5 @@
 import {$} from '../../lib/$.js'
-import {rand, stopAnimations, collision} from '../../lib/helpers.js'
+import {collision, rand, stopAnimations} from '../../lib/helpers.js'
 import {Canvas} from '../../lib/canvas.js'
 import {FRAME_DELAY} from './config.js'
 import {Path} from './Path.js'

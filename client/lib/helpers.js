@@ -57,7 +57,8 @@ export let serialize = (form) => {
 
 // Stop all animations in progress
 export let stopAnimations = () => {
-  let highestTimeoutId = setTimeout(() => {})
+  let highestTimeoutId = setTimeout(() => {
+  })
   for (let i = 0; i < highestTimeoutId; i++) {
     clearTimeout(i)
   }

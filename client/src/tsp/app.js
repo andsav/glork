@@ -1,6 +1,6 @@
 import {ENDPOINTS} from '../../lib/constants.js'
 import {$, $$, $post, $ready} from '../../lib/$.js'
-import {stopAnimations, error} from '../../lib/helpers.js'
+import {error, stopAnimations} from '../../lib/helpers.js'
 import {ConfigCanvas} from './ConfigCanvas.js'
 import {ResultCanvas} from './ResultCanvas.js'
 import {TSPCanvas} from './TSPCanvas.js'

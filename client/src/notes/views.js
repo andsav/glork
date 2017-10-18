@@ -1,5 +1,5 @@
 import {chunk, objectId2date} from '../../lib/helpers.js'
-import {title, active, content, date} from './display.js'
+import {active, content, date, title} from './display.js'
 
 /**
  *

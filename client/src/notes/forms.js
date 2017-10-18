@@ -33,16 +33,7 @@ export let changeForm = (original) => {
   }, (e) => {
     e.preventDefault()
 
-    let formData = serialize(e.target)
-    let data = {
-      'note': {
-        'title': formData['title'],
-        'url': formData['url'],
-        'content': formData['content'],
-        'tags': formData['tags'].split(/,\s*/)
-      },
-      'password': formData['password']
-    }
+    let [formData, data] = getFormData(e.target)
 
     $ajax('PUT',
       ENDPOINTS.NOTES_SINGLE + original['url'],
@@ -79,21 +70,9 @@ export let addForm = () => {
   }, (e) => {
     e.preventDefault()
 
-    let formData = serialize(e.target)
-    let data = {
-      'note': {
-        'title': formData['title'],
-        'url': formData['url'],
-        'content': formData['content'],
-        'tags': formData['tags'].split(/,\s*/)
-      },
-      'id': '',
-      'password': formData['password']
-    }
-
     $post(
       ENDPOINTS.NOTES_CREATE,
-      data,
+      getFormData(e.target)[1],
       (d) => {
         if (d) {
           window.location.href = '/notes/all'
@@ -117,9 +96,10 @@ export let deleteForm = (path) => {
     e.preventDefault()
 
     let formData = serialize(e.target)
+    let endpoint = path.split('.delete')[0] + '/' + window.btoa(formData['password'])
 
     $ajax('DELETE',
-      ENDPOINTS.NOTES_SINGLE + path.split('.delete')[0] + '/' + window.btoa(formData['password']),
+      ENDPOINTS.NOTES_SINGLE + endpoint,
       false,
       (d) => {
         if (d) {
@@ -133,6 +113,27 @@ export let deleteForm = (path) => {
 
 /**
  *
+ * @param target
+ * @returns {[null,null]}
+ */
+let getFormData = (target) => {
+  let formData = serialize(target)
+  let data = {
+    'note': {
+      'title': formData['title'],
+      'url': formData['url'],
+      'content': formData['content'],
+      'tags': formData['tags'].split(/,\s*/)
+    },
+    'id': '',
+    'password': formData['password']
+  }
+
+  return [formData, data]
+}
+
+/**
+ *
  * @param title
  * @param fields
  * @param submit
@@ -141,7 +142,7 @@ export let deleteForm = (path) => {
 let generateForm = (title, fields, submit) => {
   let form = document.createElement('form')
 
-  form.innerHTML = '<h2>' + title + '</h2>'
+  form.innerHTML = `<h2>${title}</h2>`
 
   for (let key in fields) {
     if (!fields.hasOwnProperty(key)) {

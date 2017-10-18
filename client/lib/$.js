@@ -18,7 +18,11 @@ export let $ajax = (method, url, data, success, error = (x) => {
       error(xhr.response)
     }
   }
-  if (data) { xhr.send(JSON.stringify(data)) } else { xhr.send() }
+  if (data) {
+    xhr.send(JSON.stringify(data))
+  } else {
+    xhr.send()
+  }
 }
 
 export let $post = (url, data, success, error = (x) => {
