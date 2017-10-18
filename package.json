@@ -1,6 +1,6 @@
 {
   "name": "glork",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Experiments",
   "repository": {
     "type": "git",
@@ -16,9 +16,9 @@
     "standard": "^10.0.3"
   },
   "standard": {
-    "globals": ["XMLHttpRequest", "Prism", "MathJax"]
+    "globals": ["XMLHttpRequest", "Prism", "MathJax", "WebSocket"]
   },
   "scripts": {
-    "test": "standard --fix 'client/src/**/*.js' && standard 'client/src/**/*.js'"
+    "test": "standard --fix 'client/src/**/*.js' 'client/lib/*.js' && standard 'client/src/**/*.js' 'client/lib/*.js'"
   }
 }

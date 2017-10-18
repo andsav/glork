@@ -17,7 +17,7 @@ export let collision = (previous, point, r) => previous.map((co) => dist(co, poi
 
 export let inCircle = (point, circle, r) => {
   let x = point.x - circle.x
-  let y = point.y - circle.y;
+  let y = point.y - circle.y
   return x * x + y * y < r * r
 }
 
@@ -57,7 +57,7 @@ export let serialize = (form) => {
 
 // Stop all animations in progress
 export let stopAnimations = () => {
-  let highestTimeoutId = setTimeout(';')
+  let highestTimeoutId = setTimeout(() => {})
   for (let i = 0; i < highestTimeoutId; i++) {
     clearTimeout(i)
   }
@@ -82,12 +82,12 @@ export let error = (elem, err) => {
 
 // Split an array into chunks
 export let chunk = (array, chunks) => {
-  let chunk_size = ~~(array.length / chunks)
+  let chunkSize = ~~(array.length / chunks)
   let ret = []
 
   for (let i = 0; i < array.length; ++i) {
     let e = array[i]
-    if (i % chunk_size === 0) {
+    if (i % chunkSize === 0) {
       ret.push([e])
     } else {
       ret[ret.length - 1].push(e)

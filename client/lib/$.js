@@ -18,10 +18,7 @@ export let $ajax = (method, url, data, success, error = (x) => {
       error(xhr.response)
     }
   }
-  if (data)
-    xhr.send(JSON.stringify(data))
-  else
-    xhr.send()
+  if (data) { xhr.send(JSON.stringify(data)) } else { xhr.send() }
 }
 
 export let $post = (url, data, success, error = (x) => {
@@ -34,7 +31,7 @@ export let $get = (url, success, error = (x) => {
   $ajax('GET', url, false, success, error)
 }
 
-export let $get_data = (url, data, success, error) => {
+export let $getData = (url, data, success, error) => {
   let params = Object.keys(data).map((i) => i + '=' + data[i]).join('&')
   $get(url + '?' + params, success, error)
 }

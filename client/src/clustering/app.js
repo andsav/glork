@@ -7,7 +7,7 @@ import {ConfigSlider} from './ConfigSlider.js'
 import {MainCanvas} from './MainCanvas.js'
 import {CursorSlider} from './CursorSlider.js'
 
-window.ws = null;
+window.ws = null
 
 $ready(() => {
   const canvas = new MainCanvas('c')

@@ -1,5 +1,5 @@
 export class Editor {
-  constructor(id, content = '') {
+  constructor (id, content = '') {
     this.elem = document.createElement('div')
 
     this.textarea = document.createElement('textarea')
@@ -28,20 +28,20 @@ export class Editor {
       } else if (e.keyCode === 13) {
         e.preventDefault()
 
-        let before = val.substring(0, s0),
-          after = val.substring(s1),
-          current_line = before.split('\n').pop(),
-          current_indent = current_line.match(/^\s*/)[0]
+        let before = val.substring(0, s0)
+        let after = val.substring(s1)
+        let currentLine = before.split('\n').pop()
+        let currentIndent = currentLine.match(/^\s*/)[0]
 
-        e.target.value = before + '\n' + current_indent + after
-        e.target.selectionStart = e.target.selectionEnd = s0 + 1 + current_indent.length
+        e.target.value = before + '\n' + currentIndent + after
+        e.target.selectionStart = e.target.selectionEnd = s0 + 1 + currentIndent.length
 
         return false
       } else if (e.altKey) {
         let offset = 0
         let ret = false
         switch (e.keyCode) {
-          case 84: //ctrl+t
+          case 84: // ctrl+t
             e.target.value = val.substring(0, s0) +
               '<center>' +
               '\n<table class="bordered" style="width:50%">' +
@@ -59,7 +59,7 @@ export class Editor {
               '\n</center>' +
               val.substring(s1)
             break
-          case 73: //ctrl+u
+          case 73: // ctrl+u
             e.target.value = val.substring(0, s0) + '<img src="" alt="">' + val.substring(s1)
             offset = '<img src=\''.length
             break
@@ -85,7 +85,6 @@ export class Editor {
 
             break
 
-
           default:
             ret = true
         }
@@ -100,6 +99,4 @@ export class Editor {
       this.preview.style.display = 'none'
     }
   }
-
-
 }

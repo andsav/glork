@@ -1,8 +1,8 @@
-import {$, $$, $ready, $ajax, $post, $get} from '../../lib/$.js'
+import {$ajax, $post} from '../../lib/$.js'
 import {ENDPOINTS} from '../../lib/constants.js'
 import {serialize} from '../../lib/helpers.js'
 import {Editor} from '../../lib/editor.js'
-import {title, active, content} from './display.js'
+import {active, content} from './display.js'
 
 /**
  *
@@ -48,7 +48,7 @@ export let changeForm = (original) => {
       ENDPOINTS.NOTES_SINGLE + original['url'],
       data,
       (d) => {
-        window.location.href = '/notes/' + formData['url'] + '.html';
+        window.location.href = '/notes/' + formData['url'] + '.html'
       })
 
     return false
