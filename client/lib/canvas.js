@@ -50,6 +50,7 @@ export class Canvas {
       if (circle) {
         this.drawCircle(x, y, side)
       } else {
+
         this.drawNode(x, y, side)
       }
     }

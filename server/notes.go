@@ -19,6 +19,7 @@ type ChangeQueryCallback func(*mgo.Collection) bool
 
 type Note struct {
 	Id    		bson.ObjectId	`json:"id" bson:"_id,omitempty"`
+	Tree	   	string		`json:"tree" bson:",omitempty"`
 	Title   	string		`json:"title"`
 	URL     	string  	`json:"url"`
 	Content 	string   	`json:"content"`

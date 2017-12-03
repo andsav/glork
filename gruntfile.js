@@ -8,11 +8,11 @@ module.exports = function (grunt) {
     'client/lib/socket.js'
   ]
 
-  let config = (files) => {
+  let config = (files, output) => {
     return {
       closurePath: '/opt/closure',
       js: global.concat(files),
-      jsOutputFile: 'client/dist/tsp.min.js',
+      jsOutputFile: `client/dist/${output}.min.js`,
       maxBuffer: 500,
       options: {
         compilation_level: 'ADVANCED_OPTIMIZATIONS',
@@ -34,21 +34,21 @@ module.exports = function (grunt) {
         'client/src/tsp/ResultCanvas.js',
         'client/src/tsp/TSPCanvas.js',
         'client/src/tsp/app.js'
-      ]),
+      ], 'tsp'),
       clustering: config([
         'client/src/clustering/config.js',
         'client/src/clustering/ConfigSlider.js',
         'client/src/clustering/CursorSlider.js',
         'client/src/clustering/MainCanvas.js',
         'client/src/clustering/app.js'
-      ]),
+      ], 'clustering'),
       notes: config([
         'client/src/notes/display.js',
         'client/src/notes/forms.js',
         'client/src/notes/views.js',
         'client/src/notes/router.js',
         'client/src/notes/app.js'
-      ])
+      ], 'notes')
     },
     watch: {
       tsp: {
