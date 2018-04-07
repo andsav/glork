@@ -1,5 +1,5 @@
 export class Editor {
-  constructor(id, content = '') {
+  constructor (id, content = '') {
     this.elem = document.createElement('div')
 
     this.textarea = document.createElement('textarea')

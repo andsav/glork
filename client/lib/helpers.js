@@ -2,7 +2,7 @@
  Common helper functions
  */
 
-import {$} from './$.js'
+import { $ } from './$.js'
 
 const ERROR_DIV = $('error_msg')
 

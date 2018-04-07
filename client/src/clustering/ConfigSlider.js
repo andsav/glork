@@ -1,10 +1,10 @@
-import {COLOR} from '../../lib/constants.js'
-import {MIN_CURSOR_RADIUS} from './config.js'
-import {SliderCanvas} from '../../lib/canvas.js'
-import {inCircle, round} from '../../lib/helpers.js'
+import { COLOR } from '../../lib/constants.js'
+import { MIN_CURSOR_RADIUS } from './config.js'
+import { SliderCanvas } from '../../lib/canvas.js'
+import { inCircle, round } from '../../lib/helpers.js'
 
 export class ConfigSlider extends SliderCanvas {
-  constructor(id) {
+  constructor (id) {
     super(id, function (c) {
       return {
         x: c.buttonToConfig,
@@ -14,22 +14,22 @@ export class ConfigSlider extends SliderCanvas {
     })
   }
 
-  get buttonToConfig() {
+  get buttonToConfig () {
     return (this.dataF('val') - this.dataF('min')) / (this.dataF('max') - this.dataF('min')) * (this.width - 40) + 20
   }
 
-  overButton(m) {
+  overButton (m) {
     return inCircle(m, this.button, this.button.r)
   }
 
-  setVal(v) {
+  setVal (v) {
     this.setConfig({
       x: 20 + (v - this.dataF('min')) / this.dataF('max') * (this.width - 40),
       y: this.halfHeight
     })
   }
 
-  setConfig(m) {
+  setConfig (m) {
     this.button.x = Math.max(20, Math.min(this.width - 20, m.x))
     this.data['val'] = round(
       (this.dataF('max') - this.dataF('min')) * (this.button.x - 20) / (this.width - 40) + this.dataF('min'),
@@ -41,7 +41,7 @@ export class ConfigSlider extends SliderCanvas {
     this.update()
   }
 
-  update() {
+  update () {
     this.clear()
 
     // Line

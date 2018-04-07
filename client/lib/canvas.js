@@ -1,51 +1,51 @@
-import {COLOR} from './constants.js'
-import {$} from './$.js'
+import { COLOR } from './constants.js'
+import { $ } from './$.js'
 
 export class Canvas {
-  constructor(id) {
+  constructor (id) {
     this.c = $(id)
     this.ctx = this.c.getContext('2d')
     this.ctx.fillStyle = this.ctx.strokeStyle = COLOR.DEFAULT
     this.ctx.lineWidth = 2
   }
 
-  get height() {
+  get height () {
     return this.c.height
   }
 
-  get width() {
+  get width () {
     return this.c.width
   }
 
-  get halfWidth() {
+  get halfWidth () {
     return this.c.width / 2
   }
 
-  get halfHeight() {
+  get halfHeight () {
     return this.c.height / 2
   }
 
-  hide() {
+  hide () {
     this.c.style.display = 'none'
   }
 
-  show() {
+  show () {
     this.c.style.display = 'initial'
     this.c.scrollIntoView()
   }
 
-  clear() {
+  clear () {
     this.ctx.clearRect(0, 0, this.c.width, this.c.height)
   }
 
-  mouse(e) {
+  mouse (e) {
     return {
       x: e.pageX - this.c.offsetLeft,
       y: e.pageY - this.c.offsetTop
     }
   }
 
-  placeNode(x, y, circle = false, side = 10) {
+  placeNode (x, y, circle = false, side = 10) {
     if (x > side + 2 && x < this.c.width - (side + 2) && y > side + 2 && y < this.c.height - (side + 2)) {
       if (circle) {
         this.drawCircle(x, y, side)
@@ -56,11 +56,11 @@ export class Canvas {
     }
   }
 
-  drawNode(x, y, side = 10) {
+  drawNode (x, y, side = 10) {
     this.ctx.fillRect(x - side / 2, y - side / 2, side, side)
   }
 
-  drawCircle(x, y, diameter = 10) {
+  drawCircle (x, y, diameter = 10) {
     this.ctx.beginPath()
     this.ctx.arc(x, y, diameter / 2, 0, 2 * Math.PI)
     this.ctx.fill()
@@ -68,7 +68,7 @@ export class Canvas {
 }
 
 export class SliderCanvas extends Canvas {
-  constructor(id, defaultButton) {
+  constructor (id, defaultButton) {
     super(id)
 
     this.button = defaultButton(this)
@@ -105,23 +105,23 @@ export class SliderCanvas extends Canvas {
     }
   }
 
-  get data() {
+  get data () {
     return this.c.dataset
   }
 
-  update() {
+  update () {
 
   }
 
-  overButton(m) {
+  overButton (m) {
 
   }
 
-  setConfig(m) {
+  setConfig (m) {
 
   }
 
-  dataF(x) {
+  dataF (x) {
     return parseFloat(this.c.dataset[x])
   }
 }

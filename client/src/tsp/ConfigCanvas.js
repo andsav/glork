@@ -1,7 +1,7 @@
-import {$} from '../../lib/$.js'
-import {inCircle, round} from '../../lib/helpers.js'
-import {SliderCanvas} from '../../lib/canvas.js'
-import {CONFIG_BUTTON_RADIUS} from './config.js'
+import { $ } from '../../lib/$.js'
+import { inCircle, round } from '../../lib/helpers.js'
+import { SliderCanvas } from '../../lib/canvas.js'
+import { CONFIG_BUTTON_RADIUS } from './config.js'
 
 export class ConfigCanvas extends SliderCanvas {
   constructor (id) {

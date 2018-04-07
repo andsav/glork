@@ -1,8 +1,8 @@
-import {$get} from '../../lib/$.js'
-import {ENDPOINTS} from '../../lib/constants.js'
-import {loading} from './display.js'
-import {viewAll, viewNotFound, viewRandom, viewSingle, viewTag, viewTags} from './views.js'
-import {addForm, changeForm, deleteForm} from './forms.js'
+import { $get } from '../../lib/$.js'
+import { ENDPOINTS } from '../../lib/constants.js'
+import { loading } from './display.js'
+import { viewAll, viewNotFound, viewRandom, viewSingle, viewTag, viewTags } from './views.js'
+import { addForm, changeForm, deleteForm } from './forms.js'
 
 /**
  *

@@ -1,4 +1,4 @@
-import {$, $$} from '../../lib/$.js'
+import { $, $$ } from '../../lib/$.js'
 
 /**
  *

@@ -1,8 +1,8 @@
-import {$ajax, $post} from '../../lib/$.js'
-import {ENDPOINTS} from '../../lib/constants.js'
-import {serialize} from '../../lib/helpers.js'
-import {Editor} from '../../lib/editor.js'
-import {active, content} from './display.js'
+import { $ajax, $post } from '../../lib/$.js'
+import { ENDPOINTS } from '../../lib/constants.js'
+import { serialize } from '../../lib/helpers.js'
+import { Editor } from '../../lib/editor.js'
+import { active, content } from './display.js'
 
 /**
  *

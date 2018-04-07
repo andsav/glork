@@ -1,10 +1,10 @@
-import {COLOR} from '../../lib/constants.js'
-import {MAX_CURSOR_RADIUS, MIN_CURSOR_RADIUS} from './config.js'
-import {SliderCanvas} from '../../lib/canvas.js'
-import {inCircle} from '../../lib/helpers.js'
+import { COLOR } from '../../lib/constants.js'
+import { MAX_CURSOR_RADIUS, MIN_CURSOR_RADIUS } from './config.js'
+import { SliderCanvas } from '../../lib/canvas.js'
+import { inCircle } from '../../lib/helpers.js'
 
 export class CursorSlider extends SliderCanvas {
-  constructor(id, canvas) {
+  constructor (id, canvas) {
     super(id, function (c) {
       return {
         x: 20 + ((Math.min(canvas.cursor_radius, MIN_CURSOR_RADIUS) - MIN_CURSOR_RADIUS) / MAX_CURSOR_RADIUS) * (c.width - 40),
@@ -16,11 +16,11 @@ export class CursorSlider extends SliderCanvas {
     this.canvas = canvas
   }
 
-  overButton(m) {
+  overButton (m) {
     return inCircle(m, this.button, this.button.r)
   }
 
-  setConfig(m) {
+  setConfig (m) {
     let v = (m.x - 20) / (this.width - 40) * (MAX_CURSOR_RADIUS - MIN_CURSOR_RADIUS) + MIN_CURSOR_RADIUS
     let r = Math.max(MIN_CURSOR_RADIUS, Math.min(MAX_CURSOR_RADIUS, v))
     this.canvas.updateCursor(r)
@@ -32,7 +32,7 @@ export class CursorSlider extends SliderCanvas {
     this.update()
   }
 
-  update() {
+  update () {
     this.clear()
 
     // Line

@@ -1,5 +1,5 @@
-import {chunk, objectId2date} from '../../lib/helpers.js'
-import {active, content, date, title} from './display.js'
+import { chunk, objectId2date } from '../../lib/helpers.js'
+import { active, content, date, title } from './display.js'
 
 /**
  *

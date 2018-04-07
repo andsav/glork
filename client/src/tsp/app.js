@@ -1,9 +1,9 @@
-import {ENDPOINTS} from '../../lib/constants.js'
-import {$, $$, $post, $ready} from '../../lib/$.js'
-import {error, stopAnimations} from '../../lib/helpers.js'
-import {ConfigCanvas} from './ConfigCanvas.js'
-import {ResultCanvas} from './ResultCanvas.js'
-import {TSPCanvas} from './TSPCanvas.js'
+import { ENDPOINTS } from '../../lib/constants.js'
+import { $, $$, $post, $ready } from '../../lib/$.js'
+import { error, stopAnimations } from '../../lib/helpers.js'
+import { ConfigCanvas } from './ConfigCanvas.js'
+import { ResultCanvas } from './ResultCanvas.js'
+import { TSPCanvas } from './TSPCanvas.js'
 
 // Quick and dirty return random element form array (not really random)
 Array.prototype.random = function () {  // eslint-disable-line

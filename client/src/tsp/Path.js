@@ -1,4 +1,4 @@
-import {dist, rand} from '../../lib/helpers.js'
+import { dist, rand } from '../../lib/helpers.js'
 
 export class Path {
   constructor (p) {

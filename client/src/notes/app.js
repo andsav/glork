@@ -1,5 +1,5 @@
-import {$, $ready} from '../../lib/$.js'
-import {handleClick, route} from './router.js'
+import { $, $ready } from '../../lib/$.js'
+import { handleClick, route } from './router.js'
 
 $ready(() => {
   $('notes').onclick = $('nav').onclick = handleClick
