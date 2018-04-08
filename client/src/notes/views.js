@@ -24,6 +24,9 @@ export let viewAll = (data) => {
  * @param data
  */
 export let viewTree = (data) => {
+  title()
+  active('tree')
+
   let tree = {}
 
   data.forEach(note => {
@@ -47,13 +50,13 @@ export let viewTree = (data) => {
 
   let nodes = n => {
     let leaf = Object.keys(n).map(x => {
-      let sub = n[x].hasOwnProperty('notes') ? notes(n[x]['notes']) : nodes(n[x]);
-      return `<li>${x} ${sub}</li>`
+      let sub = n[x].hasOwnProperty('notes') ? notes(n[x]['notes']) : nodes(n[x])
+      return `<li><strong onclick="this.nextSibling.classList.toggle('active')">${x}</strong>${sub}</li>`
     }).join('')
     return `<ul>${leaf}</ul>`
   }
 
-  content(`<h2>All Notes</h2><div id="node-content">${nodes(tree)}</div>`)
+  content(`<h2>All Notes</h2><div id="node-content" class="notes-tree">${nodes(tree)}</div>`)
 }
 
 /**
