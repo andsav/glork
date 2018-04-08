@@ -1,7 +1,7 @@
 import { $get } from '../../lib/$.js'
 import { ENDPOINTS } from '../../lib/constants.js'
 import { loading } from './display.js'
-import { viewAll, viewNotFound, viewRandom, viewSingle, viewTag, viewTags } from './views.js'
+import { viewAll, viewTree, viewNotFound, viewRandom, viewSingle, viewTag, viewTags } from './views.js'
 import { addForm, changeForm, deleteForm } from './forms.js'
 
 /**
@@ -17,6 +17,8 @@ export let route = (path) => {
 
   if (path === '' || path === 'all') {
     $get(ENDPOINTS.NOTES_LIST, viewAll)
+  } else if (path === 'tree') {
+    $get(ENDPOINTS.NOTES_LIST, viewTree)
   } else if (path === 'tags') {
     $get(ENDPOINTS.NOTES_TAGS, viewTags)
   } else if (path === 'random') {

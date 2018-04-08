@@ -23,6 +23,43 @@ export let viewAll = (data) => {
  *
  * @param data
  */
+export let viewTree = (data) => {
+  let tree = {}
+
+  data.forEach(note => {
+    let current = tree
+    note['tree'].forEach(node => {
+      if (!current.hasOwnProperty(node)) {
+        current[node] = {}
+      }
+      current = current[node]
+    })
+    if (!current.hasOwnProperty('notes')) {
+      current['notes'] = []
+    }
+    current['notes'].push(note)
+  })
+
+  let notes = n => {
+    let leaf = n.map(x => `<li><a href="${x['url']}.html">${x['title']}</a></li>`).join('')
+    return `<ul>${leaf}</ul>`
+  }
+
+  let nodes = n => {
+    let leaf = Object.keys(n).map(x => {
+      let sub = n[x].hasOwnProperty('notes') ? notes(n[x]['notes']) : nodes(n[x]);
+      return `<li>${x} ${sub}</li>`
+    }).join('')
+    return `<ul>${leaf}</ul>`
+  }
+
+  content(`<h2>All Notes</h2><div id="node-content">${nodes(tree)}</div>`)
+}
+
+/**
+ *
+ * @param data
+ */
 export let viewTags = (data) => {
   title()
   active('tags')

@@ -29,6 +29,10 @@ export let changeForm = (original) => {
     'tags': {
       'type': 'text',
       'value': original['tags'].join(', ')
+    },
+    'tree': {
+      'type': 'text',
+      'value': original['tree'] === null ? '' : original['tree'].join(', ')
     }
   }, (e) => {
     e.preventDefault()
@@ -65,6 +69,9 @@ export let addForm = () => {
       'type': 'textarea'
     },
     'tags': {
+      'type': 'text'
+    },
+    'tree': {
       'type': 'text'
     }
   }, (e) => {
@@ -123,7 +130,8 @@ let getFormData = (target) => {
       'title': formData['title'],
       'url': formData['url'],
       'content': formData['content'],
-      'tags': formData['tags'].split(/,\s*/)
+      'tags': formData['tags'].split(/,\s*/),
+      'tree': formData['tree'].split(/,\s*/)
     },
     'id': '',
     'password': formData['password']

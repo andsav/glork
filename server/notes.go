@@ -19,12 +19,12 @@ type ChangeQueryCallback func(*mgo.Collection) bool
 
 type Note struct {
 	Id    		bson.ObjectId	`json:"id" bson:"_id,omitempty"`
-	Tree	   	string		`json:"tree" bson:",omitempty"`
 	Title   	string		`json:"title"`
 	URL     	string  	`json:"url"`
 	Content 	string   	`json:"content"`
 	Modified	time.Time	`json:"modified,omitempty" bson:",omitempty"`
 	Tags    	[]string        `json:"tags"`
+	Tree	   	[]string		    `json:"tree"`
 }
 
 type NoteData struct {
@@ -45,7 +45,7 @@ func GetAllNotes() Notes {
 	var notes Notes
 
 	get(func(c *mgo.Collection) (Query, bool) {
-		return c.Find(bson.M{}).Select(bson.M{ "title":  1, "url": 1 }).Sort("-_id"), true
+		return c.Find(bson.M{}).Select(bson.M{ "title":  1, "url": 1, "tree": 1 }).Sort("-_id"), true
 	}, &notes)
 
 	return notes
