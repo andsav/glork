@@ -43,10 +43,17 @@ export let changeForm = (original) => {
       ENDPOINTS.NOTES_SINGLE + original['url'],
       data,
       (d) => {
-        window.location.href = '/notes/' + formData['url'] + '.html'
+        if (d) window.location.href = '/notes/' + formData['url'] + '.html'
       })
 
     return false
+  }, (form) => {
+    $ajax('PUT',
+      ENDPOINTS.NOTES_SINGLE + original['url'],
+      getFormData(form).pop(),
+      (d) => {
+        if (d) console.log(`Autosave at ${new Date()}`)
+      })
   }))
 }
 
@@ -145,9 +152,10 @@ let getFormData = (target) => {
  * @param title
  * @param fields
  * @param submit
- * @returns {Element}
+ * @param autosave
+ * @returns {HTMLFormElement}
  */
-let generateForm = (title, fields, submit) => {
+let generateForm = (title, fields, submit, autosave = null) => {
   let form = document.createElement('form')
 
   form.innerHTML = `<h2>${title}</h2>`
@@ -189,6 +197,12 @@ let generateForm = (title, fields, submit) => {
 
   form.appendChild(button)
   form.onsubmit = submit
+
+  if (typeof autosave === 'function') {
+    window.setInterval(() => {
+      autosave(form)
+    }, 5 * 1000)
+  }
 
   return form
 }
