@@ -1,3 +1,69 @@
+const shortcutMap = {
+  84: {
+    key: 't',
+    desc: 'Table',
+    insert: '<center>' +
+    '\n<table class="bordered" style="width:50%">' +
+    '\n\t<thead>' +
+    '\n\t\t<tr>' +
+    '\n\t\t\t<th></th>' +
+    '\n\t\t</tr>' +
+    '\n\t</thead>' +
+    '\n\t<tbody>' +
+    '\n\t\t<tr>' +
+    '\n\t\t\t<td></td>' +
+    '\n\t\t</tr>' +
+    '\n\t</tbody>' +
+    '\n</table>' +
+    '\n</center>',
+    cursor: ''
+  },
+  52: {
+    key: '4',
+    desc: 'Latex',
+    insert: '$$$$',
+    cursor: '$$'
+  },
+  65: {
+    key: 'a',
+    desc: 'Aside file',
+    insert: '<aside class="file">\n' +
+    '\t<a href="/public/aside/" target="_blank"><img src="/client/img/pdf_icon.png" style="vertical-align: top; width:16px; height:16px"> </a>\n' +
+    '</aside>',
+    cursor: '<aside class="file">\n\t<a href="/public/aside/'
+  },
+  67: {
+    key: 'c',
+    desc: 'Code',
+    insert: '<pre><code class="language-javascript"></code></pre>',
+    cursor: '<pre><code class="language-javascript">'
+  },
+  72: {
+    key: 'h',
+    desc: 'Section title',
+    insert: '<h3></h3>',
+    cursor: '<h3>'
+  },
+  73: {
+    key: 'u',
+    desc: 'Image',
+    insert: '<img src="" alt="">',
+    cursor: '<img src=\''
+  },
+  76: {
+    key: 'l',
+    desc: 'List',
+    insert: '<ul>\n\t<li></li>\n</ul>',
+    cursor: '<ul>\n\t<li>'
+  },
+  80: {
+    key: 'p',
+    desc: 'Paragraph',
+    insert: '<p></p>',
+    cursor: '<p>'
+  }
+}
+
 export class Editor {
   constructor (id, content = '') {
     this.elem = document.createElement('div')
@@ -10,8 +76,13 @@ export class Editor {
     this.preview.style.display = 'none'
     this.preview.style.width = '100%'
 
+    this.help = document.createElement('p')
+    this.help.innerHTML = '<em>shortcuts</em>'
+    this.help.title = Object.keys(shortcutMap).map(s => `Ctrl+${shortcutMap[s].key}: ${shortcutMap[s].desc}`).join('\n')
+
     this.elem.appendChild(this.textarea)
     this.elem.appendChild(this.preview)
+    this.elem.appendChild(this.help)
 
     this.textarea.onkeydown = (e) => {
       let val, s0, s1
@@ -37,56 +108,23 @@ export class Editor {
         e.target.selectionStart = e.target.selectionEnd = s0 + 1 + currentIndent.length
 
         return false
-      } else if (e.altKey) {
+      } else if (e.ctrlKey) {
         let offset = 0
         let ret = false
-        switch (e.keyCode) {
-          case 84: // ctrl+t
-            e.target.value = val.substring(0, s0) +
-              '<center>' +
-              '\n<table class="bordered" style="width:50%">' +
-              '\n\t<thead>' +
-              '\n\t\t<tr>' +
-              '\n\t\t\t<th></th>' +
-              '\n\t\t</tr>' +
-              '\n\t</thead>' +
-              '\n\t<tbody>' +
-              '\n\t\t<tr>' +
-              '\n\t\t\t<td></td>' +
-              '\n\t\t</tr>' +
-              '\n\t</tbody>' +
-              '\n</table>' +
-              '\n</center>' +
-              val.substring(s1)
-            break
-          case 73: // ctrl+u
-            e.target.value = val.substring(0, s0) + '<img src="" alt="">' + val.substring(s1)
-            offset = '<img src=\''.length
-            break
 
-          case 76: // ctrl+l
-            e.target.value = val.substring(0, s0) + '<ul>\n\t<li></li>\n</ul>' + val.substring(s1)
-            offset = '<ul>\n\t<li>'.length
-            break
+        if (shortcutMap.hasOwnProperty(e.keyCode)) {
+          e.target.value = val.substring(0, s0) + shortcutMap[e.keyCode].insert + val.substring(s1)
+          offset = shortcutMap[e.keyCode].cursor.length
+        } else if (e.keyCode === 56) { // ctrl+8 preview
+          this.preview.innerHTML = this.textarea.value
 
-          case 80: // ctrl+p
-            e.target.value = val.substring(0, s0) + '<p></p>' + val.substring(s1)
-            offset = '<p>'.length
-            break
+          this.textarea.style.display = 'none'
+          this.preview.style.display = 'block'
 
-          case 82:
-            this.preview.innerHTML = this.textarea.value
-
-            this.textarea.style.display = 'none'
-            this.preview.style.display = 'block'
-
-            Prism.highlightAll()
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub])
-
-            break
-
-          default:
-            ret = true
+          Prism.highlightAll()
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub])
+        } else {
+          ret = true
         }
 
         e.target.selectionStart = e.target.selectionEnd = s0 + offset
