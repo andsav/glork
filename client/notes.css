@@ -44,6 +44,15 @@ h3 a {
 
 .notes-tree strong {
   cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.notes-tree li {
+  margin-left: -15px;
 }
 
 #loading {
