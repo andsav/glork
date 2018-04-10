@@ -6,41 +6,39 @@ import (
 )
 
 type Point struct {
-	X	int	`json:"x"`
-	Y	int	`json:"y"`
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 type Points []Point
 
 type PointsSolver struct {
-	Input  Points 		`json:"p"`
-	Config []float64 	`json:"config"`
+	Input  Points    `json:"p"`
+	Config []float64 `json:"config"`
 }
 
 type PointsSolution []Points
 
-
 type Rectangle struct {
-	X0	int
-	X1	int
-	Y0	int
-	Y1	int
+	X0 int
+	X1 int
+	Y0 int
+	Y1 int
 }
 
-func random_int(min, max int) int {
-	return rand.Intn(max - min) + min
+func randomInt(min, max int) int {
+	return rand.Intn(max-min) + min
 }
 
 func (r Rectangle) RandomPoint() Point {
 	return Point{
-		X: random_int(r.X0, r.X1),
-		Y: random_int(r.Y0, r.Y1),
-	};
+		X: randomInt(r.X0, r.X1),
+		Y: randomInt(r.Y0, r.Y1),
+	}
 }
 
-
 func (a Point) distance(b Point) float64 {
-	return math.Sqrt( float64((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y)) )
+	return math.Sqrt(float64((a.X-b.X)*(a.X-b.X) + (a.Y-b.Y)*(a.Y-b.Y)))
 }
 
 func (pp Points) Len() float64 {
@@ -54,7 +52,6 @@ func (pp Points) Len() float64 {
 func (pp Points) Swap(i, j int) {
 	pp[i], pp[j] = pp[j], pp[i]
 }
-
 
 // Shuffles a path in place
 func (pp Points) Shuffle() {
@@ -78,7 +75,7 @@ func (pp Points) RandomPoint() Point {
 
 // Return a neighbour of the path
 func (pp Points) Neighbour() Points {
-	a, b := rand.Int() % len(pp), rand.Int() % len(pp)
+	a, b := rand.Int()%len(pp), rand.Int()%len(pp)
 
 	pp2 := make(Points, len(pp))
 	copy(pp2, pp)
@@ -97,7 +94,7 @@ func (pp Points) Centroid() Point {
 		y += p.Y
 	}
 
-	return Point{X:x/len(pp), Y:y/len(pp)}
+	return Point{X: x / len(pp), Y: y / len(pp)}
 }
 
 // Returns true if two points are equal
@@ -133,5 +130,5 @@ func (s PointsSolution) Swap(i, j int) {
 }
 
 func (s PointsSolution) Less(i, j int) bool {
-	return s[i].Len() > s[j].Len();
+	return s[i].Len() > s[j].Len()
 }

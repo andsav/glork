@@ -44,8 +44,9 @@ func NotesTag(w http.ResponseWriter, r *http.Request) {
 
 func NotesCreate(w http.ResponseWriter, r *http.Request) {
 	var input NoteData
-	single_input(w, r, func(i interface{}) interface{} {
-		n, ok := i.(*NoteData); if ok {
+	singleInput(w, r, func(i interface{}) interface{} {
+		n, ok := i.(*NoteData);
+		if ok {
 			return n.N.Add(n.Password)
 		} else {
 			log.Println("Cannot cast to NoteData", i)
@@ -56,8 +57,9 @@ func NotesCreate(w http.ResponseWriter, r *http.Request) {
 
 func NotesUpdate(w http.ResponseWriter, r *http.Request) {
 	var input NoteData
-	single_input(w, r, func(i interface{}) interface{} {
-		n, ok := i.(*NoteData); if ok {
+	singleInput(w, r, func(i interface{}) interface{} {
+		n, ok := i.(*NoteData);
+		if ok {
 			return n.N.Update(mux.Vars(r)["url"], n.Password)
 		} else {
 			log.Println("Cannot cast to NoteData", i)
@@ -81,8 +83,9 @@ func NotesDelete(w http.ResponseWriter, r *http.Request) {
  */
 func TspSA(w http.ResponseWriter, r *http.Request) {
 	var input PointsSolver
-	single_input(w, r, func(i interface{}) interface{} {
-		s, ok := i.(*PointsSolver); if ok {
+	singleInput(w, r, func(i interface{}) interface{} {
+		s, ok := i.(*PointsSolver);
+		if ok {
 			return s.Input.SimulatedAnnealing(s.Config[0], int(s.Config[1]))
 		} else {
 			log.Println("Cannot cast to PointsSolver", i)
@@ -93,8 +96,9 @@ func TspSA(w http.ResponseWriter, r *http.Request) {
 
 func TspLBS(w http.ResponseWriter, r *http.Request) {
 	var input PointsSolver
-	single_input(w, r, func(i interface{}) interface{} {
-		s, ok := i.(*PointsSolver); if ok {
+	singleInput(w, r, func(i interface{}) interface{} {
+		s, ok := i.(*PointsSolver);
+		if ok {
 			return s.Input.LocalBeamSearch(int(s.Config[0]), int(s.Config[1]));
 		} else {
 			log.Println("Cannot cast to PointsSolver", i)
@@ -109,7 +113,8 @@ func TspLBS(w http.ResponseWriter, r *http.Request) {
 func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
 	var input PointsSolver
 	socket(w, r, func(i interface{}, socket *websocket.Conn) bool {
-		s, ok := i.(*PointsSolver); if ok {
+		s, ok := i.(*PointsSolver);
+		if ok {
 			return s.Input.KMeans(int(s.Config[0]), socket)
 		} else {
 			log.Println("Cannot cast to PointsSolver", i)
@@ -121,7 +126,8 @@ func ClusteringKMeans(w http.ResponseWriter, r *http.Request) {
 func ClusteringDBSCAN(w http.ResponseWriter, r *http.Request) {
 	var input PointsSolver
 	socket(w, r, func(i interface{}, socket *websocket.Conn) bool {
-		s, ok := i.(*PointsSolver); if ok {
+		s, ok := i.(*PointsSolver);
+		if ok {
 			return s.Input.DBSCAN(s.Config[0], 3, socket)
 		} else {
 			log.Println("Cannot cast to PointsSolver", i)
@@ -141,7 +147,7 @@ func single(w http.ResponseWriter, r *http.Request, ret interface{}) {
 }
 
 // Single response handler with input
-func single_input(w http.ResponseWriter, r *http.Request, cb SingleCallback, input interface{}) {
+func singleInput(w http.ResponseWriter, r *http.Request, cb SingleCallback, input interface{}) {
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
 	if err != nil {

@@ -11,8 +11,8 @@ import (
  */
 
 type KMSolution struct {
-	C	Points		`json:"c"`
-	PP	[]Points	`json:"pp"`
+	C  Points   `json:"c"`
+	PP []Points `json:"pp"`
 }
 
 // K-means performs better if initial centroids are spread out
@@ -48,7 +48,7 @@ func (s *KMSolution) AssignPoints(pp Points) {
 		minD, minI := math.Inf(1), 0
 		for i, c := range s.C {
 			d := c.distance(p)
-			if(d < minD) {
+			if d < minD {
 				minD = d
 				minI = i
 			}
@@ -145,8 +145,7 @@ func (s DBSCANSolution) Send(socket *websocket.Conn) bool {
 	return Send(ret, socket)
 }
 
-
-func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) bool {
+func (pp Points) DBSCAN(eps float64, minPoints int, socket *websocket.Conn) bool {
 	solution, c := make(DBSCANSolution), 0
 
 	for _, p := range pp {
@@ -156,7 +155,7 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) boo
 
 		neighbours := pp.Region(p, eps)
 
-		if len(neighbours) < min_points {
+		if len(neighbours) < minPoints {
 			solution[p] = Noise
 		} else {
 			c++
@@ -173,7 +172,7 @@ func (pp Points) DBSCAN(eps float64, min_points int, socket *websocket.Conn) boo
 				solution.Send(socket)
 
 				npp := pp.Region(np, eps)
-				if len(npp) >= min_points {
+				if len(npp) >= minPoints {
 					neighbours = append(neighbours, npp...)
 				}
 			}
