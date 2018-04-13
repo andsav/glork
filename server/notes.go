@@ -2,6 +2,7 @@ package main
 
 import (
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2"
 	"log"
 	"crypto/sha256"
 	"encoding/hex"
@@ -44,7 +45,7 @@ func GetAllNotes() Notes {
 	var notes Notes
 
 	get(func(c *mgo.Collection) (Query, bool) {
-		return c.Find(bson.M{}).Select(bson.M{"title": 1, "url": 1, "tree": 1}).Sort("-_id"), true
+		return c.Find(bson.M{}).Select(bson.M{"title": 1, "url": 1, "tree": 1}).Sort("-modified"), true
 	}, &notes)
 
 	return notes
