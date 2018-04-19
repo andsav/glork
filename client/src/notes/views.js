@@ -1,5 +1,5 @@
 import { chunk, objectId2date } from '../../lib/helpers.js'
-import { active, content, date, title } from './display.js'
+import { active, content, underheader, title } from './display.js'
 
 /**
  *
@@ -120,7 +120,7 @@ let viewNote = (data) => {
     data['modified'] = null
   }
 
-  date(objectId2date(data['id']), data['modified'])
+  underheader(data['url'], objectId2date(data['id']), data['modified'])
 
   let contentHtml = '<div id="note-content">' + data.content.replace(/<h3>(.+)<\/h3>/g, (match, section) => {
     let anchor = section.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).join('-')

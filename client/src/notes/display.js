@@ -20,6 +20,14 @@ let getDateSpan = (d) => {
 
 /**
  *
+ * @param i
+ * @param link
+ * @returns {string}
+ */
+export let getIcon = (i, link) => `<a href="${link}"><img src="/client/img/${i}_icon.svg" style="margin-top:3px; vertical-align: top; width:10px; height:10px"></a>`
+
+/**
+ *
  * @param html
  */
 export let content = (html) => {
@@ -66,13 +74,20 @@ export let title = (before = '', after = '') => {
 
 /**
  *
+ * @param url
  * @param created
  * @param modified
  */
-export let date = (created, modified = null) => {
+export let underheader = (url, created, modified = null) => {
   let $underheader = $('underheader')
 
-  $underheader.innerHTML = `<strong>Created</strong>:&nbsp;&nbsp;${getDateSpan(created)}`
+  let icons = [
+    ['pencil', 'change'],
+    ['copy', 'clone'],
+    ['x', 'delete']
+  ].map((i) => getIcon(i[0], `${url}.${i[1]}`)).join('&nbsp;&nbsp;')
+
+  $underheader.innerHTML = `${icons}&nbsp;&nbsp;&nbsp;<strong>Created</strong>:&nbsp;&nbsp;${getDateSpan(created)}`
 
   if (modified !== null) {
     $underheader.innerHTML += `&nbsp;&nbsp;&nbsp; <strong>Modified</strong>:&nbsp;&nbsp;${getDateSpan(modified)}`

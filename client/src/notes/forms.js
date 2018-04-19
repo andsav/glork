@@ -4,6 +4,11 @@ import { serialize } from '../../lib/helpers.js'
 import { Editor } from '../../lib/editor.js'
 import { active, content } from './display.js'
 
+/**
+ *
+ * @param original
+ * @returns Object
+ */
 const formContent = (original) => {
   return {
     'password': {
