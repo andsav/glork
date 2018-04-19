@@ -4,13 +4,8 @@ import { serialize } from '../../lib/helpers.js'
 import { Editor } from '../../lib/editor.js'
 import { active, content } from './display.js'
 
-/**
- *
- * @param original
- */
-export let changeForm = (original) => {
-  active()
-  content(generateForm('Change note', {
+const formContent = (original) => {
+  return {
     'password': {
       'type': 'password'
     },
@@ -34,7 +29,16 @@ export let changeForm = (original) => {
       'type': 'text',
       'value': original['tree'] === null ? '' : original['tree'].join(', ')
     }
-  }, (e) => {
+  }
+}
+
+/**
+ *
+ * @param original
+ */
+export let changeForm = (original) => {
+  active()
+  content(generateForm('Change note', formContent(original), (e) => {
     e.preventDefault()
 
     let [formData, data] = getFormData(e.target)
@@ -59,29 +63,11 @@ export let changeForm = (original) => {
 
 /**
  *
+ * @param original
  */
-export let addForm = () => {
+export let addForm = (original = {'title': '', 'url': '', 'content': '', 'tags': [], 'tree': []}) => {
   active()
-  content(generateForm('Add note', {
-    'password': {
-      'type': 'password'
-    },
-    'title': {
-      'type': 'text'
-    },
-    'url': {
-      'type': 'text'
-    },
-    'content': {
-      'type': 'textarea'
-    },
-    'tags': {
-      'type': 'text'
-    },
-    'tree': {
-      'type': 'text'
-    }
-  }, (e) => {
+  content(generateForm('Add note', formContent(original), (e) => {
     e.preventDefault()
 
     $post(

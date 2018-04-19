@@ -34,6 +34,9 @@ export let route = (path) => {
   } else if (path.endsWith('.change')) {
     let note = path.split('.change')[0]
     $get(ENDPOINTS.NOTES_SINGLE + note, changeForm)
+  } else if(path.endsWith('.clone')) {
+    let note = path.split('.clone')[0]
+    $get(ENDPOINTS.NOTES_SINGLE + note, addForm)
   } else if (path.endsWith('.delete')) {
     deleteForm(path)
   } else if (path === 'add') {
