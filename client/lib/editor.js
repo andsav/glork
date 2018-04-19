@@ -61,6 +61,46 @@ const shortcutMap = {
     desc: 'Paragraph',
     insert: '<p></p>',
     cursor: '<p>'
+  },
+  83: {
+    key: 's',
+    desc: 'Bold',
+    insert: '<strong></strong>',
+    cursor: '<strong>'
+  },
+  69: {
+    key: 'e',
+    desc: 'Italic',
+    insert: '<em></em>',
+    cursor: '<em>'
+  }
+}
+
+const enterMap = {
+  '</li>': {
+    'addBefore': '</li>',
+    'addAfter': '<li>',
+    'removeAfter': ''
+  },
+  '</h3>': {
+    'addBefore': '</h3>',
+    'addAfter': '',
+    'removeAfter': '</h3>'
+  },
+  '</h4>': {
+    'addBefore': '</h4>',
+    'addAfter': '',
+    'removeAfter': '</h4>'
+  },
+  '</p>': {
+    'addBefore': '</p>',
+    'addAfter': '',
+    'removeAfter': '</p>'
+  },
+  '$$': {
+    'addBefore': '$$',
+    'addAfter': '',
+    'removeAfter': '\\$\\$'
   }
 }
 
@@ -103,9 +143,17 @@ export class Editor {
         let after = val.substring(s1)
         let currentLine = before.split('\n').pop()
         let currentIndent = currentLine.match(/^\s*/)[0]
+        let afterLine = after.split('\n')[0]
+        let selectionOffset = 0
+
+        if (enterMap.hasOwnProperty(afterLine)) {
+          before += enterMap[afterLine]['addBefore']
+          after = enterMap[afterLine]['addAfter'] + after.replace(new RegExp(`^${enterMap[afterLine]['removeAfter']}`), '')
+          selectionOffset = enterMap[afterLine]['addBefore'].length + enterMap[afterLine]['addAfter'].length
+        }
 
         e.target.value = before + '\n' + currentIndent + after
-        e.target.selectionStart = e.target.selectionEnd = s0 + 1 + currentIndent.length
+        e.target.selectionStart = e.target.selectionEnd = s0 + 1 + currentIndent.length + selectionOffset
 
         return false
       } else if (e.ctrlKey) {
