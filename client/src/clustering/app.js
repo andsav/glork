@@ -1,11 +1,11 @@
-import {ENDPOINTS} from '../../lib/constants.js'
-import {MIN_POINTS} from './config.js'
-import {$, $ready} from '../../lib/$.js'
-import {error} from '../../lib/helpers.js'
-import {Socket} from '../../lib/socket.js'
-import {ConfigSlider} from './ConfigSlider.js'
-import {MainCanvas} from './MainCanvas.js'
-import {CursorSlider} from './CursorSlider.js'
+import { ENDPOINTS } from '../../lib/constants.js'
+import { MIN_POINTS } from './config.js'
+import { $, $ready } from '../../lib/$.js'
+import { error } from '../../lib/helpers.js'
+import { Socket } from '../../lib/socket.js'
+import { ConfigSlider } from './ConfigSlider.js'
+import { MainCanvas } from './MainCanvas.js'
+import { CursorSlider } from './CursorSlider.js'
 
 window.ws = null
 

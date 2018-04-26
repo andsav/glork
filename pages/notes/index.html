@@ -15,11 +15,9 @@
 
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-
     </script>
 
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML"></script>
+    <script type="text/javascript" async src="/node_modules/mathjax/MathJax.js?config=TeX-AMS_CHTML"></script>
 
     <title>Notes - Andrei Savin</title>
 </head>
@@ -30,6 +28,7 @@
     <nav id="nav">
         <ul>
             <li><a id="link_all" href="/notes/all">All</a></li>
+            <li><a id="link_tree" href="/notes/tree">Tree</a></li>
             <li><a id="link_tags" href="/notes/tags">Tags</a></li>
             <li><a id="link_rand" href="/notes/random">Random</a></li>
         </ul>
@@ -37,7 +36,7 @@
 </header>
 <aside id="underheader"></aside>
 
-<div id="pages" class="">
+<div id="pages">
     <div id="notes" class="shown">
         <div id="loading"></div>
         <div id="content"></div>
@@ -45,7 +44,7 @@
 </div>
 
 <script type="text/javascript" src="/client/vendor/prism.js" data-manual></script>
-<script type="text/javascript" src="/client/dist/notes.min.js"></script>
+<script type="text/javascript" src="/client/dist/notes.min.js?2"></script>
 
 </body>
 </html>

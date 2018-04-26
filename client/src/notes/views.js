@@ -1,5 +1,5 @@
-import {chunk, objectId2date} from '../../lib/helpers.js'
-import {active, content, date, title} from './display.js'
+import { chunk, objectId2date } from '../../lib/helpers.js'
+import { active, content, underheader, title } from './display.js'
 
 /**
  *
@@ -17,6 +17,46 @@ export let viewAll = (data) => {
   }).join('')
 
   content(`<h2>All Notes</h2><div class="row">${html}</div>`)
+}
+
+/**
+ *
+ * @param data
+ */
+export let viewTree = (data) => {
+  title()
+  active('tree')
+
+  let tree = {}
+
+  data.forEach(note => {
+    let current = tree
+    note['tree'].forEach(node => {
+      if (!current.hasOwnProperty(node)) {
+        current[node] = {}
+      }
+      current = current[node]
+    })
+    if (!current.hasOwnProperty('notes')) {
+      current['notes'] = []
+    }
+    current['notes'].push(note)
+  })
+
+  let notes = n => {
+    let leaf = n.map(x => `<li><a href="${x['url']}.html">${x['title']}</a></li>`).join('')
+    return `<ul>${leaf}</ul>`
+  }
+
+  let nodes = n => {
+    let leaf = Object.keys(n).map(x => {
+      let sub = n[x].hasOwnProperty('notes') ? notes(n[x]['notes']) : nodes(n[x])
+      return `<li><strong onclick="this.nextSibling.classList.toggle('active')">${x}</strong>${sub}</li>`
+    }).join('')
+    return `<ul>${leaf}</ul>`
+  }
+
+  content(`<h2>All Notes</h2><div id="node-content" class="notes-tree">${nodes(tree)}</div>`)
 }
 
 /**
@@ -80,7 +120,7 @@ let viewNote = (data) => {
     data['modified'] = null
   }
 
-  date(objectId2date(data['id']), data['modified'])
+  underheader(data['url'], objectId2date(data['id']), data['modified'])
 
   let contentHtml = '<div id="note-content">' + data.content.replace(/<h3>(.+)<\/h3>/g, (match, section) => {
     let anchor = section.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).join('-')

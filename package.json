@@ -16,9 +16,18 @@
     "standard": "^10.0.3"
   },
   "standard": {
-    "globals": ["XMLHttpRequest", "Prism", "MathJax", "WebSocket"]
+    "globals": [
+      "XMLHttpRequest",
+      "Prism",
+      "MathJax",
+      "WebSocket"
+    ]
   },
   "scripts": {
     "test": "standard --fix 'client/src/**/*.js' 'client/lib/*.js' && standard 'client/src/**/*.js' 'client/lib/*.js'"
+  },
+  "dependencies": {
+    "mathjax": "^2.7.4",
+    "npm": "^5.8.0"
   }
 }

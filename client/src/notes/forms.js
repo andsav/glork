@@ -1,16 +1,16 @@
-import {$ajax, $post} from '../../lib/$.js'
-import {ENDPOINTS} from '../../lib/constants.js'
-import {serialize} from '../../lib/helpers.js'
-import {Editor} from '../../lib/editor.js'
-import {active, content} from './display.js'
+import { $ajax, $post } from '../../lib/$.js'
+import { ENDPOINTS } from '../../lib/constants.js'
+import { serialize } from '../../lib/helpers.js'
+import { Editor } from '../../lib/editor.js'
+import { active, content } from './display.js'
 
 /**
  *
  * @param original
+ * @returns Object
  */
-export let changeForm = (original) => {
-  active()
-  content(generateForm('Change note', {
+const formContent = (original) => {
+  return {
     'password': {
       'type': 'password'
     },
@@ -29,8 +29,21 @@ export let changeForm = (original) => {
     'tags': {
       'type': 'text',
       'value': original['tags'].join(', ')
+    },
+    'tree': {
+      'type': 'text',
+      'value': original['tree'] === null ? '' : original['tree'].join(', ')
     }
-  }, (e) => {
+  }
+}
+
+/**
+ *
+ * @param original
+ */
+export let changeForm = (original) => {
+  active()
+  content(generateForm('Change note', formContent(original), (e) => {
     e.preventDefault()
 
     let [formData, data] = getFormData(e.target)
@@ -39,35 +52,27 @@ export let changeForm = (original) => {
       ENDPOINTS.NOTES_SINGLE + original['url'],
       data,
       (d) => {
-        window.location.href = '/notes/' + formData['url'] + '.html'
+        if (d) window.location.href = '/notes/' + formData['url'] + '.html'
       })
 
     return false
+  }, (form) => {
+    $ajax('PUT',
+      ENDPOINTS.NOTES_SINGLE + original['url'],
+      getFormData(form).pop(),
+      (d) => {
+        if (d) console.log(`Autosave at ${new Date()}`)
+      })
   }))
 }
 
 /**
  *
+ * @param original
  */
-export let addForm = () => {
+export let addForm = (original = {'title': '', 'url': '', 'content': '', 'tags': [], 'tree': []}) => {
   active()
-  content(generateForm('Add note', {
-    'password': {
-      'type': 'password'
-    },
-    'title': {
-      'type': 'text'
-    },
-    'url': {
-      'type': 'text'
-    },
-    'content': {
-      'type': 'textarea'
-    },
-    'tags': {
-      'type': 'text'
-    }
-  }, (e) => {
+  content(generateForm('Add note', formContent(original), (e) => {
     e.preventDefault()
 
     $post(
@@ -123,7 +128,8 @@ let getFormData = (target) => {
       'title': formData['title'],
       'url': formData['url'],
       'content': formData['content'],
-      'tags': formData['tags'].split(/,\s*/)
+      'tags': formData['tags'].split(/,\s*/),
+      'tree': formData['tree'].split(/,\s*/)
     },
     'id': '',
     'password': formData['password']
@@ -137,9 +143,10 @@ let getFormData = (target) => {
  * @param title
  * @param fields
  * @param submit
- * @returns {Element}
+ * @param autosave
+ * @returns {HTMLFormElement}
  */
-let generateForm = (title, fields, submit) => {
+let generateForm = (title, fields, submit, autosave = null) => {
   let form = document.createElement('form')
 
   form.innerHTML = `<h2>${title}</h2>`
@@ -181,6 +188,12 @@ let generateForm = (title, fields, submit) => {
 
   form.appendChild(button)
   form.onsubmit = submit
+
+  if (typeof autosave === 'function') {
+    window.setInterval(() => {
+      autosave(form)
+    }, 5 * 1000)
+  }
 
   return form
 }

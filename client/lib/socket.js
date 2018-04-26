@@ -1,9 +1,9 @@
-import {error} from './helpers.js'
+import { error } from './helpers.js'
 
 export let Ws = null
 
 export class Socket {
-  constructor(endpoint, receiveFn, initialData = null, closeFn = function () {
+  constructor (endpoint, receiveFn, initialData = null, closeFn = function () {
   }) {
     if ((window['WebSocket'])) {
       if (Ws) {
@@ -36,11 +36,11 @@ export class Socket {
     }
   }
 
-  send(data) {
+  send (data) {
     Ws.send(JSON.stringify(data))
   }
 
-  close() {
+  close () {
     Ws.onclose = function () {
     }
     Ws.close()

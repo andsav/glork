@@ -1,10 +1,10 @@
-import {COLOR} from '../../lib/constants.js'
-import {MIN_CURSOR_RADIUS, POINTS_DELAY} from './config.js'
-import {Canvas} from '../../lib/canvas.js'
-import {collision, dist, gaussian, rand, round, stopAnimations} from '../../lib/helpers.js'
+import { COLOR } from '../../lib/constants.js'
+import { MIN_CURSOR_RADIUS, POINTS_DELAY } from './config.js'
+import { Canvas } from '../../lib/canvas.js'
+import { collision, dist, gaussian, rand, round, stopAnimations } from '../../lib/helpers.js'
 
 export class MainCanvas extends Canvas {
-  constructor(id) {
+  constructor (id) {
     super(id)
 
     this.updating = false
@@ -48,7 +48,7 @@ export class MainCanvas extends Canvas {
     }
   }
 
-  updateCursor(r) {
+  updateCursor (r) {
     this.cursor_radius = r
     this.c.style.cursor = 'url(\'data:image/svg+xml;utf8,' +
       '<svg fill="none" ' +
@@ -60,7 +60,7 @@ export class MainCanvas extends Canvas {
       '</svg>\') ' + r * 2 + ' ' + r * 2 + ', auto'
   }
 
-  placePoint(x, y) {
+  placePoint (x, y) {
     if (this.updating) {
       this.stopUpdating()
     }
@@ -71,13 +71,13 @@ export class MainCanvas extends Canvas {
     }
   }
 
-  placeGaussian(x, y, n) {
+  placeGaussian (x, y, n) {
     for (let i = 0; i < n; ++i) {
       this.placePoint(parseInt(x + gaussian() * n / 3, 10), parseInt(y + gaussian() * n / 3, 10))
     }
   }
 
-  redraw() {
+  redraw () {
     this.clear()
     this.ctx.fillStyle = COLOR.DEFAULT
     this.points.forEach((p) => {
@@ -85,14 +85,14 @@ export class MainCanvas extends Canvas {
     })
   }
 
-  reset() {
+  reset () {
     stopAnimations()
     this.stopUpdating()
     this.clear()
     this.points = []
   }
 
-  randomPoints(n = 500, points = null, reset = true) {
+  randomPoints (n = 500, points = null, reset = true) {
     if (reset) {
       this.reset()
     }
@@ -108,7 +108,7 @@ export class MainCanvas extends Canvas {
     }
   }
 
-  updateKMS(data) {
+  updateKMS (data) {
     this.updating = true
     this.data = data
 
@@ -132,7 +132,7 @@ export class MainCanvas extends Canvas {
     this.ctx.fillStyle = COLOR.DEFAULT
   }
 
-  voronoi() {
+  voronoi () {
     let points = {}
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
@@ -161,7 +161,7 @@ export class MainCanvas extends Canvas {
     })
   }
 
-  updateDBSCAN(data, config, final = false) {
+  updateDBSCAN (data, config, final = false) {
     this.updating = true
     this.data = data
 
@@ -190,7 +190,7 @@ export class MainCanvas extends Canvas {
     this.ctx.fillStyle = COLOR.DEFAULT
   }
 
-  stopUpdating() {
+  stopUpdating () {
     this.updating = false
     if (window.ws !== null) {
       window.ws.close()
@@ -198,7 +198,7 @@ export class MainCanvas extends Canvas {
     this.redraw()
   }
 
-  object(config) {
+  object (config) {
     return {
       'p': this.points.map((c) => {
         return {'x': c[0], 'y': c[1]}
