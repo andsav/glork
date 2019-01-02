@@ -13,9 +13,9 @@ const ERROR_DIV = $('error_msg')
  * @param b
  * @returns {number}
  */
-export let dist = (a, b) => {
-  let x = a[0] - b[0]
-  let y = a[1] - b[1]
+export const dist = (a, b) => {
+  const x = a[0] - b[0]
+  const y = a[1] - b[1]
   return Math.sqrt(x * x + y * y)
 }
 
@@ -26,7 +26,7 @@ export let dist = (a, b) => {
  * @param r
  * @returns {boolean}
  */
-export let collision = (previous, point, r) => previous.map((co) => dist(co, point) > r).includes(false)
+export const collision = (previous, point, r) => previous.map((co) => dist(co, point) > r).includes(false)
 
 /**
  *
@@ -35,9 +35,9 @@ export let collision = (previous, point, r) => previous.map((co) => dist(co, poi
  * @param r
  * @returns {boolean}
  */
-export let inCircle = (point, circle, r) => {
-  let x = point.x - circle.x
-  let y = point.y - circle.y
+export const inCircle = (point, circle, r) => {
+  const x = point.x - circle.x
+  const y = point.y - circle.y
   return x * x + y * y < r * r
 }
 
@@ -48,16 +48,16 @@ export let inCircle = (point, circle, r) => {
  * @param decimals
  * @returns {number}
  */
-export let round = (n, decimals) => (Math.round(n * decimals) / decimals)
+export const round = (n, decimals) => (Math.round(n * decimals) / decimals)
 
 /**
  * Fisher–Yates algorithm
  *
  * @param a
  */
-export let shuffle = (a) => {
+export const shuffle = (a) => {
   for (let i = a.length; i; i--) {
-    let j = ~~(Math.random() * i);
+    const j = ~~(Math.random() * i);
     [a[i - 1], a[j]] = [a[j], a[i - 1]]
   }
 }
@@ -69,16 +69,16 @@ export let shuffle = (a) => {
  * @param max
  * @returns {*}
  */
-export let rand = (min, max) => ~~(Math.random() * (max - min + 1)) + min
+export const rand = (min, max) => ~~(Math.random() * (max - min + 1)) + min
 
 /**
  * Returns a random number according to a Gaussian distribution N(0, 1) (Box–Muller transform)
  *
  * @returns {number}
  */
-export let gaussian = () => {
-  let u = 1 - Math.random()
-  let v = 1 - Math.random()
+export const gaussian = () => {
+  const u = 1 - Math.random()
+  const v = 1 - Math.random()
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
 }
 
@@ -88,8 +88,8 @@ export let gaussian = () => {
  * @param form
  * @returns {{}}
  */
-export let serialize = (form) => {
-  let data = {}
+export const serialize = (form) => {
+  const data = {}
 
   form.querySelectorAll('input, textarea').forEach(
     (input) => {
@@ -103,14 +103,15 @@ export let serialize = (form) => {
 /**
  * Stop all animations in progress
  */
-export let stopAnimations = () => {
+export const stopAnimations = () => {
   let highestTimeoutId = setTimeout(() => {
   })
-  for (let i = 0; i < highestTimeoutId; i++) {
-    clearTimeout(i)
-  }
 
-  ERROR_DIV.style.opacity = '0'
+  setTimeout(() => {
+    while (--highestTimeoutId) clearTimeout(highestTimeoutId)
+  }, 0)
+
+  if (ERROR_DIV) ERROR_DIV.style.opacity = '0'
 }
 
 /**
@@ -119,7 +120,7 @@ export let stopAnimations = () => {
  * @param elem
  * @param err
  */
-export let error = (elem, err) => {
+export const error = (elem, err) => {
   elem.classList.add('shake', 'shake-constant')
   ERROR_DIV.innerHTML = err
   ERROR_DIV.style.opacity = 1
@@ -140,12 +141,12 @@ export let error = (elem, err) => {
  * @param chunks
  * @returns {Array}
  */
-export let chunk = (array, chunks) => {
-  let chunkSize = ~~(array.length / chunks)
-  let ret = []
+export const chunk = (array, chunks) => {
+  const chunkSize = ~~(array.length / chunks)
+  const ret = []
 
   for (let i = 0; i < array.length; ++i) {
-    let e = array[i]
+    const e = array[i]
     if (i % chunkSize === 0) {
       ret.push([e])
     } else {
@@ -169,4 +170,4 @@ export let chunk = (array, chunks) => {
  * @param id
  * @returns {Date}
  */
-export let objectId2date = (id) => new Date(parseInt(id.substring(0, 8), 16) * 1000)
+export const objectId2date = (id) => new Date(parseInt(id.substring(0, 8), 16) * 1000)

@@ -10,10 +10,10 @@
   "license": "MIT",
   "homepage": "http://glork.net",
   "devDependencies": {
-    "grunt": "~0.4.5",
+    "grunt": "~1.1.0",
     "grunt-closure-compiler": "0.0.21",
-    "grunt-contrib-watch": "^1.0.0",
-    "standard": "^10.0.3"
+    "grunt-contrib-watch": "^1.1.0",
+    "standard": "^14.3.4"
   },
   "standard": {
     "globals": [
@@ -27,7 +27,7 @@
     "test": "standard --fix 'client/src/**/*.js' 'client/lib/*.js' && standard 'client/src/**/*.js' 'client/lib/*.js'"
   },
   "dependencies": {
-    "mathjax": "^2.7.4",
-    "npm": "^5.8.0"
+    "mathjax": "^3.0.5",
+    "npm": "^6.14.5"
   }
 }

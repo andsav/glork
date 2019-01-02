@@ -17,6 +17,12 @@ h3 a {
   vertical-align: super;
 }
 
+h5 {
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 #underheader {
   display: none;
   position: absolute;
@@ -31,7 +37,7 @@ h3 a {
 }
 
 #notes {
-  margin-bottom: 20px;
+  min-height: calc(100vh - 128px)
 }
 
 .notes-tree ul ul {
@@ -39,7 +45,7 @@ h3 a {
 }
 
 .notes-tree ul.active {
-  display: block!important;
+  display: block !important;
 }
 
 .notes-tree strong {
@@ -118,12 +124,16 @@ aside.file {
   text-indent: 0 !important;
 }
 
-.tags li:hover {
+.tags li:not(.active):hover {
   background-color: rgba(48, 47, 110, 0.16);
 }
 
 .tags li:before {
   content: none !important;
+}
+
+.tags li.active {
+  filter: grayscale(0.8) contrast(1.5);
 }
 
 form {

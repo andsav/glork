@@ -1,49 +1,81 @@
 import { $get } from '../../lib/$.js'
-import { ENDPOINTS } from '../../lib/constants.js'
-import { loading } from './display.js'
+import { stopAnimations } from '../../lib/helpers.js'
+import { ENDPOINTS, DEFAULT_COLLECTION } from '../../lib/constants.js'
+import { loading, getPath } from './display.js'
 import { viewAll, viewTree, viewNotFound, viewRandom, viewSingle, viewTag, viewTags } from './views.js'
 import { addForm, changeForm, deleteForm } from './forms.js'
+
+export const collection = (r) => `${r}/${'collection' in window.localStorage ? window.localStorage['collection'] : DEFAULT_COLLECTION}`
+
+const primaryRoutes = {
+  'all': () => { $get(collection(ENDPOINTS.NOTES_LIST), viewAll) },
+  'tree': () => { $get(collection(ENDPOINTS.NOTES_LIST), viewTree) },
+  'tags': () => { $get(collection(ENDPOINTS.NOTES_TAGS), viewTags) },
+  'random': () => { $get(collection(ENDPOINTS.NOTES_RANDOM), viewRandom) },
+  'add': () => { addForm() }
+}
+
+const secondaryRoutes = {
+  '.html': (x) => {
+    $get(collection(ENDPOINTS.NOTES_SINGLE + x), viewSingle)
+  },
+  '.tag': (x) => {
+    $get(collection(ENDPOINTS.NOTES_TAG + x), (data) => {
+      viewTag(data, x)
+    })
+  },
+  '.change': (x) => {
+    $get(collection(ENDPOINTS.NOTES_SINGLE + x), changeForm)
+  },
+  '.clone': (x) => {
+    $get(collection(ENDPOINTS.NOTES_SINGLE + x), changeForm)
+  },
+  '.collection': (x) => {
+    window.localStorage['collection'] = x
+    primaryRoutes['all']()
+  },
+  '.delete': (x, path) => {
+    deleteForm(path)
+  }
+}
 
 /**
  *
  * @param path
  */
-export let route = (path) => {
-  path = path.split(/\/notes\/*/)[1]
+export const route = (path) => {
+  stopAnimations()
 
-  if (typeof path === 'undefined') {
+  path.replace(getPath(), 'notes')
+
+  try {
+    path = path.split(/\/notes\/*/)[1]
+  } catch (e) {
     path = 'error'
   }
 
-  if (path === '' || path === 'all') {
-    $get(ENDPOINTS.NOTES_LIST, viewAll)
-  } else if (path === 'tree') {
-    $get(ENDPOINTS.NOTES_LIST, viewTree)
-  } else if (path === 'tags') {
-    $get(ENDPOINTS.NOTES_TAGS, viewTags)
-  } else if (path === 'random') {
-    $get(ENDPOINTS.NOTES_RANDOM, viewRandom)
-  } else if (path.endsWith('.html')) {
-    let note = path.split('.html')[0]
-    $get(ENDPOINTS.NOTES_SINGLE + note, viewSingle)
-  } else if (path.endsWith('.tag')) {
-    let tag = path.split('.tag')[0]
-    $get(ENDPOINTS.NOTES_TAG + tag, (data) => {
-      viewTag(data, tag)
-    })
-  } else if (path.endsWith('.change')) {
-    let note = path.split('.change')[0]
-    $get(ENDPOINTS.NOTES_SINGLE + note, changeForm)
-  } else if(path.endsWith('.clone')) {
-    let note = path.split('.clone')[0]
-    $get(ENDPOINTS.NOTES_SINGLE + note, addForm)
-  } else if (path.endsWith('.delete')) {
-    deleteForm(path)
-  } else if (path === 'add') {
-    addForm()
-  } else {
-    viewNotFound()
+  if (typeof path === 'undefined') {
+    path = 'error'
+  } else if (path === '') {
+    path = 'all'
   }
+
+  if (primaryRoutes.hasOwnProperty(path)) {
+    primaryRoutes[path]()
+  } else {
+    let notFound = true
+    for (const k in secondaryRoutes) {
+      if (path.endsWith(k)) {
+        notFound = false
+        secondaryRoutes[k](path.split(k)[0], path)
+        break
+      }
+    }
+    if (notFound) {
+      viewNotFound()
+    }
+  }
+
 }
 
 /**
@@ -51,12 +83,13 @@ export let route = (path) => {
  * @param e
  * @returns {boolean}
  */
-export let handleClick = (e) => {
+export const handleClick = (e) => {
   if (e.target.localName === 'a' && e.target.target !== '_blank' && e.target.href.indexOf('#') === -1) {
     goto(e.target.href, e.target.innerHTML)
     e.preventDefault()
     return false
   }
+  return true
 }
 
 /**

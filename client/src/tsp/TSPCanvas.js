@@ -1,8 +1,8 @@
-import { $ } from '../../lib/$.js'
-import { collision, rand, stopAnimations } from '../../lib/helpers.js'
-import { Canvas } from '../../lib/canvas.js'
-import { FRAME_DELAY } from './config.js'
-import { Path } from './Path.js'
+import {$} from '../../lib/$.js'
+import {collision, rand, stopAnimations} from '../../lib/helpers.js'
+import {Canvas} from '../../lib/canvas.js'
+import {FRAME_DELAY} from './config.js'
+import {Path} from './Path.js'
 
 export class TSPCanvas extends Canvas {
   constructor (id) {

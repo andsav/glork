@@ -1,9 +1,9 @@
-import { COLOR } from '../../lib/constants.js'
-import { $ } from '../../lib/$.js'
-import { round, shuffle, stopAnimations } from '../../lib/helpers.js'
-import { Canvas } from '../../lib/canvas.js'
-import { DEFAULT_FONT, FRAME_DELAY } from './config.js'
-import { Path } from './Path.js'
+import {COLOR} from '../../lib/constants.js'
+import {$} from '../../lib/$.js'
+import {round, shuffle, stopAnimations} from '../../lib/helpers.js'
+import {Canvas} from '../../lib/canvas.js'
+import {DEFAULT_FONT, FRAME_DELAY} from './config.js'
+import {Path} from './Path.js'
 
 export class ResultCanvas extends Canvas {
   constructor (id) {

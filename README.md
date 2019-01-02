@@ -1,11 +1,9 @@
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
 Install frontend
 =================
 
 Requires *node*, *npm* & *closure compiler*
 
-`$ npm instll -g grunt-cli`
+`npm install -g grunt-cli`
 
 `npm install`
 

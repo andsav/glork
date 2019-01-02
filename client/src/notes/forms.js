@@ -1,8 +1,9 @@
-import { $ajax, $post } from '../../lib/$.js'
+import { $ajax, $post, $ } from '../../lib/$.js'
+import { collection } from './router.js'
 import { ENDPOINTS } from '../../lib/constants.js'
 import { serialize } from '../../lib/helpers.js'
 import { Editor } from '../../lib/editor.js'
-import { active, content } from './display.js'
+import { active, content, getPath } from './display.js'
 
 /**
  *
@@ -16,7 +17,13 @@ const formContent = (original) => {
     },
     'title': {
       'type': 'text',
-      'value': original['title']
+      'value': original['title'],
+      'onchange': (e) => {
+        const $url = $('form-url')
+        if ($url.value.length === 0) {
+          $url.value = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]+/g, '')
+        }
+      }
     },
     'url': {
       'type': 'text',
@@ -41,7 +48,7 @@ const formContent = (original) => {
  *
  * @param original
  */
-export let changeForm = (original) => {
+export const changeForm = (original) => {
   active()
   content(generateForm('Change note', formContent(original), (e) => {
     e.preventDefault()
@@ -49,16 +56,16 @@ export let changeForm = (original) => {
     let [formData, data] = getFormData(e.target)
 
     $ajax('PUT',
-      ENDPOINTS.NOTES_SINGLE + original['url'],
+      collection(ENDPOINTS.NOTES_SINGLE + original['url']),
       data,
       (d) => {
-        if (d) window.location.href = '/notes/' + formData['url'] + '.html'
+        if (d) window.location.href = `/${getPath()}/` + formData['form-url'] + '.html'
       })
 
     return false
   }, (form) => {
     $ajax('PUT',
-      ENDPOINTS.NOTES_SINGLE + original['url'],
+      collection(ENDPOINTS.NOTES_SINGLE + original['url']),
       getFormData(form).pop(),
       (d) => {
         if (d) console.log(`Autosave at ${new Date()}`)
@@ -70,17 +77,17 @@ export let changeForm = (original) => {
  *
  * @param original
  */
-export let addForm = (original = {'title': '', 'url': '', 'content': '', 'tags': [], 'tree': []}) => {
+export const addForm = (original = {'title': '', 'url': '', 'content': '', 'tags': [], 'tree': []}) => {
   active()
   content(generateForm('Add note', formContent(original), (e) => {
     e.preventDefault()
 
     $post(
-      ENDPOINTS.NOTES_CREATE,
+      collection(ENDPOINTS.NOTES_CREATE),
       getFormData(e.target)[1],
       (d) => {
         if (d) {
-          window.location.href = '/notes/all'
+          window.location.href = `/${getPath()}/all`
         }
       })
 
@@ -92,7 +99,7 @@ export let addForm = (original = {'title': '', 'url': '', 'content': '', 'tags':
  *
  * @param path
  */
-export let deleteForm = (path) => {
+export const deleteForm = (path) => {
   content(generateForm('Delete note', {
     'password': {
       'type': 'password'
@@ -101,14 +108,14 @@ export let deleteForm = (path) => {
     e.preventDefault()
 
     let formData = serialize(e.target)
-    let endpoint = path.split('.delete')[0] + '/' + window.btoa(formData['password'])
+    let endpoint = path.split('.delete')[0] + '/' + window.btoa(formData['form-password'])
 
     $ajax('DELETE',
-      ENDPOINTS.NOTES_SINGLE + endpoint,
+      collection(ENDPOINTS.NOTES_SINGLE + endpoint),
       false,
       (d) => {
         if (d) {
-          window.location.href = '/notes/all'
+          window.location.href = `/${getPath()}/all`
         }
       })
 
@@ -125,14 +132,14 @@ let getFormData = (target) => {
   let formData = serialize(target)
   let data = {
     'note': {
-      'title': formData['title'],
-      'url': formData['url'],
-      'content': formData['content'],
-      'tags': formData['tags'].split(/,\s*/),
-      'tree': formData['tree'].split(/,\s*/)
+      'title': formData['form-title'],
+      'url': formData['form-url'],
+      'content': formData['form-content'],
+      'tags': formData['form-tags'].split(/,\s*/),
+      'tree': formData['form-tree'].split(/,\s*/)
     },
     'id': '',
-    'password': formData['password']
+    'password': formData['form-password']
   }
 
   return [formData, data]
@@ -173,9 +180,11 @@ let generateForm = (title, fields, submit, autosave = null) => {
       input = (new Editor(key, fields[key]['value'])).elem
     } else {
       input = document.createElement('input')
-      input.type = fields[key]['type']
-      input.name = input.id = key
-      input.value = fields[key]['value']
+      input.name = key
+      input.id = `form-${key}`
+      Object.keys(fields[key]).forEach(k => {
+        input[k] = fields[key][k]
+      })
     }
 
     group.appendChild(input)

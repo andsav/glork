@@ -109,7 +109,8 @@ export class Editor {
     this.elem = document.createElement('div')
 
     this.textarea = document.createElement('textarea')
-    this.textarea.name = this.textarea.id = id
+    this.textarea.name = id
+    this.textarea.id = `form-${id}`
     this.textarea.innerHTML = content
 
     this.preview = document.createElement('div')

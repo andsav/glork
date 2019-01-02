@@ -2,13 +2,13 @@
     JQuery replacement
  */
 
-export let $ = (id) => document.getElementById(id)
+export const $ = (id) => document.getElementById(id)
 
-export let $$ = (cls) => Array.from(document.getElementsByClassName(cls))
+export const $$ = (cls) => Array.from(document.getElementsByClassName(cls))
 
-export let $ajax = (method, url, data, success, error = (x) => {
+export const $ajax = (method, url, data, success, error = (x) => {
 }) => {
-  let xhr = new XMLHttpRequest()
+  const xhr = new XMLHttpRequest()
   xhr.open(method, url, true)
   xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
   xhr.onload = function () {
@@ -25,21 +25,21 @@ export let $ajax = (method, url, data, success, error = (x) => {
   }
 }
 
-export let $post = (url, data, success, error = (x) => {
+export const $post = (url, data, success, error = (x) => {
 }) => {
   $ajax('POST', url, data, success, error)
 }
 
-export let $get = (url, success, error = (x) => {
+export const $get = (url, success, error = (x) => {
 }) => {
   $ajax('GET', url, false, success, error)
 }
 
-export let $getData = (url, data, success, error) => {
-  let params = Object.keys(data).map((i) => i + '=' + data[i]).join('&')
+export const $getData = (url, data, success, error) => {
+  const params = Object.keys(data).map((i) => i + '=' + data[i]).join('&')
   $get(url + '?' + params, success, error)
 }
 
-export let $ready = (fn) => {
+export const $ready = (fn) => {
   document.addEventListener('DOMContentLoaded', fn)
 }

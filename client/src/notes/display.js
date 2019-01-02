@@ -1,9 +1,16 @@
 import { $, $$ } from '../../lib/$.js'
+import { COLLECTIONS, DEFAULT_COLLECTION } from '../../lib/constants.js'
+
+/**
+ *
+ * @returns {string}
+ */
+export const getPath = () => document.location.pathname.split('/')[1]
 
 /**
  *
  */
-export let loading = () => {
+export const loading = () => {
   $('loading').style.display = 'block'
   $('content').innerHTML = ''
 }
@@ -13,8 +20,8 @@ export let loading = () => {
  * @param d
  * @returns {string}
  */
-let getDateSpan = (d) => {
-  let split = d.toISOString().split('T')
+const getDateSpan = (d) => {
+  const split = d.toISOString().split('T')
   return `<span title="${split[0]} ${split[1].slice(0, 8)}">${split[0]}</span>`
 }
 
@@ -24,29 +31,35 @@ let getDateSpan = (d) => {
  * @param link
  * @returns {string}
  */
-export let getIcon = (i, link) => `<a href="${link}"><img src="/client/img/${i}_icon.svg" style="margin-top:3px; vertical-align: top; width:10px; height:10px"></a>`
+export const getIcon = (i, link) => `<a href="${link}"><img src="/client/img/${i}_icon.svg" style="margin-top:3px; vertical-align: top; width:10px; height:10px"></a>`
 
 /**
  *
  * @param html
+ * @returns {HTMLElement}
  */
-export let content = (html) => {
+export const content = (...html) => {
   let $content = $('content')
 
   $('loading').style.display = 'none'
-  if (typeof html === 'object') {
-    $content.innerHTML = ''
-    $content.appendChild(html)
-  } else {
-    $content.innerHTML = html
-  }
+
+  $content.innerHTML = ''
+  html.forEach(h => {
+    if (typeof h === 'object') {
+      $content.appendChild(h)
+    } else {
+      $content.innerHTML += h
+    }
+  })
+
+  return $content
 }
 
 /**
  *
  * @param link
  */
-export let active = (link = null) => {
+export const active = (link = null) => {
   $$('active').forEach((c) => {
     c.className = ''
   })
@@ -60,11 +73,11 @@ export let active = (link = null) => {
  * @param before
  * @param after
  */
-export let title = (before = '', after = '') => {
+export const title = (before = '', after = '') => {
   $('title').innerHTML = ((before !== '')
     ? `<span style='text-transform: capitalize'>${before}</span> `
     : '') +
-    '<a href="/notes">Notes</a>' +
+    `<a href="/${getPath()}">Notes</a>` +
     after
 
   document.title = ((before !== '') ? before + ' ' : '') + 'Notes' + after
@@ -78,10 +91,10 @@ export let title = (before = '', after = '') => {
  * @param created
  * @param modified
  */
-export let underheader = (url, created, modified = null) => {
-  let $underheader = $('underheader')
+export const underheader = (url, created, modified = null) => {
+  const $underheader = $('underheader')
 
-  let icons = [
+  const icons = [
     ['pencil', 'change'],
     ['copy', 'clone'],
     ['x', 'delete']
@@ -94,4 +107,35 @@ export let underheader = (url, created, modified = null) => {
   }
 
   $underheader.style.display = 'block'
+}
+
+/**
+ *
+ * @param collections
+ * @returns {HTMLElement}
+ */
+export const getCollectionSwitch = (collections = COLLECTIONS) => {
+  const a = (c, active) => {
+    let el = document.createElement(active ? 'SPAN' : 'A')
+    el.innerHTML = c
+    if (!active) {
+      el.href = `/notes/${c}.collection`
+    }
+    return el
+  }
+  const li = (c) => {
+    let active = 'collection' in window.localStorage ? c === window.localStorage['collection'] : c === DEFAULT_COLLECTION
+    let el = document.createElement('LI')
+    if (active) {
+      el.className = 'active'
+    }
+    el.appendChild(a(c, active))
+    return el
+  }
+  const ul = document.createElement('UL')
+  ul.className = 'tags aside'
+  collections.forEach(c => {
+    ul.appendChild(li(c))
+  })
+  return ul
 }
