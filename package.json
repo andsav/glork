@@ -10,7 +10,7 @@
   "license": "MIT",
   "homepage": "http://glork.net",
   "devDependencies": {
-    "grunt": "~1.1.0",
+    "grunt": "~1.5.3",
     "grunt-closure-compiler": "0.0.21",
     "grunt-contrib-watch": "^1.1.0",
     "standard": "^14.3.4"
