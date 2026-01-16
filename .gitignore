@@ -3,5 +3,6 @@ node_modules/
 public/
 *.min.js
 client/dist
+client/dist-react
 .htpasswd
 google9e63f68495dcf81d.html
